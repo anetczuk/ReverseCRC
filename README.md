@@ -10,7 +10,7 @@ Repository contains followint implementations of CRC:
 * _LookupCRC_ - implementation based on lookup tables,
 * _ModCRC_ - implementation compatible with _crcmod_ library.
 
-_DivisionCRC_ and _HwCRC_ have it's bacward versions which allows to find polynomials from input messages.
+_DivisionCRC_ and _HwCRC_ have its backward versions which allows to find polynomials from input messages.
 
 
 ### References

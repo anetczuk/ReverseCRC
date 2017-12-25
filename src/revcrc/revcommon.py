@@ -22,7 +22,6 @@
 #
 
 
-import crc
 import crcmod
 from revcrc.reversecrc import CRCKey
 from crc.numbermask import intToASCII

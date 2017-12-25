@@ -32,8 +32,8 @@ import logging
 from revcrc.input import InputData
 import itertools
 from revcrc.revcommon import RevCRCCommon
-from revcrc.reversecrc import RevHwCRC, BruteForceChain, DataCRC
-# from revcrc.crc import CRC
+from revcrc.reversecrc import RevHwCRC, BruteForceChain
+
 
 
 def brutePoly(inputPair):

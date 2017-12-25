@@ -30,7 +30,7 @@ import crcmod
 import random
 from crc.divisioncrc import DivisionCRC
 from crc.hwcrc import HwCRC
-from revcrc.reversecrc import RevHwCRC, CRCKey, RevDivisionCRC, RevModCRC, DataCRC,\
+from revcrc.reversecrc import RevHwCRC, CRCKey, RevDivisionCRC, RevModCRC, MessageCRC,\
     RightSubstringChain, LeftSubstringChain, SideSubstringChain
 from crc.numbermask import intToASCII
   
@@ -488,7 +488,7 @@ class RightSubstringChainTest(unittest.TestCase):
  
     def test_calculate(self):
         output = ChainMock()
-        inputData = DataCRC(0b1101, 4, 0b1111, 4)
+        inputData = MessageCRC(0b1101, 4, 0b1111, 4)
         processor = RightSubstringChain(output)
         processor.calculate(inputData)
 #         print output.input
@@ -511,7 +511,7 @@ class LeftSubstringChainTest(unittest.TestCase):
  
     def test_calculate(self):
         output = ChainMock()
-        inputData = DataCRC(0b1101, 4, 0b1111, 4)
+        inputData = MessageCRC(0b1101, 4, 0b1111, 4)
         processor = LeftSubstringChain(output)
         processor.calculate(inputData)
 #         print output.input
@@ -534,7 +534,7 @@ class SideSubstringChainTest(unittest.TestCase):
  
     def test_calculate(self):
         output = ChainMock()
-        inputData = DataCRC(0b1101, 4, 0b1111, 4)
+        inputData = MessageCRC(0b1101, 4, 0b1111, 4)
         processor = SideSubstringChain(output)
         processor.calculate(inputData)
 #         print output.input

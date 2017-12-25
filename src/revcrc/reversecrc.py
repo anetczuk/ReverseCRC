@@ -37,7 +37,7 @@ from crc.numbermask import NumberMask
 
 
 
-class DataCRC:
+class MessageCRC:
     def __init__(self, data, dataSize, crc, crcSize):
         self.dataNum = data
         self.dataSize = dataSize
@@ -45,7 +45,7 @@ class DataCRC:
         self.crcSize = crcSize
         
     def __repr__(self):
-        return "<DataCRC {:X} {} {:X} {}>".format(self.dataNum, self.dataSize, self.crcNum, self.crcSize)
+        return "<MessageCRC {:X} {} {:X} {}>".format(self.dataNum, self.dataSize, self.crcNum, self.crcSize)
 
 
 class CRCKey:
@@ -99,7 +99,7 @@ class RevCRCBase:
     def bruteForce(self, data, crc, dataSize = -1):
         if dataSize < 0:
             dataSize = data.bit_length()
-        dataCrc = DataCRC(data, dataSize, crc, self.crcSize)
+        dataCrc = MessageCRC(data, dataSize, crc, self.crcSize)
         return self.bruteForceData(dataCrc)
     
     def bruteForceData(self, dataCrc):
@@ -167,7 +167,7 @@ class RevCRCBase:
         if dataSize < 0:
             dataSize = max(data1.bit_length(), data2.bit_length())
         
-        dataCrc = DataCRC(inputData, dataSize, inputCRC, self.crcSize)
+        dataCrc = MessageCRC(inputData, dataSize, inputCRC, self.crcSize)
         return self.bruteForceData(dataCrc)
     
     def findSolution(self, dataList, dataSize, searchRange):
@@ -308,7 +308,7 @@ class RightSubstringChain:
             bitMask <<= 1
             if i < self.startSize:
                 continue
-            tmpData = DataCRC(testMessage, i+1, dataCrc.crcNum, dataCrc.crcSize)
+            tmpData = MessageCRC(testMessage, i+1, dataCrc.crcNum, dataCrc.crcSize)
 #             print "R Item:", tmpData
             self.processor.calculate(tmpData)
     
@@ -325,7 +325,7 @@ class LeftSubstringChain:
             testMessage = testMessage << 1
             if bitMask & dataCrc.dataNum:
                 testMessage = testMessage | 0b1
-            tmpData = DataCRC(testMessage, i+1, dataCrc.crcNum, dataCrc.crcSize)
+            tmpData = MessageCRC(testMessage, i+1, dataCrc.crcNum, dataCrc.crcSize)
 #             print "L Item:", tmpData
             self.processor.calculate(tmpData)
             bitMask = bitMask >> 1

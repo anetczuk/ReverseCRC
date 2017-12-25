@@ -28,11 +28,12 @@ import sys
 import time
 import argparse 
 import logging
+import cProfile
 
 from revcrc.input import InputData
 import itertools
 from revcrc.revcommon import RevCRCCommon
-from revcrc.reversecrc import RevHwCRC, BruteForceChain
+from revcrc.reversecrc import RevHwCRC, BruteForceChain, MessageCRC
 
 
 
@@ -117,6 +118,8 @@ if __name__ != '__main__':
 parser = argparse.ArgumentParser(description='Finding CRC algorithm from data')
 parser.add_argument('--mode', action='store', required=True, choices=["FS", "XOR", "SS", "BF", "COMMON"], help='Mode' )
 parser.add_argument('--file', action='store', required=True, help='File with data' )
+parser.add_argument('--profile', action='store_const', const=True, default=False, help='Profile the code' )
+parser.add_argument('--pfile', action='store', default=None, help='Profiler output file' )
  
  
 args = parser.parse_args()
@@ -126,9 +129,17 @@ logging.basicConfig(level=logging.DEBUG)
 
 print "Starting"
 
+
 starttime = time.time()
+profiler = None
 
 try:
+
+    profiler_outfile = args.pfile
+    if args.profile == True or profiler_outfile != None:
+        print "Starting profiler"
+        profiler = cProfile.Profile()
+        profiler.enable()
     
     dataParser = InputData()
     data = dataParser.parseFile(args.file)
@@ -185,7 +196,7 @@ try:
             dataSize = len(inputPair[0]) * 4
             crcNum = int(inputPair[1], 16)
             crcSize = len(inputPair[1]) * 4
-            dataCrc = DataCRC(dataNum, dataSize, crcNum, crcSize)
+            dataCrc = MessageCRC(dataNum, dataSize, crcNum, crcSize)
             chain.calculate(dataCrc)
     elif args.mode == "COMMON":
         finder = RevCRCCommon(16)
@@ -195,6 +206,16 @@ try:
         sys.exit(1)
 
 finally:
+    if profiler != None:
+        profiler.disable()
+        if profiler_outfile == None:
+            print "Generating profiler data"
+            profiler.print_stats(1)
+        else:
+            print "Storing profiler data to", profiler_outfile
+            profiler.dump_stats( profiler_outfile )
+        
     timeDiff = (time.time()-starttime)*1000.0
     print "Calculation time: {:13.8f}ms".format(timeDiff)
+    
     

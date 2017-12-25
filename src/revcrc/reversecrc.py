@@ -82,10 +82,8 @@ class CRCKey:
         return hash(str(self.poly) + str(self.init) + str(self.xor))
     
 
-## https://en.wikipedia.org/wiki/Cyclic_redundancy_check
-## http://www.cosc.canterbury.ac.nz/greg.ewing/essays/CRC-Reverse-Engineering.html
-## https://github.com/resilar/crchack
-## http://reveng.sourceforge.net/
+##
+##
 class RevCRCBase:
     
     ## crcSize  -- size of crc in bits

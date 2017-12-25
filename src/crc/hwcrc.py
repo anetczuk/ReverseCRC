@@ -26,10 +26,6 @@ from crc.numbermask import NumberMask
 
 
 ##
-## CRC reference: http://www.sunshine2k.de/articles/coding/crc/understanding_crc.html
-## http://www.sunshine2k.de/articles/coding/crc/understanding_crc.html#ch7
-## http://www.infradead.org/~mchehab/kernel_docs/unsorted/crc32.html
-## https://en.wikipedia.org/wiki/Computation_of_cyclic_redundancy_checks
 ##
 class HwCRC:
     def __init__(self, crcSize):

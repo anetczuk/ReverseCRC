@@ -87,19 +87,22 @@ class CRCKey:
 class RevCRCBase:
     
     ## crcSize  -- size of crc in bits
-    def __init__(self, crcSize, printProgress = None):
-        self.crcSize = crcSize
-        self.polyBase = 0b1 << crcSize
-        self.polyMax = self.polyBase << 1
+#     def __init__(self, crcSize, printProgress = None):
+    def __init__(self, printProgress = None):
+#         self.crcSize = crcSize
+#         self.polyBase = 0b1 << crcSize
+#         self.polyMax = self.polyBase << 1
         if printProgress == None:
             self.progress = False
         else:
             self.progress = printProgress
     
-    def bruteForce(self, data, crc, dataSize = -1):
+    def bruteForce(self, data, crc, dataSize = -1, crcSize = -1):
         if dataSize < 0:
             dataSize = data.bit_length()
-        dataCrc = MessageCRC(data, dataSize, crc, self.crcSize)
+        if crcSize < 0:
+            crcSize = crc.bit_length()
+        dataCrc = MessageCRC(data, dataSize, crc, crcSize)
         return self.bruteForceData(dataCrc)
     
     def bruteForceData(self, dataCrc):
@@ -115,14 +118,17 @@ class RevCRCBase:
         dataMask = NumberMask(dataCrc.dataNum, dataCrc.dataSize)
 #         if reverseMode:
 #             dataMask.reverseBytes()
-        poly = self.polyBase + 1
+        poly = (0x1 << dataCrc.crcSize)
+        polyMax = (poly << 1) 
+        polyNum = NumberMask(0x0, dataCrc.crcSize)
         retList = []
-        while poly < self.polyMax:
+        while poly < polyMax:
             if self.progress and (poly % 16384) == 16383:
                 sys.stdout.write("\r{:b}".format(poly))
                 sys.stdout.flush()
 
-            polyCRC = crcProc.calculate3(dataMask, poly)
+            polyNum.setNumber(poly)
+            polyCRC = crcProc.calculate3(dataMask, polyNum)
             if polyCRC == crc:
                 ##print "Detected poly: {:b}".format(retPoly)
 #                 if self.progress:
@@ -150,15 +156,18 @@ class RevCRCBase:
         crc = int(crcString, 16)
         crcSize = len(crcString) * 4
         
-        reverse = RevHwCRC(crcSize, printProgress = printInfo)
-        return reverse.bruteForce(data, crc)
+        reverse = RevHwCRC(printProgress = printInfo)
+        return reverse.bruteForce(data, crc, crcSize = crcSize)
     
-    def findXOR(self, data1, crc1, data2, crc2, dataSize = -1):
+    def findXOR(self, data1, crc1, data2, crc2, dataSize = -1, crcSize = -1):
         inputData = data1 ^ data2
         inputCRC = crc1 ^ crc2
+
+        if crcSize < 0:
+            crcSize = max(crc1.bit_length(), crc2.bit_length())
         
         if self.progress:
-            messageFormat = "xor-ed input: {:b} {:0" + str(self.crcSize) + "b}"
+            messageFormat = "xor-ed input: {:b} {:0" + str(crcSize) + "b}"
             print messageFormat.format(inputData, inputCRC)
 
 #         messageFormat = "xor-ed input: {:X} {:0" + str(self.crcSize) + "b}"
@@ -167,10 +176,10 @@ class RevCRCBase:
         if dataSize < 0:
             dataSize = max(data1.bit_length(), data2.bit_length())
         
-        dataCrc = MessageCRC(inputData, dataSize, inputCRC, self.crcSize)
+        dataCrc = MessageCRC(inputData, dataSize, inputCRC, crcSize)
         return self.bruteForceData(dataCrc)
     
-    def findSolution(self, dataList, dataSize, searchRange):
+    def findSolution(self, dataList, dataSize, crcSize, searchRange):
         if len(dataList) < 2:
             return []
         
@@ -187,27 +196,30 @@ class RevCRCBase:
             crc1 = dataPair1[1]
             data2 = dataPair2[0]
             crc2 = dataPair2[1]
-            keys = self.findCRCKey(data1, crc1, data2, crc2, dataSize, searchRange)
+            keys = self.findCRCKey(data1, crc1, data2, crc2, dataSize, crcSize, searchRange)
             
             retList += keys
             
         return retList
     
-    def findCRCKey(self, data1, crc1, data2, crc2, dataSize=-1, searchRange=0):
+    def findCRCKey(self, data1, crc1, data2, crc2, dataSize=-1, crcSize=-1, searchRange=0):
         if dataSize < 0:
             dataSize = max( data1.bit_length(), data2.bit_length() )
-        polyList = self.findXOR(data1, crc1, data2, crc2, dataSize)
+        if crcSize < 0:
+            crcSize = max( crc1.bit_length(), crc2.bit_length() )
+        polyList = self.findXOR(data1, crc1, data2, crc2, dataSize, crcSize)
         
         searchStart = dataSize-searchRange
         
         retList = []
         for polyPair in polyList:
             poly = polyPair[0]
+            polyMask = NumberMask(poly, crcSize)
             reversedMode = polyPair[1]
             polyAdded = False
             for ds in range(searchStart, dataSize+1):
                 d1 = NumberMask(data1, ds)
-                cb1 = self.createBackwardCRCProcessor(d1, crc1, poly)
+                cb1 = self.createBackwardCRCProcessor(d1, crc1, polyMask)
                 cb1.setReversed(reversedMode)
                 backList = cb1.calculate()
                 if len(backList) < 1:
@@ -218,7 +230,7 @@ class RevCRCBase:
                     crcProc = self.createCRCProcessor()
                     crcProc.setReversed(reversedMode)
                     crcProc.setRegisterInitValue(initVal)
-                    verifyCrc = crcProc.calculate3(d1, poly)
+                    verifyCrc = crcProc.calculate3(d1, polyMask)
                     if (verifyCrc != crc1):
                         continue
     #                 if self.progress:
@@ -245,8 +257,8 @@ class RevCRCBase:
              
             ## print "Testing: 0x{:X}".format(testMessage)
              
-            crcProc = HwCRC( polySize )
-            crc = crcProc.calculate(testMessage, polyUnderTest)
+            crcProc = HwCRC()
+            crc = crcProc.calculate2(testMessage, testMessage.bit_length(), polyUnderTest, polySize)
             ##print "Found: {} {}".format(crc, crcNum)
             if crc == crcNum:
                 return testMessage
@@ -255,41 +267,41 @@ class RevCRCBase:
     def createCRCProcessor(self):
         return None
     
-    def createBackwardCRCProcessor(self):
+    def createBackwardCRCProcessor(self, dataMask, crc, polyMask):
         return None
     
         
 class RevHwCRC(RevCRCBase):
-    def __init__(self, crcSize, printProgress = None):
-        RevCRCBase.__init__(self, crcSize, printProgress)
+    def __init__(self, printProgress = None):
+        RevCRCBase.__init__(self, printProgress)
 
     def createCRCProcessor(self):
-        return HwCRC(self.crcSize)        
+        return HwCRC()
         
-    def createBackwardCRCProcessor(self, data, crc, poly):        
-        return HwCRCBackward( data, crc, self.crcSize, poly )
+    def createBackwardCRCProcessor(self, dataMask, crc, polyMask):        
+        return HwCRCBackward( dataMask, crc, polyMask )
     
     
 class RevDivisionCRC(RevCRCBase):
-    def __init__(self, crcSize, printProgress = None):
-        RevCRCBase.__init__(self, crcSize, printProgress)
+    def __init__(self, printProgress = None):
+        RevCRCBase.__init__(self, printProgress)
 
     def createCRCProcessor(self):
-        return DivisionCRC(self.crcSize)        
+        return DivisionCRC()
         
-    def createBackwardCRCProcessor(self, data, crc, poly):        
-        return DivisionCRCBackward( data, crc, self.crcSize, poly )
+    def createBackwardCRCProcessor(self, dataMask, crc, polyMask):     
+        return DivisionCRCBackward( dataMask, crc, polyMask )
     
     
 class RevModCRC(RevCRCBase):
-    def __init__(self, crcSize, printProgress = None):
-        RevCRCBase.__init__(self, crcSize, printProgress)
+    def __init__(self, printProgress = None):
+        RevCRCBase.__init__(self, printProgress)
 
     def createCRCProcessor(self):
-        return ModCRC(self.crcSize)        
+        return ModCRC()        
         
-    def createBackwardCRCProcessor(self, data, crc, poly):        
-        return DivisionCRCBackward( data, crc, self.crcSize, poly )
+    def createBackwardCRCProcessor(self, dataMask, crc, polyMask):        
+        return DivisionCRCBackward( dataMask, crc, polyMask )
         
 ### ================================================================
         
@@ -348,7 +360,7 @@ class RevBFReceiver:
         ##self.processor.calculate(dataCrc)
         print "Finding poly for data: {}".format(dataCrc)
         tstamp = time.time()
-        calc = RevHwCRC(dataCrc.crcSize, True)
+        calc = RevHwCRC(True)
         calc.bruteForceData(dataCrc)
         timeDiff = (time.time()-tstamp)*1000.0
         print "Time: {:13.8f}ms".format(timeDiff)

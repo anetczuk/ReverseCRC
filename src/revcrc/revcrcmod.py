@@ -24,7 +24,7 @@
 
 import itertools
 import crcmod
-from revcrc.reversecrc import DataCRC, CRCKey
+from revcrc.reversecrc import CRCKey, MessageCRC
 from crc.numbermask import intToASCII
 
 
@@ -74,7 +74,7 @@ class RevCRCMod(object):
         xorData = data1 ^ data2
         diffLength = xorData.bit_length()
         xorCRC = crc1 ^ crc2
-        dataCrc = DataCRC(xorData, diffLength, xorCRC, self.crcSize)
+        dataCrc = MessageCRC(xorData, diffLength, xorCRC, self.crcSize)
         polyList = self.bruteForce3(dataCrc)
         
         dataString1 = intToASCII(data1)

@@ -28,8 +28,7 @@ from crc.numbermask import NumberMask
 ##
 ##
 class HwCRC:
-    def __init__(self, crcSize):
-        self.setCRCSize(crcSize)
+    def __init__(self):
         self.reset()
     
     def reset(self):
@@ -37,10 +36,10 @@ class HwCRC:
         self.xorOut = 0x0
         self.reversed = False
     
-    def setCRCSize(self, crcSize):
-        self.crcSize = crcSize
-        self.masterBit = 0b1 << self.crcSize
-        self.crcMask = self.masterBit - 1
+#     def setCRCSize(self, crcSize):
+#         self.crcSize = crcSize
+#         self.masterBit = 0b1 << self.crcSize
+#         self.crcMask = self.masterBit - 1
     
     def setRegisterInitValue(self, value):
         self.registerInit = value
@@ -51,30 +50,30 @@ class HwCRC:
     def setReversed(self, value = True):
         self.reversed = value
         
+    ## 'poly' with leading '1'
     def calculate(self, data, poly):
-        return self.calculate2(data, data.bit_length(), poly)
+        return self.calculate2(data, data.bit_length(), poly, poly.bit_length()-1)
     
-    def calculate2(self, data, dataSize, poly):
+    def calculate2(self, data, dataSize, poly, crcSize):
         dataMask = NumberMask(data, dataSize)
-        return self.calculate3(dataMask, poly)
+        polyMask = NumberMask(poly, crcSize)
+        return self.calculate3(dataMask, polyMask)
   
-    def calculate3(self, dataMask, poly):
+    def calculate3(self, dataMask, polyMask):
         if self.reversed == False:
-            return self.calculateMSB(dataMask, poly)
+            return self.calculateMSB(dataMask, polyMask)
         else:
-#             revPoly = reverseBits(poly, self.crcSize)
-#             return self.calculateLSB(dataMask, revPoly)
-            return self.calculateLSB(dataMask, poly)
+            return self.calculateLSB(dataMask, polyMask)
         
     ## 'poly' without leading '1'
-    def calculateMSB(self, dataMask, poly):         
+    def calculateMSB(self, dataMask, polyMask):         
         register = self.registerInit
  
         dataNum = dataMask.dataNum
-        dataBit = (dataMask.msbMask >> 1)
+        dataBit = (dataMask.masterBit >> 1)
 
-        crcMSB = (self.masterBit >> 1)
-        genPoly = poly & self.crcMask
+        crcMSB = (polyMask.masterBit >> 1)
+        crcMask = polyMask.masterBit-1
  
         ##for _ in range(0, dataMask.dataSize):
         while(dataBit > 0):
@@ -82,9 +81,9 @@ class HwCRC:
                 register ^= crcMSB
             dataBit >>= 1
             register <<= 1
-            if (register & self.masterBit) > 0:
-                register ^= genPoly
-                register &= self.crcMask
+            if (register & polyMask.masterBit) > 0:
+                register ^= polyMask.dataNum
+                register &= crcMask
                   
         if self.xorOut != 0:
             register ^= self.xorOut
@@ -92,10 +91,8 @@ class HwCRC:
         return register
 
     ## 'poly' without leading '1'
-    def calculateLSB(self, dataMask, poly):         
+    def calculateLSB(self, dataMask, polyMask):         
         register = self.registerInit
-  
-        genPoly = poly & self.crcMask
   
         dataNum = dataMask.dataNum
         dataBit = 1
@@ -105,7 +102,7 @@ class HwCRC:
                 register ^= 1
             if (register & 1) > 0:
                 register >>= 1
-                register ^= genPoly
+                register ^= polyMask.dataNum
             else:
                 register >>= 1
             dataBit <<= 1
@@ -116,6 +113,7 @@ class HwCRC:
         return register
 
 
+    #TODO: remove method
     @staticmethod
     def reverseBits(num, size):
         b = '{:0{width}b}'.format(num, width=size)
@@ -123,6 +121,6 @@ class HwCRC:
 
     @staticmethod
     def calcCRC(data, poly):
-        crcProc = HwCRC(poly.bit_length())
+        crcProc = HwCRC()
         return crcProc.calculate(data, poly)
 

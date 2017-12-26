@@ -29,6 +29,7 @@ from crc.divisioncrc import DivisionCRC
 import random
 import crcmod
 from crc.numbermask import NumberMask, reverseBits
+
 # import logging
 
  
@@ -48,84 +49,84 @@ class DivisionCRCTest(unittest.TestCase):
         pass
       
     def test_calculate_1(self):
-        crcProc = DivisionCRC(1)
-        crc = crcProc.calculate2(0b1, 1, 0b1)
+        crcProc = DivisionCRC()
+        crc = crcProc.calculate2(0b1, 1, 0b1, 1)
         self.assertEqual( crc, 0b1 )
         
-        crc = crcProc.calculate2(0b0, 1, 0b1)
+        crc = crcProc.calculate2(0b0, 1, 0b1, 1)
         self.assertEqual( crc, 0b0 )
         
-        crc = crcProc.calculate2(0b10, 2, 0b1)
+        crc = crcProc.calculate2(0b10, 2, 0b1, 1)
         self.assertEqual( crc, 0b1 )
         
-        crc = crcProc.calculate2(0b01, 2, 0b1)
+        crc = crcProc.calculate2(0b01, 2, 0b1, 1)
         self.assertEqual( crc, 0b1 )
         
     def test_calculate_1rev(self):
-        crcProc = DivisionCRC(1)
+        crcProc = DivisionCRC()
         crcProc.setReversed()
         
-        crc = crcProc.calculate2(0b1, 1, 0b1)
+        crc = crcProc.calculate2(0b1, 1, 0b1, 1)
         self.assertEqual( crc, 0b1 )
         
-        crc = crcProc.calculate2(0b0, 1, 0b1)
+        crc = crcProc.calculate2(0b0, 1, 0b1, 1)
         self.assertEqual( crc, 0b0 )
         
-        crc = crcProc.calculate2(0b10, 2, 0b1)
+        crc = crcProc.calculate2(0b10, 2, 0b1, 1)
         self.assertEqual( crc, 0b1 )
         
-        crc = crcProc.calculate2(0b01, 2, 0b1)
+        crc = crcProc.calculate2(0b01, 2, 0b1, 1)
         self.assertEqual( crc, 0b1 )
         
     def test_calculate_2(self):
-        crcProc = DivisionCRC(2)
-        crc = crcProc.calculate2(0b00, 2, 0b11)
+        crcProc = DivisionCRC()
+        crc = crcProc.calculate2(0b00, 2, 0b11, 2)
         self.assertEqual( crc, 0b00 )
         
-        crc = crcProc.calculate2(0b01, 2, 0b11)
+        crc = crcProc.calculate2(0b01, 2, 0b11, 2)
         self.assertEqual( crc, 0b11 )
         
-        crc = crcProc.calculate2(0b10, 2, 0b11)
+        crc = crcProc.calculate2(0b10, 2, 0b11, 2)
         self.assertEqual( crc, 0b01 )
         
-        crc = crcProc.calculate2(0b11, 2, 0b11)
+        crc = crcProc.calculate2(0b11, 2, 0b11, 2)
         self.assertEqual( crc, 0b10 )
         
     def test_calculate_2rev(self):
-        crcProc = DivisionCRC(2)
+        crcProc = DivisionCRC()
         crcProc.setReversed()
         
-        crc = crcProc.calculate2(0b00, 2, 0b11)
+        crc = crcProc.calculate2(0b00, 2, 0b11, 2)
         self.assertEqual( crc, 0b00 )
         
-        crc = crcProc.calculate2(0b01, 2, 0b11)
+        crc = crcProc.calculate2(0b01, 2, 0b11, 2)
         self.assertEqual( crc, 0b10 )
         
-        crc = crcProc.calculate2(0b10, 2, 0b11)
+        crc = crcProc.calculate2(0b10, 2, 0b11, 2)
         self.assertEqual( crc, 0b11 )
         
-        crc = crcProc.calculate2(0b11, 2, 0b11)
+        crc = crcProc.calculate2(0b11, 2, 0b11, 2)
         self.assertEqual( crc, 0b01 )
         
     def test_MSB_LSB(self):
         data = NumberMask(random.randint(1, 0xFF), 8)
         crcSize = 8
         crcMax = 2**crcSize-1
-        inputPoly = random.randint(1, crcMax)
+        inputPoly = NumberMask(random.randint(1, crcMax), crcSize)
         regInit = random.randint(0, crcMax)
         xorOut = random.randint(0, crcMax)
                 
-        crcProc = DivisionCRC(crcSize)
+        crcProc = DivisionCRC()
         crcProc.setRegisterInitValue( regInit )
         crcProc.setXorOutValue( xorOut )
         crc = crcProc.calculateMSB(data, inputPoly)
         
         revData = data.reversed()
-        revPoly = reverseBits(inputPoly, crcSize)
+        revPoly = inputPoly.reversed()
         revRegInit = reverseBits(regInit, crcSize)
         revXorOut = reverseBits(xorOut, crcSize)
         
-        revCrcProc = DivisionCRC(crcSize)
+        revCrcProc = DivisionCRC()
         revCrcProc.setReversed()
         revCrcProc.setRegisterInitValue( revRegInit )
         revCrcProc.setXorOutValue( revXorOut )
@@ -138,19 +139,18 @@ class DivisionCRCTest(unittest.TestCase):
 
     def test_CRC(self):
         data = NumberMask(0xBF, 8)
-        crcSize = 8
-        inputPoly = 0x130
+        inputPoly = NumberMask(0x130, 8)
         regInit = 0x0
         xorOut = 0x0
         reverse = True
  
-        crcProc = HwCRC(crcSize)
+        crcProc = HwCRC()
         crcProc.setReversed(reverse)
         crcProc.setRegisterInitValue( regInit )
         crcProc.setXorOutValue( xorOut )        
         crc  = crcProc.calculate3(data, inputPoly)
         
-        dcrcProc = DivisionCRC(crcSize)
+        dcrcProc = DivisionCRC()
         dcrcProc.setReversed(reverse)
         dcrcProc.setRegisterInitValue( regInit )
         dcrcProc.setXorOutValue( xorOut )
@@ -166,18 +166,18 @@ class DivisionCRCTest(unittest.TestCase):
         data = NumberMask(random.randint(1, 0xFFFFFFFFFFFFFFFF), 64)
         crcSize = 8
         crcMax = 2**8-1
-        inputPoly = 0x100 | random.randint(1, crcMax)
+        inputPoly = NumberMask(0x100 | random.randint(1, crcMax), crcSize)
         regInit = random.randint(0, crcMax)
         xorOut = random.randint(0, crcMax)
         reverse = bool(random.randint(0, 1))
  
-        crc_func = HwCRC(crcSize)
+        crc_func = HwCRC()
         crc_func.setReversed(reverse)
         crc_func.setRegisterInitValue( regInit )
         crc_func.setXorOutValue( xorOut )
         crcLib  = crc_func.calculate3(data, inputPoly)
         
-        crcProc = DivisionCRC(crcSize)
+        crcProc = DivisionCRC()
         crcProc.setReversed(reverse)
         crcProc.setRegisterInitValue( regInit )
         crcProc.setXorOutValue( xorOut )
@@ -191,19 +191,19 @@ class DivisionCRCTest(unittest.TestCase):
         data = NumberMask(0x00, 8*random.randint(1, 8))
         crcSize = 8
         crcMax = 2**8-1
-        inputPoly = 0x100 | random.randint(1, crcMax)
+        inputPoly = NumberMask(0x100 | random.randint(1, crcMax), crcSize)
         reverse = bool(random.randint(0, 1))
         regInit = 0x0
         xorOut = 0x0
  
-        crc_func = crcmod.mkCrcFun(inputPoly, rev=reverse, initCrc=regInit, xorOut=xorOut)
+        crc_func = crcmod.mkCrcFun(inputPoly.data, rev=reverse, initCrc=regInit, xorOut=xorOut)
         crcLib  = crc_func( data.toASCII() )
 #         print "crc: {:X} {:X}".format( crc, crc2 )
         
-        crcProc = DivisionCRC(crcSize)
+        crcProc = DivisionCRC()
         crcProc.setReversed(reverse)
         crcProc.setXorOutValue( xorOut )
-        crcProc.setInitCRC( regInit )
+        crcProc.setInitCRC( regInit, crcSize )
         
         if reverse:
             data.reverseBytes()
@@ -217,17 +217,17 @@ class DivisionCRCTest(unittest.TestCase):
         data = NumberMask(random.randint(1, 0xFFFFFFFFFFFFFFFF), 64)
         crcSize = 8
         crcMax = 2**8-1
-        inputPoly = 0x100 | random.randint(1, crcMax)
+        inputPoly = NumberMask(0x100 | random.randint(1, crcMax), crcSize)
         ## 'regInit' and 'xorOut' are not incompatible
         regInit = 0x0
         xorOut = 0x0
         reverse = bool(random.randint(0, 1))
  
-        crc_func = crcmod.mkCrcFun(inputPoly, rev=reverse, initCrc=regInit, xorOut=xorOut)
+        crc_func = crcmod.mkCrcFun(inputPoly.data, rev=reverse, initCrc=regInit, xorOut=xorOut)
         crcLib  = crc_func( data.toASCII() )
 #         print "crc: {:X} {:X}".format( crc, crc2 )
         
-        crcProc = DivisionCRC(crcSize)
+        crcProc = DivisionCRC()
         crcProc.setReversed(reverse)
         crcProc.setXorOutValue( xorOut )
         crcProc.setRegisterInitValue( regInit )
@@ -235,7 +235,7 @@ class DivisionCRCTest(unittest.TestCase):
         
         if reverse:
             data.reverseBytes()
-            inputPoly = reverseBits(inputPoly, crcSize)
+            inputPoly.reverse()
         
         crc = crcProc.calculate3(data, inputPoly)
           

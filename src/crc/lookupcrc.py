@@ -30,30 +30,31 @@ from crc.numbermask import NumberMask
 GlobalLookupTables = {}
     
 class LookupCRC:
-    def __init__(self, crcSize, lookupSize):
-        self.lookupSize = min(lookupSize, crcSize) 
-        self.crcSize = crcSize
+    def __init__(self, lookupSize):
+        self.lookupSize = lookupSize 
     
+    ## 'poly' with leading '1'
     def calculate(self, data, poly):
-        return self.calculate2(data, data.bit_length(), poly)
+        return self.calculate2(data, data.bit_length(), poly, poly.bit_length()-1)
     
-    def calculate2(self, data, dataSize, poly):
+    def calculate2(self, data, dataSize, poly, crcSize):
         dataMask = NumberMask(data, dataSize)
-        return self.calculate3(dataMask, poly)
+        polyMask = NumberMask(poly, crcSize)
+        return self.calculate3(dataMask, polyMask)
             
-    def calculate3(self, dataMask, poly):
-        lookup = self.prepareTable(poly)
+    def calculate3(self, dataMask, polyMask):
+        lookup = self.prepareTable(polyMask)
 
         dataSize = max(dataMask.dataSize, self.lookupSize)
         assert (dataSize % self.lookupSize) == 0
 
         register = 0
         rep = dataSize / self.lookupSize
-        crcMask = (1 << self.crcSize) - 1
+        crcMask = (1 << polyMask.dataSize) - 1
         lookupMask = (1 << self.lookupSize) - 1
         valMask = lookupMask << (dataSize - self.lookupSize)
         
-        indexShift = self.crcSize - self.lookupSize
+        indexShift = polyMask.dataSize - self.lookupSize
         indexMask = lookupMask << indexShift
         
         inputData = dataMask.dataNum
@@ -69,12 +70,13 @@ class LookupCRC:
 
         return register
 
-    def prepareTable(self, poly):
+    def prepareTable(self, polyMask):
         lookup = {}
-        crcProc = HwCRC(self.crcSize)
+        crcProc = HwCRC()
         maxVal = 1 << self.lookupSize
         for i in range(0, maxVal):
-            lookup[i] = crcProc.calculate2(i, self.lookupSize, poly)
+            data = NumberMask(i, self.lookupSize)
+            lookup[i] = crcProc.calculate3(data, polyMask)
         return lookup
     
     

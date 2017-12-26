@@ -24,8 +24,8 @@
  
 import unittest
 import os
-from revcrc.revcrcmod import RevCRCMod
 import crcmod
+from revcrc.revcrcmod import RevCRCMod
 from crc.numbermask import intToASCII
 # import logging
  
@@ -35,7 +35,7 @@ __scriptdir__ = os.path.dirname(os.path.realpath(__file__))
 # logging.basicConfig(level=logging.INFO)
 
   
-class RevCRCTest(unittest.TestCase):
+class RevCRCModTest(unittest.TestCase):
     def setUp(self):
         # Called before the first testfunction is executed
         pass

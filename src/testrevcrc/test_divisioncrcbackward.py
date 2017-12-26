@@ -31,6 +31,7 @@ from crc.divisioncrc import DivisionCRC
 from revcrc.divisioncrcbackward import DivisionCRCBackwardState,\
     DivisionCRCBackward
 from crc.numbermask import NumberMask
+
  
  
 __scriptdir__ = os.path.dirname(os.path.realpath(__file__))
@@ -48,11 +49,11 @@ class DivisionCRCBackwardStateTest(unittest.TestCase):
         pass
 
     def test_shift(self):
-        poly = 0b100011101
-        crc = 0x0F
         crcSize = 8
+        poly = NumberMask(0b100011101, crcSize)
+        crc = 0x0F
         
-        cb = DivisionCRCBackwardState(crcSize, poly, crc)
+        cb = DivisionCRCBackwardState(poly, crc)
         
         cb.shiftBit(True)
         self.assertEqual( cb.register, 0b10001001 )
@@ -113,218 +114,218 @@ class DivisionCRCBackwardTest(unittest.TestCase):
         pass
 
     def test_round_cd8(self):
-        data = 0xC2
         dataSize = 8
-        inputPoly = 0b100011101
-        crc = 0x0F
+        data = NumberMask(0xC2, dataSize)
         crcSize = 8
+        inputPoly = NumberMask(0b100011101, crcSize)
+        crc = 0x0F
         regInit = 0x0
         xorOut = 0
         
-        cb = DivisionCRCBackward( NumberMask(data, dataSize), crc, crcSize, inputPoly, xorOut )
+        cb = DivisionCRCBackward( data, crc, inputPoly, xorOut )
         retList = cb.calculate()
-        self.assertIn(DivisionCRCBackwardState(crcSize, inputPoly, regInit, NumberMask(data, dataSize)), retList)
+        self.assertIn(DivisionCRCBackwardState(inputPoly, regInit, data), retList)
         
     def test_round_cd8_2(self):
-        data =  0xC2
         dataSize = 8
-        inputPoly = 0b100011101
+        data =  NumberMask(0xC2, dataSize)
+        crcSize = 8
+        inputPoly = NumberMask(0b100011101, crcSize)
         regInit = 0x00
         xorOut = 0x00
-        crcSize = 8
          
-        crcProc = DivisionCRC(crcSize)
+        crcProc = DivisionCRC()
         crcProc.setRegisterInitValue(regInit)
         crcProc.setXorOutValue(xorOut)
-        crc = crcProc.calculate2(data, dataSize, inputPoly)
+        crc = crcProc.calculate3(data, inputPoly)
          
-        cb = DivisionCRCBackward( NumberMask(data, dataSize), crc, crcSize, inputPoly, xorOut )
+        cb = DivisionCRCBackward( data, crc, inputPoly, xorOut )
         retList = cb.calculate()
-        self.assertIn(DivisionCRCBackwardState(crcSize, inputPoly, 0x0, NumberMask(data, dataSize)), retList)
+        self.assertIn(DivisionCRCBackwardState(inputPoly, 0x0, data), retList)
         
     def test_round_cd8_3(self):
-        data =  0xC6
         dataSize = 8
-        inputPoly = 0b100011101
+        data =  NumberMask(0xC6, dataSize)
+        crcSize = 8
+        inputPoly = NumberMask(0b100011101, crcSize)
         regInit = 0x00
         xorOut = 0x00
-        crcSize = 8
          
-        crcProc = DivisionCRC(crcSize)
+        crcProc = DivisionCRC()
         crcProc.setRegisterInitValue(regInit)
         crcProc.setXorOutValue(xorOut)
-        crc = crcProc.calculate2(data, dataSize, inputPoly)
+        crc = crcProc.calculate3(data, inputPoly)
          
-        cb = DivisionCRCBackward( NumberMask(data, dataSize), crc, crcSize, inputPoly, xorOut )
+        cb = DivisionCRCBackward( data, crc, inputPoly, xorOut )
         retList = cb.calculate()
-        self.assertIn(DivisionCRCBackwardState(crcSize, inputPoly, 0x0, NumberMask(data, dataSize)), retList)
+        self.assertIn(DivisionCRCBackwardState(inputPoly, 0x0, data), retList)
         
     def test_round_cd8_3rev(self):
-        data =  0xC6
         dataSize = 8
-        inputPoly = 0b100011101
+        data =  NumberMask(0xC6, dataSize)
+        crcSize = 8
+        inputPoly = NumberMask(0b100011101, crcSize)
         regInit = 0x00
         xorOut = 0x00
-        crcSize = 8
         reverse = True
          
-        crcProc = DivisionCRC(crcSize)
+        crcProc = DivisionCRC()
         crcProc.setReversed(reverse)
         crcProc.setRegisterInitValue(regInit)
         crcProc.setXorOutValue(xorOut)
-        crc = crcProc.calculate2(data, dataSize, inputPoly)
+        crc = crcProc.calculate3(data, inputPoly)
          
-        cb = DivisionCRCBackward( NumberMask(data, dataSize), crc, crcSize, inputPoly, xorOut )
+        cb = DivisionCRCBackward( data, crc, inputPoly, xorOut )
         cb.setReversed(reverse)
         retList = cb.calculate()
-        self.assertIn(DivisionCRCBackwardState(crcSize, inputPoly, 0x0, NumberMask(data, dataSize)), retList)
+        self.assertIn(DivisionCRCBackwardState(inputPoly, 0x0, data), retList)
 
     def test_round_c8d9_rev(self):
-        data =  0x100
         dataSize = 9
-        inputPoly = 0b100011101
+        data =  NumberMask(0x100, dataSize)
+        crcSize = 8
+        inputPoly = NumberMask(0b100011101, crcSize)
         regInit = 0x00
         xorOut = 0x00
-        crcSize = 8
         reverse = True
          
-        crcProc = DivisionCRC(crcSize)
+        crcProc = DivisionCRC()
         crcProc.setReversed(reverse)
         crcProc.setRegisterInitValue(regInit)
         crcProc.setXorOutValue(xorOut)
-        crc = crcProc.calculate2(data, dataSize, inputPoly)
+        crc = crcProc.calculate3(data, inputPoly)
          
-        cb = DivisionCRCBackward( NumberMask(data, dataSize), crc, crcSize, inputPoly, xorOut )
+        cb = DivisionCRCBackward( data, crc, inputPoly, xorOut )
         cb.setReversed(reverse)
         retList = cb.calculate()
-        self.assertIn(DivisionCRCBackwardState(crcSize, inputPoly, 0x0, NumberMask(data, dataSize)), retList)
+        self.assertIn(DivisionCRCBackwardState(inputPoly, 0x0, data), retList)
         
     def test_round_c8d16(self):
-        data =  0x5AC6
         dataSize = 16
-        inputPoly = 0b100011101
+        data =  NumberMask(0x5AC6, dataSize)
+        crcSize = 8
+        inputPoly = NumberMask(0b100011101, crcSize)
         regInit = 0x00
         xorOut = 0x00
-        crcSize = 8
          
-        crcProc = DivisionCRC(crcSize)
+        crcProc = DivisionCRC()
         crcProc.setRegisterInitValue(regInit)
         crcProc.setXorOutValue(xorOut)
-        crc = crcProc.calculate2(data, dataSize, inputPoly)
+        crc = crcProc.calculate3(data, inputPoly)
          
-        cb = DivisionCRCBackward( NumberMask(data, dataSize), crc, crcSize, inputPoly, xorOut )
+        cb = DivisionCRCBackward( data, crc, inputPoly, xorOut )
         retList = cb.calculate()
-        self.assertIn(DivisionCRCBackwardState(crcSize, inputPoly, 0x0, NumberMask(data, dataSize)), retList)
+        self.assertIn(DivisionCRCBackwardState(inputPoly, 0x0, data), retList)
         
     def test_round_c8d16_rev(self):
-        data =  0x5AC6
         dataSize = 16
-        inputPoly = 0b100011101
+        data =  NumberMask(0x5AC6, dataSize)
+        crcSize = 8
+        inputPoly = NumberMask(0b100011101, crcSize)
         regInit = 0x00
         xorOut = 0x00
-        crcSize = 8
         reverse = True
          
-        crcProc = DivisionCRC(crcSize)
+        crcProc = DivisionCRC()
         crcProc.setReversed(reverse)
         crcProc.setRegisterInitValue(regInit)
         crcProc.setXorOutValue(xorOut)
-        crc = crcProc.calculate2(data, dataSize, inputPoly)
+        crc = crcProc.calculate3(data, inputPoly)
          
-        cb = DivisionCRCBackward( NumberMask(data, dataSize), crc, crcSize, inputPoly, xorOut )
+        cb = DivisionCRCBackward( data, crc, inputPoly, xorOut )
         cb.setReversed(reverse)
         retList = cb.calculate()
-        self.assertIn(DivisionCRCBackwardState(crcSize, inputPoly, 0x0, NumberMask(data, dataSize)), retList)
+        self.assertIn(DivisionCRCBackwardState(inputPoly, 0x0, data), retList)
         
     def test_round_c8d8_init_random(self):
         dataSize = 8
         crcSize = 8
         data = NumberMask(random.randint(1, 2**dataSize-1), dataSize)
         crcMax = 2**crcSize-1
-        inputPoly = random.randint(1, crcMax)
+        inputPoly = NumberMask(random.randint(1, crcMax), crcSize)
         regInit = random.randint(1, crcMax)
         xorOut = 0x0
         reverse = random.randint(1, crcMax)
  
-        crcFun = DivisionCRC(crcSize)
+        crcFun = DivisionCRC()
         crcFun.setReversed(reverse)
         crcFun.setRegisterInitValue(regInit)
         crcFun.setXorOutValue(xorOut)
         crc = crcFun.calculate3(data, inputPoly)
           
-        cb = DivisionCRCBackward( data, crc, crcSize, inputPoly, xorOut )
+        cb = DivisionCRCBackward( data, crc, inputPoly, xorOut )
         cb.setReversed(reverse)
         retList = cb.calculate()
-        self.assertIn(DivisionCRCBackwardState(crcSize, inputPoly, regInit, data), retList)
+        self.assertIn(DivisionCRCBackwardState(inputPoly, regInit, data), retList)
         
     def test_round_xor_random(self):
         dataPower = random.randint(1, 8)
         dataSize = dataPower*8
-        data = random.randint(1, 2**dataSize-1)
+        data = NumberMask(random.randint(1, 2**dataSize-1), dataSize)
         crcSize = random.randint(1, dataPower)*8
         crcMax = 2**crcSize-1
-        inputPoly = random.randint(1, crcMax)
+        inputPoly = NumberMask(random.randint(1, crcMax), crcSize)
         
         regInit = 0x0
         xorOut = random.randint(1, crcMax)
         reverse = random.randint(1, crcMax)
  
-        crcFun = DivisionCRC(crcSize)
+        crcFun = DivisionCRC()
         crcFun.setReversed(reverse)
         crcFun.setRegisterInitValue(regInit)
         crcFun.setXorOutValue(xorOut)
-        crc = crcFun.calculate2(data, dataSize, inputPoly)
+        crc = crcFun.calculate3(data, inputPoly)
           
-        cb = DivisionCRCBackward( NumberMask(data, dataSize), crc, crcSize, inputPoly, xorOut )
+        cb = DivisionCRCBackward( data, crc, inputPoly, xorOut )
         cb.setReversed(reverse)
         retList = cb.calculate()
-        self.assertIn(DivisionCRCBackwardState(crcSize, inputPoly, regInit, NumberMask(data, dataSize)), retList)
+        self.assertIn(DivisionCRCBackwardState(inputPoly, regInit, data), retList)
 
     def test_round_init_random(self):
         dataPower = random.randint(1, 8)
         dataSize = dataPower*8
-        data = random.randint(1, 2**dataSize-1)
+        data = NumberMask(random.randint(1, 2**dataSize-1), dataSize)
         crcSize = random.randint(1, dataPower)*8
         crcMax = 2**crcSize-1
-        inputPoly = random.randint(1, crcMax)
+        inputPoly = NumberMask(random.randint(1, crcMax), crcSize)
         
         regInit = random.randint(1, crcMax)
         xorOut = 0x0
         reverse = random.randint(1, crcMax)
  
-        crcFun = DivisionCRC(crcSize)
+        crcFun = DivisionCRC()
         crcFun.setReversed(reverse)
         crcFun.setRegisterInitValue(regInit)
         crcFun.setXorOutValue(xorOut)
-        crc = crcFun.calculate2(data, dataSize, inputPoly)
+        crc = crcFun.calculate3(data, inputPoly)
           
-        cb = DivisionCRCBackward( NumberMask(data, dataSize), crc, crcSize, inputPoly, xorOut )
+        cb = DivisionCRCBackward( data, crc, inputPoly, xorOut )
         cb.setReversed(reverse)
         retList = cb.calculate()
-        self.assertIn(DivisionCRCBackwardState(crcSize, inputPoly, regInit, NumberMask(data, dataSize)), retList)
+        self.assertIn(DivisionCRCBackwardState(inputPoly, regInit, data), retList)
         
     def test_round_DCRC_init_random(self):
         dataPower = random.randint(1, 8)
         dataSize = dataPower*8
-        data = random.randint(1, 2**dataSize-1)
+        data = NumberMask(random.randint(1, 2**dataSize-1), dataSize)
         crcSize = random.randint(1, dataPower)*8
         crcMax = 2**crcSize-1
-        inputPoly = random.randint(1, crcMax)
+        inputPoly = NumberMask(random.randint(1, crcMax), crcSize)
         
         regInit = random.randint(1, crcMax)
         xorOut = 0x0
         reverse = random.randint(1, crcMax)
  
-        crcFun = DivisionCRC(crcSize)
+        crcFun = DivisionCRC()
         crcFun.setReversed(reverse)
         crcFun.setRegisterInitValue(regInit)
         crcFun.setXorOutValue(xorOut)
-        crc = crcFun.calculate2(data, dataSize, inputPoly)
+        crc = crcFun.calculate3(data, inputPoly)
           
-        cb = DivisionCRCBackward( NumberMask(data, dataSize), crc, crcSize, inputPoly, xorOut )
+        cb = DivisionCRCBackward( data, crc, inputPoly, xorOut )
         cb.setReversed(reverse)
         retList = cb.calculate()
-        self.assertIn(DivisionCRCBackwardState(crcSize, inputPoly, regInit, NumberMask(data, dataSize)), retList)
+        self.assertIn(DivisionCRCBackwardState(inputPoly, regInit, data), retList)
 
 
 

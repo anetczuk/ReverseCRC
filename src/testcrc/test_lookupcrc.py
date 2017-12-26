@@ -43,8 +43,8 @@ class LookupCRCTest(unittest.TestCase):
         ##crc = crcCalc.calculate(data, poly)
         crc = 1
         
-        crcProc = LookupCRC(2, 1)
-        lookupCrc = crcProc.calculate2(data, 4, poly)
+        crcProc = LookupCRC(1)
+        lookupCrc = crcProc.calculate2(data, 4, poly, 2)
         self.assertEqual( lookupCrc, crc )
         
     def test_calculate_4(self):
@@ -54,8 +54,8 @@ class LookupCRCTest(unittest.TestCase):
         ##crc = crcCalc.calculate(data, poly)
         crc = 14
         
-        crcProc = LookupCRC(4, 2)
-        lookupCrc = crcProc.calculate2(data, 8, poly)
+        crcProc = LookupCRC(2)
+        lookupCrc = crcProc.calculate2(data, 8, poly, 4)
         self.assertEqual( lookupCrc, crc )
         
     def test_calculate_4_half(self):
@@ -65,9 +65,9 @@ class LookupCRCTest(unittest.TestCase):
 #         crc = crcCalc.calculate2(data, 6, poly)
         crc = 14
         
-        crcProc = LookupCRC(4, 4)
+        crcProc = LookupCRC(4)
         with self.assertRaises(AssertionError):
-            lookupCrc = crcProc.calculate2(data, 6, poly)
+            lookupCrc = crcProc.calculate2(data, 6, poly, 4)
             self.assertEqual( lookupCrc, crc )
     
     def test_calculate_8(self):
@@ -77,7 +77,7 @@ class LookupCRCTest(unittest.TestCase):
         ##crc = crcCalc.calculate(data, poly)
         crc = 89
         
-        crcProc = LookupCRC(8, 4)
+        crcProc = LookupCRC(4)
         lookupCrc = crcProc.calculate(data, poly)
         self.assertEqual( lookupCrc, crc )
 

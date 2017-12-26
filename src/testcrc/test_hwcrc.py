@@ -48,94 +48,94 @@ class HwCRCTest(unittest.TestCase):
         pass
       
     def test_calculate_1(self):
-        crcProc = HwCRC(1)
-        crc = crcProc.calculate2(0b1, 1, 0b1)
+        crcProc = HwCRC()
+        crc = crcProc.calculate2(0b1, 1, 0b1, 1)
         self.assertEqual( crc, 0b1 )
         
-        crc = crcProc.calculate2(0b0, 1, 0b1)
+        crc = crcProc.calculate2(0b0, 1, 0b1, 1)
         self.assertEqual( crc, 0b0 )
         
-        crc = crcProc.calculate2(0b10, 2, 0b1)
+        crc = crcProc.calculate2(0b10, 2, 0b1, 1)
         self.assertEqual( crc, 0b1 )
         
-        crc = crcProc.calculate2(0b01, 2, 0b1)
+        crc = crcProc.calculate2(0b01, 2, 0b1, 1)
         self.assertEqual( crc, 0b1 )
         
     def test_calculate_1rev(self):
-        crcProc = HwCRC(1)
+        crcProc = HwCRC()
         crcProc.setReversed()
         
-        crc = crcProc.calculate2(0b1, 1, 0b1)
+        crc = crcProc.calculate2(0b1, 1, 0b1, 1)
         self.assertEqual( crc, 0b1 )
         
-        crc = crcProc.calculate2(0b0, 1, 0b1)
+        crc = crcProc.calculate2(0b0, 1, 0b1, 1)
         self.assertEqual( crc, 0b0 )
         
-        crc = crcProc.calculate2(0b10, 2, 0b1)
+        crc = crcProc.calculate2(0b10, 2, 0b1, 1)
         self.assertEqual( crc, 0b1 )
         
-        crc = crcProc.calculate2(0b01, 2, 0b1)
+        crc = crcProc.calculate2(0b01, 2, 0b1, 1)
         self.assertEqual( crc, 0b1 )
         
     def test_calculate_2(self):
-        crcProc = HwCRC(2)
-        crc = crcProc.calculate2(0b00, 2, 0b11)
+        crcProc = HwCRC()
+        crc = crcProc.calculate2(0b00, 2, 0b11, 2)
         self.assertEqual( crc, 0b00 )
         
-        crc = crcProc.calculate2(0b01, 2, 0b11)
+        crc = crcProc.calculate2(0b01, 2, 0b11, 2)
         self.assertEqual( crc, 0b11 )
         
-        crc = crcProc.calculate2(0b10, 2, 0b11)
+        crc = crcProc.calculate2(0b10, 2, 0b11, 2)
         self.assertEqual( crc, 0b01 )
         
-        crc = crcProc.calculate2(0b11, 2, 0b11)
+        crc = crcProc.calculate2(0b11, 2, 0b11, 2)
         self.assertEqual( crc, 0b10 )
         
     def test_calculate_2rev(self):
-        crcProc = HwCRC(2)
+        crcProc = HwCRC()
         crcProc.setReversed()
         
-        crc = crcProc.calculate2(0b00, 2, 0b11)
+        crc = crcProc.calculate2(0b00, 2, 0b11, 2)
         self.assertEqual( crc, 0b00 )
         
-        crc = crcProc.calculate2(0b01, 2, 0b11)
+        crc = crcProc.calculate2(0b01, 2, 0b11, 2)
         self.assertEqual( crc, 0b10 )
         
-        crc = crcProc.calculate2(0b10, 2, 0b11)
+        crc = crcProc.calculate2(0b10, 2, 0b11, 2)
         self.assertEqual( crc, 0b11 )
         
-        crc = crcProc.calculate2(0b11, 2, 0b11)
+        crc = crcProc.calculate2(0b11, 2, 0b11, 2)
         self.assertEqual( crc, 0b01 )
     
     def test_calculate_3(self):
         ## taken from https://en.wikipedia.org/wiki/Cyclic_redundancy_check
-        crcProc = HwCRC(3)
-        crc = crcProc.calculate(0b11010011101100, 0b011) ## 0x34EC 0xB
+        crcProc = HwCRC()
+        crc = crcProc.calculate2(0b11010011101100, 16, 0b011, 3) ## 0x34EC 0xB
         self.assertEqual( crc, 0b100 )
-        crc = crcProc.calculate(0b11010011101101, 0b011) ## 0x34ED 0xB
+        crc = crcProc.calculate2(0b11010011101101, 16, 0b011, 3) ## 0x34ED 0xB
         self.assertEqual( crc, 0b111 )
-        crc = crcProc.calculate(0b11010011101110, 0b011) ## 0x34EE 0xB
+        crc = crcProc.calculate2(0b11010011101110, 16, 0b011, 3) ## 0x34EE 0xB
         self.assertEqual( crc, 0b010 )
-        crc = crcProc.calculate(0b11010011101111, 0b011) ## 0x34EF 0xB
+        crc = crcProc.calculate2(0b11010011101111, 16, 0b011, 3) ## 0x34EF 0xB
         self.assertEqual( crc, 0b001 )
         
-        crc = crcProc.calculate(0b11010011101111, 0b011) ## 0x34EF 0xB
+        crc = crcProc.calculate2(0b11010011101111, 16, 0b011, 3) ## 0x34EF 0xB
         self.assertEqual( crc, 0b001 )
-        crc = crcProc.calculate(0b11010111101111, 0b011) ## 0x35EF 0xB
+        crc = crcProc.calculate2(0b11010111101111, 16, 0b011, 3) ## 0x35EF 0xB
         self.assertEqual( crc, 0b111 )
-        crc = crcProc.calculate(0b11011011101111, 0b011) ## 0x36EF 0xB
+        crc = crcProc.calculate2(0b11011011101111, 16, 0b011, 3) ## 0x36EF 0xB
         self.assertEqual( crc, 0b110 )
-        crc = crcProc.calculate(0b11011111101111, 0b011) ## 0x37EF 0xB
+        crc = crcProc.calculate2(0b11011111101111, 16, 0b011, 3) ## 0x37EF 0xB
         self.assertEqual( crc, 0b000 )
         
     def test_calculate_leading(self):
-        crc1 = HwCRC.calcCRC(     0b11010011101100, 0b011)
-        crc2 = HwCRC.calcCRC(0b0000011010011101100, 0b011)
+        crc1 = HwCRC.calcCRC(     0b11010011101100, 0b1011)
+        crc2 = HwCRC.calcCRC(0b0000011010011101100, 0b1011)
         self.assertEqual( crc1, crc2 )
 
     def test_calculate_8(self):
         ## taken from http://www.sunshine2k.de/articles/coding/crc/understanding_crc.html#ch3
-        crcProc = HwCRC(8)
+        crcProc = HwCRC()
         crc = crcProc.calculate(0x112233, 0x107)
         self.assertEqual( crc, 0xD4 )
         
@@ -152,14 +152,14 @@ class HwCRCTest(unittest.TestCase):
         self.assertEqual( crc, 0b10101100 )                 ## 0xAC
         
     def test_calculate_8_regInit(self):
-        crcProc = HwCRC(8)
+        crcProc = HwCRC()
         crcProc.setRegisterInitValue(0xA5)                  ## 0b10100101
           
         crc = crcProc.calculate(0xA53937CF, 0x11D)
         self.assertEqual( crc, 0x1D )
         
     def test_calculate_8_xorOut(self):
-        crcProc = HwCRC(8)
+        crcProc = HwCRC()
         crcProc.setXorOutValue(0xA5)
         crc = crcProc.calculate(0xA53937CF, 0x11D)
         self.assertEqual( crc, 0x14 )
@@ -167,9 +167,9 @@ class HwCRCTest(unittest.TestCase):
         
     def test_calculate2_8rev_check(self):
         ## input data generated from other tests
-        crcProc = HwCRC(8)
+        crcProc = HwCRC()
         crcProc.setReversed()
-        crc = crcProc.calculate2(0x000300, 24, 0x1BF)
+        crc = crcProc.calculate2(0x000300, 24, 0x1BF, 8)
         self.assertEqual( crc, 80 )
         
     def test_calculate3_8rev(self):
@@ -180,11 +180,11 @@ class HwCRCTest(unittest.TestCase):
         regInit = 0x00
         xorOut = 0x00
         
-        crcProc = HwCRC(crcSize)
+        crcProc = HwCRC()
         crcProc.setRegisterInitValue( regInit )
         crcProc.setXorOutValue( xorOut )
         crcProc.setReversed()
-        crc = crcProc.calculate2(data, dataSize, inputPoly)
+        crc = crcProc.calculate2(data, dataSize, inputPoly, crcSize)
         self.assertEqual( crc, 0 )
         
     def test_calculate3_8revB(self):
@@ -195,11 +195,11 @@ class HwCRCTest(unittest.TestCase):
         regInit = 0x00
         xorOut = 0x00
         
-        crcProc = HwCRC(crcSize)
+        crcProc = HwCRC()
         crcProc.setRegisterInitValue( regInit )
         crcProc.setXorOutValue( xorOut )
         crcProc.setReversed()
-        crc = crcProc.calculate2(data, dataSize, inputPoly)
+        crc = crcProc.calculate2(data, dataSize, inputPoly, crcSize)
         self.assertEqual( crc, 0 )
         
     def test_calculate3_8rev_init_xor(self):
@@ -210,32 +210,32 @@ class HwCRCTest(unittest.TestCase):
         regInit = 0x0F
         xorOut = 0xF0
         
-        crcProc = HwCRC(crcSize)
+        crcProc = HwCRC()
         crcProc.setRegisterInitValue( regInit )
         crcProc.setXorOutValue( xorOut )
         crcProc.setReversed()
-        crc = crcProc.calculate2(data, dataSize, inputPoly)
+        crc = crcProc.calculate2(data, dataSize, inputPoly, crcSize)
         self.assertEqual( crc, 240 )
         
     def test_MSB_LSB(self):
         data = NumberMask(random.randint(1, 0xFF), 8)
         crcSize = 8
         crcMax = 2**crcSize-1
-        inputPoly = random.randint(1, crcMax)
+        inputPoly = NumberMask(random.randint(1, crcMax), crcSize)
         regInit = random.randint(0, crcMax)
         xorOut = random.randint(0, crcMax)
                 
-        crcProc = HwCRC(crcSize)
+        crcProc = HwCRC()
         crcProc.setRegisterInitValue( regInit )
         crcProc.setXorOutValue( xorOut )
         crc = crcProc.calculateMSB(data, inputPoly)
         
         revData = data.reversed()
-        revPoly = reverseBits(inputPoly, crcSize)
+        revPoly = inputPoly.reversed()
         revRegInit = reverseBits(regInit, crcSize)
         revXorOut = reverseBits(xorOut, crcSize)
         
-        revCrcProc = HwCRC(crcSize)
+        revCrcProc = HwCRC()
         revCrcProc.setReversed()
         revCrcProc.setRegisterInitValue( revRegInit )
         revCrcProc.setXorOutValue( revXorOut )
@@ -250,24 +250,24 @@ class HwCRCTest(unittest.TestCase):
         data = NumberMask(random.randint(1, 0xFFFFFFFFFFFFFFFF), 64)
         crcSize = 8
         crcMax = 2**crcSize-1
-        inputPoly = (0x1 << crcSize) | random.randint(1, crcMax)
+        inputPoly = NumberMask((0x1 << crcSize) | random.randint(1, crcMax), crcSize)
 #         regInit = random.randint(0, crcMax)
 #         xorOut = random.randint(0, crcMax)
         regInit = 0x0
         xorOut = 0x0
         reverse = bool(random.randint(0, 1))
  
-        crc_func = crcmod.mkCrcFun(inputPoly, rev=reverse, initCrc=regInit, xorOut=xorOut)
+        crc_func = crcmod.mkCrcFun(inputPoly.data, rev=reverse, initCrc=regInit, xorOut=xorOut)
         crcLib  = crc_func( data.toASCII() )
 #         print "crc: {:X} {:X}".format( crc, crc2 )
         
-        crcProc = HwCRC(crcSize)
+        crcProc = HwCRC()
         crcProc.setReversed(reverse)
         crcProc.setXorOutValue( xorOut )
                 
         if reverse:
             data.reverseBytes()
-            inputPoly = reverseBits(inputPoly, crcSize)
+            inputPoly.reverse()
             crcInit = reverseBits(regInit^xorOut, crcSize)
             crcProc.setRegisterInitValue( crcInit )
         else:

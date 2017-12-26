@@ -61,46 +61,50 @@ def reverseBytes(num, sizeBytes = -1):
 
 class NumberMask:
     def __init__(self, data, dataSize):
-        self.msbMask = 0b1 << dataSize      ## cached value
-        self.dataNum = (data & (self.msbMask-1))
         self.dataSize = dataSize
+        self.masterBit = 0b1 << dataSize              ## cached value
+        self.setNumber(data)
+    
+    def setNumber(self, newValue):
+        self.data = newValue
+        self.dataNum = (newValue & (self.masterBit-1))
     
     def pushMSB(self, bit):
         if bit > 0:
-            self.dataNum |= self.msbMask
+            self.dataNum |= self.masterBit
         self.dataSize += 1
-        self.msbMask <<= 1
+        self.masterBit <<= 1
         
     def pushLSB(self, bit):
         self.dataNum <<= 1
         if bit > 0:
             self.dataNum |= 1
         self.dataSize += 1
-        self.msbMask <<= 1
+        self.masterBit <<= 1
         
     def pushLSZeros(self, num):
         self.dataNum <<= num
         self.dataSize += num
-        self.msbMask <<= num
+        self.masterBit <<= num
         
     def popLSZeros(self, num):
         self.dataNum >>= num
         self.dataSize -= num
-        self.msbMask >>= num
+        self.masterBit >>= num
         
     def pushMSZeros(self, num):
         self.dataSize += num
-        self.msbMask <<= num
+        self.masterBit <<= num
          
     def popMSZeros(self, num):
         self.dataSize -= num
-        self.msbMask >>= num
+        self.masterBit >>= num
     
     def containsMSB(self, dataMask):
         sizeDiff = self.dataSize - dataMask.dataSize
         if sizeDiff < 0:
             return False
-        cmpMask = ((dataMask.msbMask-1) << sizeDiff) 
+        cmpMask = ((dataMask.masterBit-1) << sizeDiff) 
         data1 = self.dataNum & cmpMask
         data2 = (dataMask.dataNum << sizeDiff)
         return (data1 == data2)
@@ -108,7 +112,7 @@ class NumberMask:
     def containsLSB(self, dataMask):
         if self.dataSize < dataMask.dataSize:
             return False
-        cmpMask = dataMask.msbMask-1
+        cmpMask = dataMask.masterBit-1
         data1 = self.dataNum & cmpMask
         data2 = dataMask.dataNum & cmpMask
         return (data1 == data2)
@@ -132,7 +136,7 @@ class NumberMask:
     
     def getMSB(self, length):
         retBits = 0
-        dataBit = (self.msbMask >> 1)
+        dataBit = (self.masterBit >> 1)
         for _ in range(0, length):
             retBits <<= 1
             if (self.dataNum & dataBit) > 0:

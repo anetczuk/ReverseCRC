@@ -32,7 +32,6 @@ import cProfile
 
 from revcrc.input import InputData
 import itertools
-from revcrc.revcommon import RevCRCCommon
 from revcrc.reversecrc import RevHwCRC, BruteForceChain, MessageCRC
 
 
@@ -65,10 +64,10 @@ def findXOR(inputPair1, inputPair2):
     data2 = int(data2String, 16)
     crc2 = int(crc2String, 16)
 
-    reverse = RevHwCRC(crc1Size, False)
+    reverse = RevHwCRC(False)
 #     reverse.findXOR2(data1, crc1, data2, crc2)
 #     retList = reverse.findCRCKey(data1, crc1, data2, crc2)
-    retList = reverse.findXOR2(data1, crc1, data2, crc2)
+    retList = reverse.findXOR2(data1, crc1, data2, crc2, crcSize = crc1Size)
 #     if len(retList) > 0:
 #         print "Found polys:", retList
 
@@ -96,9 +95,9 @@ def findKey(inputPair1, inputPair2):
     data2 = int(data2String, 16)
     crc2 = int(crc2String, 16)
 
-    reverse = RevHwCRC(crc1Size, False)
+    reverse = RevHwCRC(False)
 #     reverse.findXOR2(data1, crc1, data2, crc2)
-    retList = reverse.findCRCKey(data1, crc1, data2, crc2)
+    retList = reverse.findCRCKey(data1, crc1, data2, crc2, crcSize = crc1Size)
 #     if len(retList) > 0:
 #         print "Found polys:", retList
 
@@ -199,7 +198,7 @@ try:
             dataCrc = MessageCRC(dataNum, dataSize, crcNum, crcSize)
             chain.calculate(dataCrc)
     elif args.mode == "COMMON":
-        finder = RevCRCCommon(16)
+        finder = RevHwCRC()
         foundCRC = finder.findSolutionStrings(data)
     else:
         print "Invalid mode:", args.mode

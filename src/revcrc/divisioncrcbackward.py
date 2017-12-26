@@ -30,12 +30,12 @@ from crc.numbermask import NumberMask
 
 class DivisionCRCBackwardState:
 
-    def __init__(self, crcSize, poly, reg = 0x0, data = NumberMask(0, 0)):
-        self.dataMask = copy.deepcopy(data)
-        self.crcSize = crcSize
-        self.masterBit = 0b1 << crcSize     ## cached value
+    def __init__(self, polyMask, reg = 0x0, dataMask = NumberMask(0, 0)):
+        self.dataMask = copy.deepcopy(dataMask)
+        self.crcSize = polyMask.dataSize
+        self.masterBit = 0b1 << self.crcSize     ## cached value
         self.crcMask = self.masterBit - 1
-        self.poly = poly & self.crcMask
+        self.poly = polyMask.data & self.crcMask
         self.register = reg
 
     def shiftBit(self, one, revMode = False):
@@ -109,12 +109,12 @@ class DivisionCRCBackwardState:
 ## Finds registry init value
 ##
 class DivisionCRCBackward:
-    def __init__(self, dataMask, crc, crcSize, poly, xorOut = 0):
+    def __init__(self, dataMask, crc, polyMask, xorOut = 0):
         self.dataMask = copy.deepcopy(dataMask)
-        self.crcSize = crcSize
+        self.crcSize = polyMask.dataSize
         self.reversedMode = False
         self.collector = []
-        self.collector.append( DivisionCRCBackwardState( crcSize, poly, crc^xorOut) )
+        self.collector.append( DivisionCRCBackwardState( polyMask, crc^xorOut) )
 
     def setReversed(self, value = True):
         self.reversedMode = value

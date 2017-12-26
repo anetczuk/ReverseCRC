@@ -26,8 +26,7 @@ from crc.numbermask import reverseBits, NumberMask
 
 
 class DivisionCRC:
-    def __init__(self, crcSize):
-        self.setCRCSize(crcSize)
+    def __init__(self):
         self.reset()
         
     def reset(self):
@@ -35,10 +34,10 @@ class DivisionCRC:
         self.xorOut = 0x0
         self.reversed = False
     
-    def setCRCSize(self, crcSize):
-        self.crcSize = crcSize
-        self.masterBit = 0b1 << self.crcSize
-        self.crcMask = self.masterBit - 1
+#     def setCRCSize(self, crcSize):
+#         self.crcSize = crcSize
+#         self.masterBit = 0b1 << self.crcSize
+#         self.crcMask = self.masterBit - 1
     
     def setRegisterInitValue(self, value):
         self.registerInit = value
@@ -46,45 +45,46 @@ class DivisionCRC:
     def setXorOutValue(self, value):
         self.xorOut = value
         
-    def setInitCRC(self, value):
+    def setInitCRC(self, value, crcSize):
         self.registerInit = value ^ self.xorOut
         if self.reversed == True:
-            self.registerInit = reverseBits(self.registerInit, self.crcSize)
+            self.registerInit = reverseBits(self.registerInit, crcSize)
     
     def setReversed(self, value = True):
         self.reversed = value
     
+    ## 'poly' with leading '1'
     def calculate(self, data, poly):
-        return self.calculate2(data, data.bit_length(), poly)
+        return self.calculate2(data, data.bit_length(), poly, poly.bit_length()-1)
     
-    def calculate2(self, data, dataSize, poly):
+    def calculate2(self, data, dataSize, poly, crcSize):
         dataMask = NumberMask(data, dataSize)
-        return self.calculate3(dataMask, poly)
+        polyMask = NumberMask(poly, crcSize)
+        return self.calculate3(dataMask, polyMask)
   
-    def calculate3(self, dataMask, poly):
+    def calculate3(self, dataMask, polyMask):
         if self.reversed == False:
-            return self.calculateMSB(dataMask, poly)
+            return self.calculateMSB(dataMask, polyMask)
         else:
-#             revPoly = reverseBits(poly, self.crcSize)
-            return self.calculateLSB(dataMask, poly)
+            return self.calculateLSB(dataMask, polyMask)
     
     ## old implementation is very helpful when defining backward algorithm
     ## 'poly' without leading '1'
-    def calculateMSB(self, dataMask, poly):
+    def calculateMSB(self, dataMask, polyMask):
         ## MSB first
         
         ## with leading '1' to xor out bit on shifting
-        genPoly = self.masterBit | (poly & self.crcMask)
+        genPoly = polyMask.dataNum | polyMask.masterBit
         
         dataNum = dataMask.dataNum
   
         ## init shift register
-        initShift = min(self.crcSize, dataMask.dataSize)
+        initShift = min(polyMask.dataSize, dataMask.dataSize)
         register = dataMask.getMSB(initShift) ^ self.registerInit
-        dataBit = (dataMask.msbMask >> (initShift+1))
+        dataBit = (dataMask.masterBit >> (initShift+1))
         ## old version
 #         register = 0
-#         dataBit = (dataMask.msbMask >> 1)
+#         dataBit = (dataMask.masterBit >> 1)
 #         initShift = min(self.crcSize, dataMask.dataSize)
 #         ### copy first 'initShift' from input
 #         for _ in range(0, initShift):
@@ -99,7 +99,7 @@ class DivisionCRC:
             register <<= 1
             if (dataNum & dataBit) > 0:
                 register |= 1
-            if (register & self.masterBit) > 0:
+            if (register & polyMask.masterBit) > 0:
                 register ^= genPoly
             dataBit >>= 1
               
@@ -109,9 +109,9 @@ class DivisionCRC:
 #             register ^= self.xorOut
             
         ### shift crc zeros
-        for _ in range(0, self.crcSize):
+        for _ in range(0, polyMask.dataSize):
             register <<= 1
-            if (register & self.masterBit) > 0:
+            if (register & polyMask.masterBit) > 0:
                 register ^= genPoly
                  
         if self.xorOut != 0:
@@ -121,15 +121,13 @@ class DivisionCRC:
     
     ## old implementation is very helpful when defining backward algorithm
     ## 'poly' without leading '1'
-    def calculateLSB(self, dataMask, poly):
+    def calculateLSB(self, dataMask, polyMask):
         ## LSB first
-        
-        genPoly = poly & self.crcMask
         
         dataNum = dataMask.dataNum
  
         ## init shift register
-        initShift = min(self.crcSize, dataMask.dataSize)
+        initShift = min(polyMask.dataSize, dataMask.dataSize)
         register = dataMask.getLSB(initShift) ^ self.registerInit
         dataBit = (1 << initShift)
         ## old version
@@ -149,10 +147,10 @@ class DivisionCRC:
         ## divide
         for _ in range(initShift, dataMask.dataSize):
             if (dataNum & dataBit) > 0:
-                register |= self.masterBit
+                register |= polyMask.masterBit
             if (register & 1) > 0:
                 register >>= 1
-                register ^= genPoly
+                register ^= polyMask.dataNum
             else:
                 register >>= 1
             dataBit <<= 1
@@ -163,10 +161,10 @@ class DivisionCRC:
 #             register ^= self.xorOut
              
         ### shift crc zeros
-        for _ in range(0, self.crcSize):
+        for _ in range(0, polyMask.dataSize):
             if (register & 1) > 0:
                 register >>= 1
-                register ^= genPoly
+                register ^= polyMask.dataNum
             else:
                 register >>= 1
 

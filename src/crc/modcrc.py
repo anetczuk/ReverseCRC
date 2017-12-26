@@ -30,20 +30,20 @@ from crc.numbermask import reverseBits
 ## Compatible with crcmod library
 ##
 class ModCRC(HwCRC):
-    def __init__(self, crcSize):
-        HwCRC.__init__(self, crcSize)
+    def __init__(self):
+        HwCRC.__init__(self)
         
-    def setInitCRC(self, value):
+    def setInitCRC(self, value, crcSize):
         self.registerInit = value
         self.registerInit ^= self.xorOut
         if self.reversed == True:
-            self.registerInit = reverseBits(self.registerInit, self.crcSize)
+            self.registerInit = reverseBits(self.registerInit, crcSize)
         
-    def calculate3(self, dataMask, poly):
+    def calculate3(self, dataMask, polyMask):
         if self.reversed == False:
-            return self.calculateMSB(dataMask, poly)
+            return self.calculateMSB(dataMask, polyMask)
         else:
             revData = dataMask.reversedBytes()
-            revPoly = reverseBits(poly, self.crcSize)
+            revPoly = polyMask.reversed()
             return self.calculateLSB(revData, revPoly)
 #             return self.calculateLSB(dataMask, poly)

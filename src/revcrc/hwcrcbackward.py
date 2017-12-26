@@ -29,13 +29,13 @@ import math
 
 class HwCRCBackwardState:
 
-    def __init__(self, crcSize, poly, reg = 0x0):
-        self.crcSize = crcSize
+    def __init__(self, polyMask, reg = 0x0):
+        self.crcSize = polyMask.dataSize
         self.masterBit = 0b1 << self.crcSize     ## cached value
 #         self.crcMask = self.masterBit - 1
         crcMask = self.masterBit - 1
         self.crcMSB = (self.masterBit >> 1)
-        self.poly = poly & crcMask
+        self.poly = polyMask.data & crcMask
         self.register = reg
         self.valid = True
 
@@ -95,11 +95,11 @@ class HwCRCBackwardState:
  
  
 class HwCRCBackward:
-    def __init__(self, dataMask, crc, crcSize, poly, xorOut = 0):
+    def __init__(self, dataMask, crc, polyMask, xorOut = 0):
         self.dataMask = copy.deepcopy(dataMask)
         self.reversedMode = False
         self.collector = []
-        self.collector.append( HwCRCBackwardState( crcSize, poly, crc^xorOut) )
+        self.collector.append( HwCRCBackwardState( polyMask, crc^xorOut) )
  
     def setReversed(self, value = True):
         self.reversedMode = value
@@ -108,7 +108,7 @@ class HwCRCBackward:
         dataNum = self.dataMask.dataNum
         dataBit = 1
         if self.reversedMode:
-            dataBit = (self.dataMask.msbMask >> 1)
+            dataBit = (self.dataMask.masterBit >> 1)
             
         for _ in range(0, self.dataMask.dataSize):
             currBit = dataNum & dataBit

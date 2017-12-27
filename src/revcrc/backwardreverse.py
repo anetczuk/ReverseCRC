@@ -33,6 +33,7 @@ from revcrc.divisioncrcbackward import DivisionCRCBackward
 from revcrc.reverse import Reverse, MessageCRC, CRCKey
 from crc.numbermask import NumberMask
 import itertools
+import sys
 
 
     
@@ -45,28 +46,6 @@ class BackwardReverse(Reverse):
 #     def __init__(self, crcSize, printProgress = None):
     def __init__(self, printProgress = None):
         Reverse.__init__(self, printProgress)
-      
-    def findSolutionList(self, dataList):
-
-        if len(dataList) < 1:
-            return
-
-        numbersList = []
-        dataSize = 0
-        crcSize = 0
-        for i in range(0, len(dataList)):
-            dataPair = dataList[i]
-            dataString = dataPair[0]
-            crcString = dataPair[1]
-            dataSize = max( dataSize, len(dataString)*8 )
-            crcSize = max( crcSize, len(crcString)*8 )
-            data = int(dataString, 16)
-            crc = int(crcString, 16)
-            numbersList.append((data, crc))
-            
-        if (self.progress):
-            print "List size: {} Data size: {} CRC size: {}".format(len(numbersList), dataSize, crcSize)
-        self.findSolution(numbersList, dataSize, crcSize)
         
     def findSolution(self, dataList, dataSize, crcSize, searchRange = 0):
         if len(dataList) < 2:
@@ -74,8 +53,11 @@ class BackwardReverse(Reverse):
         
         retList = []
         comb = list( itertools.combinations( dataList, 2 ) )
-        
         cLen = len(comb)
+        
+        if (self.progress):
+            print "Combinations number:", cLen
+        
         for i in range(0, cLen):
             combPair = comb[i]
             dataPair1 = combPair[0]
@@ -122,10 +104,11 @@ class BackwardReverse(Reverse):
                     verifyCrc = crcProc.calculate3(d1, polyMask)
                     if (verifyCrc != crc1):
                         continue
-    #                 if self.progress:
-    #                     sys.stdout.write("\r")
-    #                     print "Found init: 0b{0:b} 0x{0:X}".format(initVal)
-                    retList.append( CRCKey(poly, reversedMode, initVal, -1, -1, ds) )
+                    thekey = CRCKey(poly, reversedMode, initVal, -1, -1, ds)
+                    if self.progress:
+                        sys.stdout.write("\r")
+                        print "Found key:", thekey
+                    retList.append( thekey )
                     polyAdded = True
             if polyAdded == False:
                 ret = CRCKey()

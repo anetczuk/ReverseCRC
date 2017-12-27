@@ -88,6 +88,27 @@ class Reverse(object):
     def setReturnOnFirst(self):
         self.returnFirst = True
 
+    def findSolutionList(self, dataList):
+        if len(dataList) < 1:
+            return
+
+        numbersList = []
+        dataSize = 0
+        crcSize = 0
+        for i in range(0, len(dataList)):
+            dataPair = dataList[i]
+            dataString = dataPair[0]
+            crcString = dataPair[1]
+            dataSize = max( dataSize, len(dataString)*4 )
+            crcSize = max( crcSize, len(crcString)*4 )
+            data = int(dataString, 16)
+            crc = int(crcString, 16)
+            numbersList.append((data, crc))
+            
+        if (self.progress):
+            print "List size: {} Data size: {} CRC size: {}".format(len(numbersList), dataSize, crcSize)
+        self.findSolution(numbersList, dataSize, crcSize)
+
     def bruteForce3(self, dataCrc):
         crcNum = dataCrc.crcNum
         poly = 1 << (dataCrc.crcSize)
@@ -106,12 +127,6 @@ class Reverse(object):
             poly += 1
         return retList
 
-    
-    
-    ##============================================================
-    
-    
-    
     def bruteForcePair(self, inputPair):
         dataString = inputPair[0]
         crcString = inputPair[1]

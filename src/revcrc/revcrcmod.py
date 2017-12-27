@@ -65,6 +65,9 @@ class RevCRCMod(Reverse):
         return retList
     
     def findCRCKey(self, data1, crc1, data2, crc2, dataSize, crcSize, searchRange=0):
+        if self.progress:
+            print "Checking {:X} {:X} xor {:X} {:X}".format(data1, crc1, data2, crc2)
+            
         xorData = data1 ^ data2
         diffLength = xorData.bit_length()
         xorCRC = crc1 ^ crc2
@@ -75,8 +78,8 @@ class RevCRCMod(Reverse):
         dataString2 = intToASCII(data2)
         regMax = 1 << crcSize
         
-#         print "found polys:", polyList
-#         print "max:", regMax
+        if self.progress:
+            print "found polys:", polyList
     
         retList = []
         for poly in polyList:

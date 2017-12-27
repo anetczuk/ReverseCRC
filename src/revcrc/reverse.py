@@ -107,6 +107,7 @@ class Reverse(object):
             
         if (self.progress):
             print "List size: {} Data size: {} CRC size: {}".format(len(numbersList), dataSize, crcSize)
+            
         self.findSolution(numbersList, dataSize, crcSize)
 
     def bruteForce3(self, dataCrc):

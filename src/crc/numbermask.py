@@ -27,13 +27,16 @@ import copy
 
 
 
-def intToASCII(number):
+def intToASCII(number, dataSize = -1):
+    if dataSize < 0:
+        dataSize = number.bit_length()
     ret = ""
     value = number
-    while( value > 0 ):
+    while( dataSize > 0 ):
         char = value & 0xFF
         ret = chr(char) + ret
         value >>= 8
+        dataSize -= 8
     return ret
 
 def asciiToInt(dataString):
@@ -66,6 +69,65 @@ def reverseBytes(num, sizeBytes = -1):
         ret |= (val & 0xFF)
         val >>= 8
     return ret
+
+
+class SubNumber(object):
+    def __init__(self, data, dataSize, pos):
+        self.data = data
+        self.size = dataSize
+        self.pos = pos
+        
+    def toASCII(self):
+        return intToASCII(self.data, self.size)
+        
+    def __repr__(self):
+        return "<SubNumber {} {} {}>".format(self.data, self.size, self.pos)
+
+    def __eq__(self, other):
+        if self.data != other.data:
+            return False
+        if self.size != other.size:
+            return False
+        if self.pos != other.pos:
+            return False
+        return True
+    
+    def __ne__(self, other):
+        return ((self == other) == False)
+    
+    def __hash__(self):
+        return hash( (self.data, self.size, self.pos) )
+    
+
+def generateSubstrings(dataString, maxPos = -1):
+    valSet = set()
+    retSet = set()
+    length = len(dataString)
+    if maxPos < 0:
+        maxPos = length-1
+    for x in xrange(maxPos+1):
+        for y in xrange(x,length):
+            substr = dataString[x:y+1]
+            if (substr in valSet) == False:
+                valSet.add(substr)
+                retSet.add( SubNumber(substr, len(substr), x) )
+    return retSet
+
+def generateSubstringsReverse(dataString, maxPos = -1):
+    valSet = set()
+    retSet = set()
+    length = len(dataString)
+    if maxPos < 0:
+        maxPos = length-1
+    for x in xrange(length):
+        ypos = max(x, length-maxPos-1)
+        for y in xrange(ypos,length):
+            substr = dataString[x:y+1]
+            if (substr in valSet) == False:
+                valSet.add(substr)
+                subLen = len(substr)
+                retSet.add( SubNumber(substr, subLen, length-subLen-x) )
+    return retSet
 
 
 class NumberMask:
@@ -160,6 +222,25 @@ class NumberMask:
     def toASCII(self):
         return intToASCII(self.dataNum)
     
+    def generateSubnumbers(self, maxPos = -1, maxLen = -1):
+        valSet = set()
+        retSet = set()
+        lenMask = 1
+        if maxPos < 0:
+            maxPos = self.dataSize-1
+        for l in xrange(self.dataSize):
+            xpos = min(self.dataSize-l, maxPos+1)
+            for x in xrange(xpos):
+                val = (self.dataNum >> x) &  lenMask
+                valLen = l+1
+                t = (val, valLen)
+                if (t in valSet) == False:
+                    valSet.add( t )
+                    retSet.add( SubNumber(val, valLen, x) )
+            lenMask = (lenMask << 1) | 0x1
+                
+        return retSet
+    
     def __repr__(self):
         digits = int(math.ceil( float(self.dataSize)/4 ))
         return ("<NumberMask 0x{:0" + str(digits) + "X} {}>").format(self.dataNum, self.dataSize)
@@ -174,5 +255,6 @@ class NumberMask:
     def __ne__(self, other):
         return ((self == other) == False)
     
-#     def __hash__(self):
-#         return hash(str(self.dataNum) + str(self.dataSize))
+    def __hash__(self):
+        return hash( (self.dataSize, self.dataNum) )
+    

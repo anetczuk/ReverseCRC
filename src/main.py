@@ -35,6 +35,7 @@ import itertools
 from revcrc.backwardreverse import RevHwCRC, BruteForceChain
 from revcrc.reverse import MessageCRC
 from revcrc.revcommon import RevCRCCommon
+from revcrc.revcrcmod import RevCRCMod
 
 
 
@@ -203,6 +204,7 @@ try:
 #         finder = RevHwCRC(True)
 #         foundCRC = finder.findSolutionList(data)
         finder = RevCRCCommon(True)
+#         finder = RevCRCMod(True)
         foundCRC = finder.findSolutionList(data)
     else:
         print "Invalid mode:", args.mode

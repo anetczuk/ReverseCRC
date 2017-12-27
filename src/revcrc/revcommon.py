@@ -25,7 +25,7 @@
 import crcmod
 from revcrc.backwardreverse import CRCKey
 from revcrc.reverse import Reverse
-from crc.numbermask import intToASCII
+from crc.numbermask import NumberMask, generateSubstringsReverse
 
 
 
@@ -52,38 +52,62 @@ class RevCRCCommon(Reverse):
             return set()
         
         dataPair = dataList[0]
-        retList = self.findCRCKey(dataPair[0], dataPair[1], dataSize, crcSize, searchRange)
+        retList = self.findCRCKeyBits( NumberMask(dataPair[0], dataSize), dataPair[1], crcSize, searchRange)
+#         retList = self.findCRCKeyBytes( NumberMask(dataPair[0], dataSize), dataPair[1], crcSize, searchRange)
         
         for i in xrange(1, len(dataList)):
             dataPair = dataList[i]
-            keys = self.findCRCKey(dataPair[0], dataPair[1], dataSize, crcSize, searchRange)
+            keys = self.findCRCKeyBits( NumberMask(dataPair[0], dataSize), dataPair[1], crcSize, searchRange)
+#             keys = self.findCRCKeyBytes( NumberMask(dataPair[0], dataSize), dataPair[1], crcSize, searchRange)
             retList.intersection( keys )
             
         return retList
         
-    def findCRCKey(self, dataValue, crcNum, dataSize, crcSize, searchRange):
-        dataString = intToASCII(dataValue)
-        retList = set()
-
+    def findCRCKeyBits(self, dataMask, crcNum, crcSize, searchRange):
         if self.progress:
-            print "Checking {:X} {:X}".format(dataValue, crcNum)
-                     
-        length = len(dataString)
-        for i in xrange(length):                ## start
-            for j in xrange(i,length):          ## end
-                substr = dataString[i:j + 1]
+            print "Checking {:X} {:X}".format(dataMask.data, crcNum)
+            
+        retList = set()
+                
+        subList = dataMask.generateSubnumbers(0, dataMask.dataSize - searchRange)
+        for sub in subList:
+            substr = sub.toASCII()
+#             if self.progress:
+#                 subnum = asciiToInt(substr)
+#                 print "Checking substring {:X}".format(subnum)
+            subRet = self.findCRC(substr, crcNum, crcSize)
+            for key in subRet:
+                key.dataPos = sub.pos
+                key.dataLen = sub.size
+            retList |= subRet
+            
+        if self.progress and len(retList)>0:
+            print "Found keys:", retList
+            
+        return retList
+    
+    def findCRCKeyBytes(self, dataMask, crcNum, crcSize, searchRange):
+        if self.progress:
+            print "Checking {:X} {:X}".format(dataMask.data, crcNum)
+            
+        retList = set()
+                
+        dataString = dataMask.toASCII()
+        subList = generateSubstringsReverse(dataString, 0)
+        for sub in subList:
+            substr = sub.data
 #                 if self.progress:
 #                     subnum = asciiToInt(substr)
 #                     print "Checking substring {:X}".format(subnum)
-                subRet = self.findCRC(substr, crcNum, crcSize)
-                for key in subRet:
-                    key.dataPos = i*8
-                    key.dataLen = (j-i+1)*8
-                retList |= subRet
+            subRet = self.findCRC(substr, crcNum, crcSize)
+            for key in subRet:
+                key.dataPos = sub.pos*8
+                key.dataLen = sub.size*8
+            retList |= subRet
              
         if self.progress and len(retList)>0:
             print "Found keys:", retList
-             
+            
         return retList
         
     def findCRC(self, data, crc, crcSize):

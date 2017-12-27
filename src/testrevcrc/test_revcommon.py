@@ -24,9 +24,10 @@
  
 import unittest
 import os
-from revcrc.revcommon import RevCRCCommon
 import crcmod
+from revcrc.revcommon import RevCRCCommon
 from crc.numbermask import intToASCII
+from revcrc.reverse import CRCKey
 
   
   
@@ -50,7 +51,23 @@ class RevCRCCommonTest(unittest.TestCase):
         foundCRC = list( foundCRC )
         self.assertEqual( foundCRC, [] )
         
-    def test_findSolution_one(self):
+    def test_findSolution_8a(self):
+        dataList = []
+        
+        crcFun = crcmod.predefined.mkCrcFun("crc-8")        ## init: 0x0, xor: 0x0, poly: 0x107
+        
+        data = 0xAB
+        crc  = crcFun( intToASCII(data) )
+        dataList.append( (data, crc) )
+        
+        finder = RevCRCCommon()
+        foundCRC = finder.findSolution(dataList, 8, 8)
+        foundCRC = list( foundCRC )
+
+#         print "found:", foundCRC
+        self.assertIn( CRCKey(0x107, False, 0x0, 0x0, 0, 8), foundCRC )
+        
+    def test_findSolution_8b(self):
         dataList = []
         
         crcFun = crcmod.predefined.mkCrcFun("crc-8")        ## init: 0x0, xor: 0x0, poly: 0x107
@@ -64,14 +81,7 @@ class RevCRCCommonTest(unittest.TestCase):
         foundCRC = list( foundCRC )
 
 #         print "found:", foundCRC
-        self.assertEqual( len(foundCRC), 1 )
-        crcKey = foundCRC[0]
-        self.assertEqual( crcKey.poly, 0x107 )
-        self.assertEqual( crcKey.rev, False )
-        self.assertEqual( crcKey.init, 0x0 )
-        self.assertEqual( crcKey.xor, 0x0 )
-        self.assertEqual( crcKey.dataPos, 0 )
-        self.assertEqual( crcKey.dataLen, 16 )
+        self.assertIn( CRCKey(0x107, False, 0x0, 0x0, 0, 16), foundCRC )
 
     def test_findSolution_crc16(self):
         dataList = []
@@ -91,14 +101,7 @@ class RevCRCCommonTest(unittest.TestCase):
         foundCRC = list( foundCRC )
          
 #         print "found:", foundCRC
-        self.assertEqual( len(foundCRC), 1 )
-        crcKey = foundCRC[0]
-        self.assertEqual( crcKey.poly, 0x18005 )
-        self.assertEqual( crcKey.rev, True )
-        self.assertEqual( crcKey.init, 0x0000 )
-        self.assertEqual( crcKey.xor, 0x0000 )
-        self.assertEqual( crcKey.dataPos, 0 )
-        self.assertEqual( crcKey.dataLen, 32 )
+        self.assertIn( CRCKey(0x18005, True, 0x0, 0x0, 0, 32), foundCRC )
         
     def test_findSolution_crc16buypass(self):
         dataList = []
@@ -118,14 +121,7 @@ class RevCRCCommonTest(unittest.TestCase):
         foundCRC = list( foundCRC )
          
 #         print "found:", foundCRC
-        self.assertEqual( len(foundCRC), 1 )
-        crcKey = foundCRC[0]
-        self.assertEqual( crcKey.poly, 0x18005 )
-        self.assertEqual( crcKey.rev, False )
-        self.assertEqual( crcKey.init, 0x0000 )
-        self.assertEqual( crcKey.xor, 0x0000 )
-        self.assertEqual( crcKey.dataPos, 0 )
-        self.assertEqual( crcKey.dataLen, 32 )
+        self.assertIn( CRCKey(0x18005, False, 0x0, 0x0, 0, 32), foundCRC )
         
     def test_findSolution_crc16dnp(self):
         dataList = []
@@ -145,14 +141,7 @@ class RevCRCCommonTest(unittest.TestCase):
         foundCRC = list( foundCRC )
          
 #         print "found:", foundCRC
-        self.assertEqual( len(foundCRC), 1 )
-        crcKey = foundCRC[0]
-        self.assertEqual( crcKey.poly, 0x13D65 )
-        self.assertEqual( crcKey.rev, True )
-        self.assertEqual( crcKey.init, 0xFFFF )
-        self.assertEqual( crcKey.xor, 0xFFFF )
-        self.assertEqual( crcKey.dataPos, 0 )
-        self.assertEqual( crcKey.dataLen, 16 )
+        self.assertIn( CRCKey(0x13D65, True, 0xFFFF, 0xFFFF, 0, 16), foundCRC )
 
     def test_findSolutionSubstring_crc16(self):
         dataList = []
@@ -172,14 +161,7 @@ class RevCRCCommonTest(unittest.TestCase):
         foundCRC = list( foundCRC )
          
 #         print "found:", foundCRC
-        self.assertEqual( len(foundCRC), 1 )
-        crcKey = foundCRC[0]
-        self.assertEqual( crcKey.poly, 0x18005 )
-        self.assertEqual( crcKey.rev, True )
-        self.assertEqual( crcKey.init, 0x0000 )
-        self.assertEqual( crcKey.xor, 0x0000 )
-        self.assertEqual( crcKey.dataPos, 16 )
-        self.assertEqual( crcKey.dataLen, 16 )
+        self.assertIn( CRCKey(0x18005, True, 0x0, 0x0, 0, 16), foundCRC )
 
  
 if __name__ == "__main__":

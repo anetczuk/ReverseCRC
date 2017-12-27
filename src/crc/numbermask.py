@@ -36,6 +36,15 @@ def intToASCII(number):
         value >>= 8
     return ret
 
+def asciiToInt(dataString):
+    ret = 0
+    length = len(dataString)
+    for i in xrange(length):                ## start
+        ret <<= 8
+        val = ord(dataString[i])
+        ret |= val & 0xFF
+    return ret
+
 def reverseBits(num, sizeBits = -1):
     if sizeBits < 0:
         sizeBits = num.bit_length()

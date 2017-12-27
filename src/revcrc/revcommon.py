@@ -58,21 +58,31 @@ class RevCRCCommon(Reverse):
             dataPair = dataList[i]
             keys = self.findCRCKey(dataPair[0], dataPair[1], dataSize, crcSize, searchRange)
             retList.intersection( keys )
+            
         return retList
         
     def findCRCKey(self, dataValue, crcNum, dataSize, crcSize, searchRange):
         dataString = intToASCII(dataValue)
         retList = set()
+
+        if self.progress:
+            print "Checking {:X} {:X}".format(dataValue, crcNum)
                      
         length = len(dataString)
         for i in xrange(length):                ## start
             for j in xrange(i,length):          ## end
                 substr = dataString[i:j + 1]
+#                 if self.progress:
+#                     subnum = asciiToInt(substr)
+#                     print "Checking substring {:X}".format(subnum)
                 subRet = self.findCRC(substr, crcNum, crcSize)
                 for key in subRet:
                     key.dataPos = i*8
                     key.dataLen = (j-i+1)*8
                 retList |= subRet
+             
+        if self.progress and len(retList)>0:
+            print "Found keys:", retList
              
         return retList
         
@@ -128,10 +138,35 @@ class RevCRCCommon(Reverse):
  
  
     def checkCRC(self, dataString, crc, crcKey, retList):
-        crc_func = crcmod.mkCrcFun(crcKey.poly, rev=crcKey.rev, initCrc=crcKey.init, xorOut=crcKey.xor)
+#         crc_func = crcmod.mkCrcFun(crcKey.poly, rev=crcKey.rev, initCrc=crcKey.init, xorOut=crcKey.xor)
+        crc_func = CRCModCacheMap.instance.getFunction(crcKey)
         polyCRC  = crc_func( dataString )
         ##print "comp:", polyCRC, crc
         if polyCRC == crc:
             retList.add( crcKey )
         
 
+
+class CRCModCacheMap(object):
+    '''
+    Caching results of 'crcmod.mkCrcFun()' gives huge performance boost.
+    '''
+    
+    instance = None
+    
+    def __init__(self):
+        '''
+        Constructor
+        '''
+        self.map = dict()
+
+
+    def getFunction(self, crcKey):
+        if crcKey in self.map:
+            return self.map[crcKey]
+#         print "Creating new function for", crcKey
+        crc_func = crcmod.mkCrcFun(crcKey.poly, rev=crcKey.rev, initCrc=crcKey.init, xorOut=crcKey.xor)
+        self.map.update( [(crcKey, crc_func)] )
+        return crc_func
+    
+CRCModCacheMap.instance = CRCModCacheMap()

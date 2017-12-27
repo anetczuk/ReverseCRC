@@ -32,6 +32,7 @@ class InputData:
     def __init__(self):
         self.data = []          ## list of pairs
     
+    ## data is a list of pairs
     def parseFile(self, path):
         self.data = []
         if not os.path.exists(path):

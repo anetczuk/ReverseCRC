@@ -32,7 +32,8 @@ import cProfile
 
 from revcrc.input import InputData
 import itertools
-from revcrc.reversecrc import RevHwCRC, BruteForceChain, MessageCRC
+from revcrc.backwardreverse import RevHwCRC, BruteForceChain
+from revcrc.reverse import MessageCRC
 
 
 
@@ -198,8 +199,8 @@ try:
             dataCrc = MessageCRC(dataNum, dataSize, crcNum, crcSize)
             chain.calculate(dataCrc)
     elif args.mode == "COMMON":
-        finder = RevHwCRC()
-        foundCRC = finder.findSolutionStrings(data)
+        finder = RevHwCRC(True)
+        foundCRC = finder.findSolutionList(data)
     else:
         print "Invalid mode:", args.mode
         sys.exit(1)

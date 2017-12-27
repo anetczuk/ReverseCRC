@@ -45,8 +45,8 @@ class RevCRCCommonTest(unittest.TestCase):
  
     def test_findSolution_empty(self):
         dataList = []
-        finder = RevCRCCommon(8)
-        foundCRC = finder.findSolution(dataList)
+        finder = RevCRCCommon()
+        foundCRC = finder.findSolution(dataList, 8, 8)
         foundCRC = list( foundCRC )
         self.assertEqual( foundCRC, [] )
         
@@ -59,8 +59,8 @@ class RevCRCCommonTest(unittest.TestCase):
         crc  = crcFun( intToASCII(data) )
         dataList.append( (data, crc) )
         
-        finder = RevCRCCommon(8)
-        foundCRC = finder.findSolution(dataList)
+        finder = RevCRCCommon()
+        foundCRC = finder.findSolution(dataList, 16, 8)
         foundCRC = list( foundCRC )
 
 #         print "found:", foundCRC
@@ -86,8 +86,8 @@ class RevCRCCommonTest(unittest.TestCase):
         crc  = crcFun( intToASCII(data) )
         dataList.append( (data, crc) )
          
-        finder = RevCRCCommon(16)
-        foundCRC = finder.findSolution(dataList)
+        finder = RevCRCCommon()
+        foundCRC = finder.findSolution(dataList, 32, 16)
         foundCRC = list( foundCRC )
          
 #         print "found:", foundCRC
@@ -113,8 +113,8 @@ class RevCRCCommonTest(unittest.TestCase):
         crc  = crcFun( intToASCII(data) )
         dataList.append( (data, crc) )
          
-        finder = RevCRCCommon(16)
-        foundCRC = finder.findSolution(dataList)
+        finder = RevCRCCommon()
+        foundCRC = finder.findSolution(dataList, 32, 16)
         foundCRC = list( foundCRC )
          
 #         print "found:", foundCRC
@@ -140,8 +140,8 @@ class RevCRCCommonTest(unittest.TestCase):
         crc  = crcFun( intToASCII(data) )
         dataList.append( (data, crc) )
          
-        finder = RevCRCCommon(16)
-        foundCRC = finder.findSolution(dataList)
+        finder = RevCRCCommon()
+        foundCRC = finder.findSolution(dataList, 16, 16)
         foundCRC = list( foundCRC )
          
 #         print "found:", foundCRC
@@ -167,8 +167,8 @@ class RevCRCCommonTest(unittest.TestCase):
         crc  = crcFun( intToASCII(data) )
         dataList.append( (0x47440000 | data, crc) )
          
-        finder = RevCRCCommon(16)
-        foundCRC = finder.findSolutionSubstring(dataList)
+        finder = RevCRCCommon()
+        foundCRC = finder.findSolution(dataList, 32, 16)
         foundCRC = list( foundCRC )
          
 #         print "found:", foundCRC

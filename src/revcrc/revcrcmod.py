@@ -22,32 +22,26 @@
 #
 
 
-import itertools
 import crcmod
-from revcrc.reversecrc import CRCKey, MessageCRC
+from revcrc.reverse import Reverse, MessageCRC, CRCKey
 from crc.numbermask import intToASCII
+import itertools
 
 
 
-class RevCRCMod(object):
+class RevCRCMod(Reverse):
     '''
-    classdocs
+    Uses crcmod library to check CRC configurations.
     '''
 
 
-    def __init__(self, crcSize):
+    def __init__(self, printProgress = None):
         '''
         Constructor
         '''
-        self.crcSize = crcSize
-        self.polyBase = 0b1 << crcSize
-        self.polyMax = self.polyBase << 1
-        self.returnFirst = False
+        Reverse.__init__(self, printProgress)
     
-    def setReturnOnFirst(self):
-        self.returnFirst = True
-    
-    def findSolution(self, dataList, dataSize, searchRange):
+    def findSolution(self, dataList, dataSize, crcSize, searchRange = 0):
         if len(dataList) < 2:
             return []
         
@@ -64,22 +58,22 @@ class RevCRCMod(object):
             crc1 = dataPair1[1]
             data2 = dataPair2[0]
             crc2 = dataPair2[1]
-            keys = self.findCRCKey2(data1, crc1, data2, crc2, dataSize, searchRange)
+            keys = self.findCRCKey(data1, crc1, data2, crc2, dataSize, crcSize, searchRange)
             
             retList += keys
             
         return retList
     
-    def findCRCKey2(self, data1, crc1, data2, crc2, dataSize, searchRange):
+    def findCRCKey(self, data1, crc1, data2, crc2, dataSize, crcSize, searchRange=0):
         xorData = data1 ^ data2
         diffLength = xorData.bit_length()
         xorCRC = crc1 ^ crc2
-        dataCrc = MessageCRC(xorData, diffLength, xorCRC, self.crcSize)
+        dataCrc = MessageCRC(xorData, diffLength, xorCRC, crcSize)
         polyList = self.bruteForce3(dataCrc)
         
         dataString1 = intToASCII(data1)
         dataString2 = intToASCII(data2)
-        regMax = 1 << self.crcSize
+        regMax = 1 << crcSize
         
 #         print "found polys:", polyList
 #         print "max:", regMax
@@ -91,13 +85,11 @@ class RevCRCMod(object):
             for initReg in xrange(0, regMax):
 #                 print "checking init: {:b}".format( initReg )
                 for xorReg in xrange(0, regMax):
-                    crc_func = crcmod.mkCrcFun(poly, rev=False, initCrc=initReg, xorOut=xorReg)
-                    
-                    verifyCrc1 = crc_func( dataString1 )
+                    verifyCrc1 = self.calculateStringCRC(poly, False, initReg, xorReg, dataString1 )
                     if (verifyCrc1 != crc1):
                         continue
                         
-                    verifyCrc2 = crc_func( dataString2 )
+                    verifyCrc2 = self.calculateStringCRC(poly, False, initReg, xorReg, dataString2 )
                     if (verifyCrc2 != crc2):
                         continue
                     
@@ -118,23 +110,12 @@ class RevCRCMod(object):
                 retList.append(ret)
                 
         return retList
-
-    def bruteForce3(self, dataCrc):
-        crcNum = dataCrc.crcNum
-        poly = self.polyBase + 1
-        retList = []
-        dataString = intToASCII(dataCrc.dataNum)
-        
-        while poly < self.polyMax:
-#             print "checking poly: {:b}".format( poly )
-            ##crc_func = crcmod.mkCrcFun(poly, rev=False, initCrc=0x0, xorOut=0x0)
-            ##polyCRC  = crc_func( dataString )
-            crc_func = crcmod.Crc(poly, rev=False, initCrc=0x0, xorOut=0x0)
-            crc_func.update( dataString )
-            polyCRC = crc_func.crcValue
-            if polyCRC == crcNum:
-                retList.append(poly)
-            poly += 1
-        return retList
-
-
+    
+    def calculateStringCRC(self, poly, reverse, initReg, xorOut, data):
+        #TODO: non-zero 'initReg' not supported
+        #TODO: non-zero 'xorOut' not supported
+        crc_func = crcmod.mkCrcFun(poly, rev=reverse, initCrc=initReg, xorOut=xorOut)
+        return crc_func( data )
+#         crc_func = crcmod.Crc(poly, rev=reverse, initCrc=initReg, xorOut=xorOut)
+#         crc_func.update( data )
+#         return crc_func.crcValue

@@ -30,7 +30,7 @@ import crcmod
 import random
 from crc.divisioncrc import DivisionCRC
 from crc.hwcrc import HwCRC
-from revcrc.reversecrc import RevHwCRC, CRCKey, RevDivisionCRC, RevModCRC, MessageCRC,\
+from revcrc.backwardreverse import RevHwCRC, CRCKey, RevDivisionCRC, RevModCRC, MessageCRC,\
     RightSubstringChain, LeftSubstringChain, SideSubstringChain
 from crc.numbermask import intToASCII
   
@@ -59,7 +59,8 @@ class RevHwCRCTest(unittest.TestCase):
         self.assertTrue( (0b100011101, False) in poly )
         
     def test_bruteForcePair(self):
-        poly = RevHwCRC.bruteForcePair(["C2","0F"])
+        finder = RevHwCRC()
+        poly = finder.bruteForcePair(["C2","0F"])
         self.assertTrue( (0b100011101, False) in poly )
         
     def test_findXOR_8_1bit(self):
@@ -213,7 +214,8 @@ class RevHwCRCTest(unittest.TestCase):
         self.assertEqual( foundCRC, [] )
         
     def test_findSubstring_found(self):
-        sumMessage = RevHwCRC.findSubstring(0x3210A53937C7, 0b01011001, 0x1D, 8)
+        finder = RevHwCRC()
+        sumMessage = finder.findSubstring(0x3210A53937C7, 0b01011001, 0x1D, 8)
         self.assertEqual( sumMessage, 0xA53937C7 )
 
     def test_findCRCKey_8(self):

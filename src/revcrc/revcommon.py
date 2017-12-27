@@ -23,7 +23,8 @@
 
 
 import crcmod
-from revcrc.reversecrc import CRCKey
+from revcrc.backwardreverse import CRCKey
+from revcrc.reverse import Reverse
 from crc.numbermask import intToASCII
 
 
@@ -34,90 +35,50 @@ def get_all_substrings(input_string):
   
   
 
-class RevCRCCommon(object):
+class RevCRCCommon(Reverse):
     '''
-    classdocs
+    Uses crcmod library to check common CRC configurations.
     '''
 
 
-    def __init__(self, crcSize):
+    def __init__(self, printProgress = None):
         '''
         Constructor
         '''
-        self.crcSize = crcSize
+        Reverse.__init__(self, printProgress)
     
-    
-    def findSolutionStrings(self, dataList):
+    def findSolution(self, dataList, dataSize, crcSize, searchRange = 0):
         if len(dataList) < 1: 
             return set()
         
         dataPair = dataList[0]
-        retList = self.findSubstringCRC(dataPair[0], dataPair[1])
+        retList = self.findCRCKey(dataPair[0], dataPair[1], dataSize, crcSize, searchRange)
         
         for i in xrange(1, len(dataList)):
             dataPair = dataList[i]
-            keys = self.findSubstringCRC(dataPair[0], dataPair[1])
-            print "keys:", keys
-            ##retList.intersection( keys )
-            retList |= keys
+            keys = self.findCRCKey(dataPair[0], dataPair[1], dataSize, crcSize, searchRange)
+            retList.intersection( keys )
         return retList
-            
         
-    def findSolutionSubstring(self, dataList):
-        if len(dataList) < 1: 
-            return set()
-        
-        dataPair = dataList[0]
-        dataString = intToASCII(dataPair[0])
-        retList = self.findSubstringCRC(dataString, dataPair[1])
-        
-        for i in xrange(1, len(dataList)):
-            dataPair = dataList[i]
-            dataString = intToASCII(dataPair[0])
-            keys = self.findSubstringCRC(dataString, dataPair[1])
-            ##retList.intersection( keys )
-            retList |= keys
-        return retList
-    
-    def findSubstringCRC(self, dataString, crc):
+    def findCRCKey(self, dataValue, crcNum, dataSize, crcSize, searchRange):
+        dataString = intToASCII(dataValue)
         retList = set()
-                    
+                     
         length = len(dataString)
         for i in xrange(length):                ## start
             for j in xrange(i,length):          ## end
                 substr = dataString[i:j + 1]
-                subRet = self.findCRC(substr, crc)
+                subRet = self.findCRC(substr, crcNum, crcSize)
                 for key in subRet:
                     key.dataPos = i*8
                     key.dataLen = (j-i+1)*8
                 retList |= subRet
-            
-        return retList
-    
-    def findSolution(self, dataList):
-        if len(dataList) < 1: 
-            return set()
-        
-        dataPair = dataList[0]
-        retList = self.findCRCKey(dataPair[0], dataPair[1])
-        
-        for i in xrange(1, len(dataList)):
-            dataPair = dataList[i]
-            keys = self.findCRCKey(dataPair[0], dataPair[1])
-            retList.intersection( keys )
+             
         return retList
         
-    def findCRCKey(self, dataValue, crcNum):
-        dataString = intToASCII(dataValue)
-        ret = self.findCRC(dataString, crcNum)
-        for crcItem in ret:
-            crcItem.dataPos = 0
-            crcItem.dataLen = len(dataString)*8
-        return ret
-    
-    def findCRC(self, data, crc):
+    def findCRC(self, data, crc, crcSize):
         retList = set()
-        if self.crcSize == 8:
+        if crcSize == 8:
             self.checkCRC(data, crc, CRCKey(0x107, False, 0x0, 0x0), retList)
             self.checkCRC(data, crc, CRCKey(0x139, True, 0x0, 0x0), retList)
             self.checkCRC(data, crc, CRCKey(0x11D, False, 0xFD, 0x0), retList)
@@ -125,7 +86,7 @@ class RevCRCCommon(object):
             self.checkCRC(data, crc, CRCKey(0x131, True, 0x0, 0x0), retList)
             self.checkCRC(data, crc, CRCKey(0x107, True, 0xFF, 0x0), retList)
             self.checkCRC(data, crc, CRCKey(0x19B, True, 0x0, 0x0), retList)
-        elif self.crcSize == 16:
+        elif crcSize == 16:
             self.checkCRC(data, crc, CRCKey(0x18005, True, 0x0, 0x0), retList)
             self.checkCRC(data, crc, CRCKey(0x18005, False, 0x0, 0x0), retList)
             self.checkCRC(data, crc, CRCKey(0x18005, False, 0x800D, 0x0), retList)
@@ -145,11 +106,11 @@ class RevCRCCommon(object):
             self.checkCRC(data, crc, CRCKey(0x11021, True, 0x0, 0x0), retList)
             self.checkCRC(data, crc, CRCKey(0x11021, False, 0xFFFF, 0x0), retList)
             self.checkCRC(data, crc, CRCKey(0x11021, False, 0x1D0F, 0x0), retList)
-        elif self.crcSize == 24:
+        elif crcSize == 24:
             self.checkCRC(data, crc, CRCKey(0x1864CFB, False, 0xB704CE, 0x0), retList)
             self.checkCRC(data, crc, CRCKey(0x15D6DCB, False, 0xFEDCBA, 0x0), retList)
             self.checkCRC(data, crc, CRCKey(0x15D6DCB, False, 0xABCDEF, 0x0), retList)
-        elif self.crcSize == 32:
+        elif crcSize == 32:
             self.checkCRC(data, crc, CRCKey(0x104C11DB7, True, 0x0, 0xFFFFFFFF), retList)
             self.checkCRC(data, crc, CRCKey(0x104C11DB7, False, 0x0, 0xFFFFFFFF), retList)
             self.checkCRC(data, crc, CRCKey(0x11EDC6F41, True, 0x0, 0xFFFFFFFF), retList)
@@ -159,13 +120,13 @@ class RevCRCCommon(object):
             self.checkCRC(data, crc, CRCKey(0x1814141AB, False, 0x0, 0x0), retList)
             self.checkCRC(data, crc, CRCKey(0x104C11DB7, True, 0xFFFFFFFF, 0x0), retList)
             self.checkCRC(data, crc, CRCKey(0x1000000AF, False, 0x0, 0x0), retList)
-        elif self.crcSize == 64:
+        elif crcSize == 64:
             self.checkCRC(data, crc, CRCKey(0x1000000000000001B, True, 0x0, 0x0), retList)
             self.checkCRC(data, crc, CRCKey(0x142F0E1EBA9EA3693, False, 0x0, 0xFFFFFFFFFFFFFFFF), retList)
             self.checkCRC(data, crc, CRCKey(0x1AD93D23594C935A9, True, 0xFFFFFFFFFFFFFFFF, 0x0), retList)
         return retList
-
-
+ 
+ 
     def checkCRC(self, dataString, crc, crcKey, retList):
         crc_func = crcmod.mkCrcFun(crcKey.poly, rev=crcKey.rev, initCrc=crcKey.init, xorOut=crcKey.xor)
         polyCRC  = crc_func( dataString )

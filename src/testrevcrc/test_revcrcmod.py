@@ -46,14 +46,14 @@ class RevCRCModTest(unittest.TestCase):
  
     def test_findSolution_empty(self):
         dataList = []
-        finder = RevCRCMod(8)
-        foundCRC = finder.findSolution(dataList, 8, 0)
+        finder = RevCRCMod()
+        foundCRC = finder.findSolution(dataList, 8, 8, 0)
         self.assertEqual( foundCRC, [] )
         
     def test_findSolution_one(self):
         dataList = [(1,1)]
-        finder = RevCRCMod(8)
-        foundCRC = finder.findSolution(dataList, 8, 0)
+        finder = RevCRCMod()
+        foundCRC = finder.findSolution(dataList, 8, 8, 0)
         self.assertEqual( foundCRC, [] )
         
     def test_findSolution_crc8(self):
@@ -69,9 +69,9 @@ class RevCRCModTest(unittest.TestCase):
         crc  = crcFun( intToASCII(data) )
         dataList.append( (data, crc) )
          
-        finder = RevCRCMod(8)
+        finder = RevCRCMod()
         finder.setReturnOnFirst()
-        foundCRC = finder.findSolution(dataList, 8, 0)
+        foundCRC = finder.findSolution(dataList, 8, 8, 0)
          
 #         print "found:", foundCRC
         self.assertEqual( len(foundCRC), 1 )

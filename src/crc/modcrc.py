@@ -22,7 +22,7 @@
 #
 
 
-from crc.crcproc import CRCProc, CRCKey
+from crc.crcproc import CRCProc
 import crcmod
 
 

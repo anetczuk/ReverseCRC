@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-from crc.numbermask import intToASCII, NumberMask
+from crc.numbermask import NumberMask
 import sys
 
 
@@ -74,28 +74,6 @@ class Reverse(object):
             print "List size: {} Data size: {} CRC size: {}".format(len(numbersList), dataSize, crcSize)
             
         self.findSolution(numbersList, dataSize, crcSize)
-
-    #TODO: remove alias method
-    def bruteForce3(self, dataCrc):
-        return self.findPoly(self, dataCrc)
-        
-    def findPoly(self, xoredDataCrc):
-        crcNum = xoredDataCrc.crcNum
-        poly = 1 << (xoredDataCrc.crcSize)
-        polyMax = poly << 1
-        retList = []
-        dataString = intToASCII(xoredDataCrc.dataNum)
-        
-        while poly < polyMax:
-#             print "checking poly: {:b}".format( poly )
-            ##crc_func = crcmod.mkCrcFun(poly, rev=False, initCrc=0x0, xorOut=0x0)
-            ##polyCRC  = crc_func( dataString )
-
-            polyCRC = self.calculateStringCRC(poly, False, 0x0, 0x0, dataString)
-            if polyCRC == crcNum:
-                retList.append(poly)
-            poly += 1
-        return retList
 
     def bruteForcePair(self, inputPair):
         dataString = inputPair[0]
@@ -183,10 +161,7 @@ class Reverse(object):
 
     def findSolution(self, dataList, dataSize, crcSize, searchRange = 0):
         raise NotImplementedError
-    
-    def calculateStringCRC(self, poly, reverse, initReg, xorOut, data):
-        raise NotImplementedError
-    
+
     def calculateNumberCRC(self, polyMask, reverse, initReg, xorOut, dataMask):
         raise NotImplementedError
 

@@ -403,6 +403,44 @@ class RevModCRCTest(unittest.TestCase):
         # Called after the last testfunction was executed
         pass
 
+    def test_findSolution2_empty(self):
+        dataList = []
+        finder = RevModCRC()
+        foundCRC = finder.findSolution2(dataList, 8, 8, 0)
+        self.assertEqual( foundCRC, [] )
+        
+    def test_findSolution2_one(self):
+        dataList = [(1,1)]
+        finder = RevModCRC()
+        foundCRC = finder.findSolution2(dataList, 8, 8, 0)
+        self.assertEqual( foundCRC, [] )
+        
+    def test_findSolution2_crc8(self):
+        dataList = []
+         
+        crcFun = crcmod.predefined.mkCrcFun("crc-8")        ## init: 0x0, xor: 0x0, poly: 0x107
+         
+        data = 0xABCD
+        crc  = crcFun( intToASCII(data) )
+        dataList.append( (data, crc) )
+         
+        data = data ^ 0x0040
+        crc  = crcFun( intToASCII(data) )
+        dataList.append( (data, crc) )
+         
+        finder = RevModCRC()
+        finder.setReturnOnFirst()
+        foundCRC = finder.findSolution(dataList, 8, 8, 0)
+         
+#         print "found:", foundCRC
+        self.assertEqual( len(foundCRC), 1 )
+        crcKey = foundCRC[0]
+        self.assertEqual( crcKey.poly, 0x107 )
+        self.assertEqual( crcKey.init, 0x0 )
+        self.assertEqual( crcKey.xor, 0x0 )
+        self.assertEqual( crcKey.dataPos, 0 )
+        self.assertEqual( crcKey.dataLen, 16 )
+
     def test_findXOR_crcmod_8Arev(self):
         data =  0xF90AD5FF
         data2 = 0xF90AD5FD
@@ -452,7 +490,7 @@ class RevModCRCTest(unittest.TestCase):
 #         print "found:", foundCRC
         self.assertIn( CRCKey(0x18005, False, 0x0, -1, -1, dataSize ), foundCRC )
     
-    ## test casea takes too long
+    ## test case takes too long
     def xxxtest_findSolution_crcmod16buypass(self):
         dataList = []
         dataSize = 16

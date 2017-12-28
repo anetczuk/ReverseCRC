@@ -22,7 +22,6 @@
 #
 
 
-from crc.numbermask import NumberMask
 from crc.crcproc import CRCProc
 
 

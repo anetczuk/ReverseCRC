@@ -27,11 +27,11 @@ import time
 
 from crc.hwcrc import HwCRC
 from crc.divisioncrc import DivisionCRC
-from crc.modcrc import ModCRC
+from crc.modcrc import ModCRC, CRCModCacheMap
 from revcrc.hwcrcbackward import HwCRCBackward
 from revcrc.divisioncrcbackward import DivisionCRCBackward
 from revcrc.reverse import Reverse, MessageCRC
-from crc.numbermask import NumberMask
+from crc.numbermask import NumberMask, intToASCII
 import itertools
 import sys
 from crc.crcproc import CRCKey
@@ -177,6 +177,113 @@ class RevDivisionCRC(BackwardReverse):
 class RevModCRC(BackwardReverse):
     def __init__(self, printProgress = None):
         BackwardReverse.__init__(self, printProgress)
+
+
+    def findSolution2(self, dataList, dataSize, crcSize, searchRange = 0):
+        if len(dataList) < 2:
+            return []
+        
+        retList = []
+        comb = list( itertools.combinations( dataList, 2 ) )
+        
+        cLen = len(comb)
+        for i in range(0, cLen):
+            combPair = comb[i]
+            dataPair1 = combPair[0]
+            dataPair2 = combPair[1]
+            
+            data1 = dataPair1[0]
+            crc1 = dataPair1[1]
+            data2 = dataPair2[0]
+            crc2 = dataPair2[1]
+            keys = self.findCRCKey(data1, crc1, data2, crc2, dataSize, crcSize, searchRange)
+            
+            retList += keys
+            
+        return retList
+    
+    def findCRCKey(self, data1, crc1, data2, crc2, dataSize, crcSize, searchRange=0):
+        if self.progress:
+            print "Checking {:X} {:X} xor {:X} {:X}".format(data1, crc1, data2, crc2)
+            
+        xorData = data1 ^ data2
+        diffLength = xorData.bit_length()
+        xorCRC = crc1 ^ crc2
+        dataCrc = MessageCRC(xorData, diffLength, xorCRC, crcSize)
+        polyList = self.findPoly(dataCrc)
+        
+        dataString1 = intToASCII(data1)
+        dataString2 = intToASCII(data2)
+        regMax = 1 << crcSize
+        
+        if self.progress:
+            print "found polys:", polyList
+    
+        retList = []
+        for poly in polyList:
+            polyAdded = False
+#             print "checking poly: {:X}".format( poly )
+            for initReg in xrange(0, regMax):
+#                 print "checking init: {:b}".format( initReg )
+                for xorReg in xrange(0, regMax):
+                    verifyCrc1 = self.calculateStringCRC(poly, False, initReg, xorReg, dataString1 )
+                    if (verifyCrc1 != crc1):
+                        continue
+                        
+                    verifyCrc2 = self.calculateStringCRC(poly, False, initReg, xorReg, dataString2 )
+                    if (verifyCrc2 != crc2):
+                        continue
+                    
+                    ret = CRCKey()
+                    ret.poly = poly
+                    ret.init = initReg
+                    ret.xor = xorReg
+                    ret.dataPos = 0
+                    ret.dataLen = data1.bit_length()
+                    retList.append(ret)
+                    polyAdded = True
+                    if self.returnFirst == True:
+                        return retList
+                     
+            if polyAdded == False:
+                ret = CRCKey()
+                ret.poly = poly
+                retList.append(ret)
+                
+        return retList
+
+    def findPoly(self, xoredDataCrc):
+        crcNum = xoredDataCrc.crcNum
+        poly = 1 << (xoredDataCrc.crcSize)
+        polyMax = poly << 1
+        retList = []
+        dataString = intToASCII(xoredDataCrc.dataNum)
+        
+        while poly < polyMax:
+#             print "checking poly: {:b}".format( poly )
+            ##crc_func = crcmod.mkCrcFun(poly, rev=False, initCrc=0x0, xorOut=0x0)
+            ##polyCRC  = crc_func( dataString )
+
+            polyCRC = self.calculateStringCRC(poly, False, 0x0, 0x0, dataString)
+            if polyCRC == crcNum:
+                retList.append(poly)
+            poly += 1
+        return retList
+    
+    def calculateStringCRC(self, poly, reverse, initReg, xorOut, data):
+        #TODO: non-zero 'initReg' not supported
+        #TODO: non-zero 'xorOut' not supported
+        crcKey = CRCKey(poly, reverse, initReg, xorOut)
+        crc_func = CRCModCacheMap.instance.getFunction(crcKey)
+#         crc_func = crcmod.mkCrcFun(poly, rev=reverse, initCrc=initReg, xorOut=xorOut)
+        return crc_func( data )
+#         crc_func = crcmod.Crc(poly, rev=reverse, initCrc=initReg, xorOut=xorOut)
+#         crc_func.update( data )
+#         return crc_func.crcValue
+
+
+    ### =========================================================
+
 
     def createCRCProcessor(self):
         return ModCRC()        

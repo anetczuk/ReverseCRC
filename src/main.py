@@ -32,7 +32,7 @@ import cProfile
 
 from revcrc.input import InputData
 import itertools
-from revcrc.backwardreverse import RevHwCRC
+from revcrc.backwardreverse import RevHwCRC, RevDivisionCRC
 from revcrc.reverse import MessageCRC
 
 
@@ -200,6 +200,7 @@ try:
             chain.calculate(dataCrc)
     elif args.mode == "COMMON":
         finder = RevHwCRC(True)
+#         finder = RevDivisionCRC(True)
 #         finder = RevModCRC(True)
 #         finder = RevCRCCommon(True)
         foundCRC = finder.findSolutionList(data, 48)

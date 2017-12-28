@@ -32,10 +32,7 @@ class DivisionCRCBackwardState:
 
     def __init__(self, polyMask, reg = 0x0, dataMask = NumberMask(0, 0)):
         self.dataMask = copy.deepcopy(dataMask)
-        self.crcSize = polyMask.dataSize
-        self.masterBit = 0b1 << self.crcSize     ## cached value
-        self.crcMask = self.masterBit - 1
-        self.poly = polyMask.data & self.crcMask
+        self.polyMask = copy.deepcopy(polyMask)
         self.register = reg
 
     def shiftBit(self, one, revMode = False):
@@ -48,8 +45,8 @@ class DivisionCRCBackwardState:
     def shiftMSB(self, one):
         ## reversing MSB mode
         if one:
-            self.register ^= self.poly
-            self.register |= self.masterBit             ## set one
+            self.register ^= self.polyMask.dataNum
+            self.register |= self.polyMask.masterBit             ## set one
         self.dataMask.pushMSB( self.register & 1 )
         self.register >>= 1
         
@@ -57,13 +54,13 @@ class DivisionCRCBackwardState:
     def shiftLSB(self, one):
         ## reversing MSB mode
         if one:
-            self.register ^= self.poly
+            self.register ^= self.polyMask.dataNum
             self.register <<= 1
             self.register |= 1
         else:
             self.register <<= 1
-        self.dataMask.pushLSB( self.register & self.masterBit )
-        self.register &= self.crcMask
+        self.dataMask.pushLSB( self.register & self.polyMask.masterBit )
+        self.register &= self.polyMask.dataMask
 
     def initXorMSB(self, data, dataSize):
         self.dataMask.dataNum |= (data << self.dataMask.dataSize)
@@ -84,15 +81,13 @@ class DivisionCRCBackwardState:
         
     def __repr__(self):
         regSize4 = int(math.ceil( float(self.crcSize)/4 ))
-        messageFormat = "<DCRCBState dm:{} p:0x{:X} cs:{} r:0x{:0" + str(regSize4) + "X}>"
-        return messageFormat.format(self.dataMask, self.poly, self.crcSize, self.register)
+        messageFormat = "<DCRCBState dm:{} pm{} r:0x{:0" + str(regSize4) + "X}>"
+        return messageFormat.format(self.dataMask, self.polyMask, self.register)
     
     def __eq__(self, other):
         if self.dataMask != other.dataMask:
             return False
-        if self.poly != other.poly:
-            return False
-        if self.crcSize != other.crcSize:
+        if self.polyMask != other.polyMask:
             return False
         if self.register != other.register:
             return False
@@ -102,7 +97,7 @@ class DivisionCRCBackwardState:
         return ((self == other) == False)
      
     def __hash__(self):
-        return hash(str(self.dataMask) + str(self.poly) + str(self.crcSize) + str(self.register))
+        return hash(str(self.dataMask) + str(self.polyMask) + str(self.register))
 
 
 ##
@@ -156,7 +151,8 @@ class DivisionCRCBackward:
         for _ in range(0, num):
             receiver = []
             for c in self.collector:
-                c1 = copy.deepcopy(c)
+                ##c1 = copy.deepcopy(c)
+                c1 = c
                 c2 = copy.deepcopy(c)
                 
                 c1.shiftBit(False, self.reversedMode)

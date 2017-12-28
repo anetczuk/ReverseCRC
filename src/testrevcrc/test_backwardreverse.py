@@ -362,6 +362,35 @@ class RevDivisionCRCTest(unittest.TestCase):
         self.assertTrue( (inputPoly, True) in polyList )
 
         
+    def test_findSolution_c16d16(self):
+        dataList = []
+        crcSize = 16
+        dataSize = 16
+        inputPoly = 0x18005             ## 0x18005 = 98309
+        regInit = 0x0
+        xorOut = 0x0
+        reverse = False
+        
+        ## init: 0, xor: 0, rev, poly: 0x18005
+        crcFun = DivisionCRC()
+        crcFun.setReversed(reverse)
+        crcFun.setRegisterInitValue(regInit)
+        crcFun.setXorOutValue(xorOut)
+
+        data1 = 0xABCD
+        crc1  = crcFun.calculate2(data1, dataSize, inputPoly, crcSize)
+        dataList.append( (data1, crc1) )
+          
+        data2 = data1 ^ 0x0010
+        crc2  = crcFun.calculate2(data2, dataSize, inputPoly, crcSize)
+        dataList.append( (data2, crc2) )
+          
+        finder = RevDivisionCRC()
+        foundCRC = finder.findSolution(dataList, dataSize, crcSize, 0)
+          
+#         print "found data:", foundCRC
+        self.assertIn( CRCKey(inputPoly, reverse, regInit, -1, 0, dataSize ), foundCRC )
+        
     def test_findSolution_c16d16_rev(self):
         dataList = []
         crcSize = 16

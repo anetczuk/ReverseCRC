@@ -30,12 +30,8 @@ import math
 class HwCRCBackwardState:
 
     def __init__(self, polyMask, reg = 0x0):
-        self.crcSize = polyMask.dataSize
-        self.masterBit = 0b1 << self.crcSize     ## cached value
-#         self.crcMask = self.masterBit - 1
-        crcMask = self.masterBit - 1
-        self.crcMSB = (self.masterBit >> 1)
-        self.poly = polyMask.data & crcMask
+        self.polyMask = copy.deepcopy(polyMask)
+        self.crcMSB = self.polyMask.masterBit >> 1
         self.register = reg
         self.valid = True
 
@@ -52,8 +48,8 @@ class HwCRCBackwardState:
     def shiftMSB(self, regBit, dataBit):
         ## reversing MSB mode
         if regBit == True:
-            self.register ^= self.poly
-            self.register |= self.masterBit
+            self.register ^= self.polyMask.dataNum
+            self.register |= self.polyMask.masterBit
         self.valid = ((self.register & 1) == 0)     ## valid if last bit is '0'
         self.register >>= 1
         if dataBit > 0:
@@ -63,26 +59,26 @@ class HwCRCBackwardState:
     def shiftLSB(self, regBit, dataBit):
         ## reversing LSB mode
         if regBit == True:
-            self.register ^= self.poly
+            self.register ^= self.polyMask.dataNum
             self.register <<= 1
             self.register |= 1
         else:
             self.register <<= 1
-        self.valid = ((self.register & self.masterBit) == 0)     ## valid if last bit is '0'
+        self.valid = ((self.register & self.polyMask.masterBit) == 0)     ## valid if last bit is '0'
         if dataBit > 0:
             self.register ^= 1
         
     def __repr__(self):
-        regSize4 = int(math.ceil( float(self.crcSize)/4 ))
-        messageFormat = "<CRCBState p:0x{:X} cs:{} r:0x{:0" + str(regSize4) + "X}>"
-        return messageFormat.format(self.poly, self.crcSize, self.register)
+        regSize4 = int(math.ceil( float(self.polyMask.dataSize)/4 ))
+        messageFormat = "<CRCBState pm:{} r:0x{:0" + str(regSize4) + "X} v:{}>"
+        return messageFormat.format(self.polyMask, self.register, self.valid)
     
     def __eq__(self, other):
-        if self.crcSize != other.crcSize:
-            return False
-        if self.poly != other.poly:
+        if self.polyMask != other.polyMask:
             return False
         if self.register != other.register:
+            return False
+        if self.valid != other.valid:
             return False
         return True
      
@@ -90,7 +86,7 @@ class HwCRCBackwardState:
         return ((self == other) == False)
      
     def __hash__(self):
-        return hash(str(self.poly) + str(self.crcSize) + str(self.register))
+        return hash(str(self.polyMask) + str(self.register) + str(self.valid))
 
  
  
@@ -114,8 +110,10 @@ class HwCRCBackward:
             currBit = dataNum & dataBit
             receiver = []
             for c in self.collector:
-                c1 = copy.deepcopy(c)
+                ##c1 = copy.deepcopy(c)
+                c1 = c
                 c2 = copy.deepcopy(c)
+                
                 c1.shiftBit(False, currBit, self.reversedMode)
                 if c1.isValid():
                     receiver.append(c1)

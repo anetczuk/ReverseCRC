@@ -109,7 +109,7 @@ class ModCRCTest(unittest.TestCase):
         regInit = 0x0
         xorOut = 0x0
           
-        crc_func = crcmod.mkCrcFun(inputPoly.data, initCrc=regInit, rev=True, xorOut=xorOut)
+        crc_func = crcmod.mkCrcFun(inputPoly.masterData(), initCrc=regInit, rev=True, xorOut=xorOut)
         crcLib = crc_func( data.toASCII() )
   
         crcProc = ModCRC()
@@ -130,7 +130,7 @@ class ModCRCTest(unittest.TestCase):
         regInit = 0x0
         xorOut = 0x0
           
-        crc_func = crcmod.mkCrcFun(inputPoly.data, initCrc=regInit, rev=True, xorOut=xorOut)
+        crc_func = crcmod.mkCrcFun(inputPoly.masterData(), initCrc=regInit, rev=True, xorOut=xorOut)
         crcLib = crc_func( data.toASCII() )
   
         crcProc = ModCRC()
@@ -148,7 +148,7 @@ class ModCRCTest(unittest.TestCase):
         regInit = 0x0
         xorOut = 0x0
           
-        crc_func = crcmod.mkCrcFun(inputPoly.data, initCrc=regInit, rev=True, xorOut=xorOut)
+        crc_func = crcmod.mkCrcFun(inputPoly.masterData(), initCrc=regInit, rev=True, xorOut=xorOut)
         crcLib = crc_func( data.toASCII() )
   
         crcProc = ModCRC()
@@ -166,7 +166,7 @@ class ModCRCTest(unittest.TestCase):
         regInit = 0x0F
         xorOut = 0x0
 
-        crc_func = crcmod.mkCrcFun(inputPoly.data, initCrc=regInit, rev=True, xorOut=xorOut)
+        crc_func = crcmod.mkCrcFun(inputPoly.masterData(), initCrc=regInit, rev=True, xorOut=xorOut)
         crcLib = crc_func( data.toASCII() )
    
         crcProc = ModCRC()
@@ -185,7 +185,7 @@ class ModCRCTest(unittest.TestCase):
         xorOut = 0x0F
         reverse = True
           
-        crc_func = crcmod.mkCrcFun(inputPoly.data, initCrc=regInit, rev=reverse, xorOut=xorOut)
+        crc_func = crcmod.mkCrcFun(inputPoly.masterData(), initCrc=regInit, rev=reverse, xorOut=xorOut)
         crcLib = crc_func( data.toASCII() )
     
         crcProc = ModCRC()
@@ -275,7 +275,7 @@ class ModCRCTest(unittest.TestCase):
         xorOut = 0x0
         reverse = bool(random.randint(0, 1))
  
-        crc_func = crcmod.mkCrcFun(inputPoly.data, rev=reverse, initCrc=regInit, xorOut=xorOut)
+        crc_func = crcmod.mkCrcFun(inputPoly.masterData(), rev=reverse, initCrc=regInit, xorOut=xorOut)
         crcLib  = crc_func( data.toASCII() )
 #         print "crc: {:X} {:X}".format( crc, crc2 )
         

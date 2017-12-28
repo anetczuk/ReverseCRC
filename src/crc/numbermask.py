@@ -130,52 +130,87 @@ def generateSubstringsReverse(dataString, maxPos = -1):
     return retSet
 
 
+
+# class RawNumber(object):
+#     def __init__(self, data, dataSize):
+#         self.dataSize = dataSize
+#         self.setNumber(data)
+#         
+#     def setNumber(self, newValue):
+#         self.dataNum = (newValue & ((0b1 << self.dataSize)-1) )
+#         
+#     def __repr__(self):
+#         digits = int(math.ceil( float(self.dataSize)/4 ))
+#         return ("<RawNumber 0x{:0" + str(digits) + "X} {}>").format(self.dataNum, self.dataSize)
+# 
+#     def __eq__(self, other):
+#         if self.dataNum != other.dataNum:
+#             return False
+#         if self.dataSize != other.dataSize:
+#             return False
+#         return True
+#     
+#     def __ne__(self, other):
+#         return ((self == other) == False)
+#     
+#     def __hash__(self):
+#         return hash( (self.dataSize, self.dataNum) )
+
+
+    
 class NumberMask:
     def __init__(self, data, dataSize):
         self.dataSize = dataSize
-        self.masterBit = 0b1 << dataSize              ## cached value
+        self.calculateCache()
         self.setNumber(data)
     
     def setNumber(self, newValue):
-        self.data = newValue
-        self.dataNum = (newValue & (self.masterBit-1))
+#         self.data = newValue
+        self.dataNum = (newValue & (self.dataMask))
+    
+    def calculateCache(self):
+        self.masterBit = 0b1 << self.dataSize
+        self.dataMask = self.masterBit-1        
+    
+    def masterData(self):
+        return self.dataNum | self.masterBit
     
     def pushMSB(self, bit):
         if bit > 0:
             self.dataNum |= self.masterBit
         self.dataSize += 1
-        self.masterBit <<= 1
+        self.calculateCache()
         
     def pushLSB(self, bit):
         self.dataNum <<= 1
         if bit > 0:
             self.dataNum |= 1
         self.dataSize += 1
-        self.masterBit <<= 1
+        self.calculateCache()
         
     def pushLSZeros(self, num):
         self.dataNum <<= num
         self.dataSize += num
-        self.masterBit <<= num
+        self.calculateCache()
         
     def popLSZeros(self, num):
         self.dataNum >>= num
         self.dataSize -= num
-        self.masterBit >>= num
+        self.calculateCache()
         
     def pushMSZeros(self, num):
         self.dataSize += num
-        self.masterBit <<= num
+        self.calculateCache()
          
     def popMSZeros(self, num):
         self.dataSize -= num
-        self.masterBit >>= num
+        self.calculateCache()
     
     def containsMSB(self, dataMask):
         sizeDiff = self.dataSize - dataMask.dataSize
         if sizeDiff < 0:
             return False
-        cmpMask = ((dataMask.masterBit-1) << sizeDiff) 
+        cmpMask = (dataMask.dataMask << sizeDiff) 
         data1 = self.dataNum & cmpMask
         data2 = (dataMask.dataNum << sizeDiff)
         return (data1 == data2)
@@ -183,7 +218,7 @@ class NumberMask:
     def containsLSB(self, dataMask):
         if self.dataSize < dataMask.dataSize:
             return False
-        cmpMask = dataMask.masterBit-1
+        cmpMask = dataMask.dataMask
         data1 = self.dataNum & cmpMask
         data2 = dataMask.dataNum & cmpMask
         return (data1 == data2)

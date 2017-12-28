@@ -101,18 +101,35 @@ class BackwardReverse(Reverse):
                 d1 = NumberMask(data1, ds)
                 cb1 = self.createBackwardCRCProcessor(d1, crc1, polyMask)
                 cb1.setReversed(reversedMode)
-                backList = cb1.calculate()
-                if len(backList) < 1:
+                backList1 = cb1.calculate()
+                if len(backList1) < 1:
                     continue
                 
-                for back in backList:
-                    initVal = back.register
+                d2 = NumberMask(data2, ds)
+                cb2 = self.createBackwardCRCProcessor(d2, crc2, polyMask)
+                cb2.setReversed(reversedMode)
+                backList2 = cb2.calculate()
+                if len(backList2) < 1:
+                    continue
+# 
+                backList = self.intersectBackLists(backList1, backList2)
+                if len(backList) < 1:
+                    continue 
+
+                for initVal in backList:
                     crcProc = self.createCRCProcessor()
                     crcProc.setReversed(reversedMode)
                     crcProc.setRegisterInitValue(initVal)
-                    verifyCrc = crcProc.calculate3(d1, polyMask)
-                    if (verifyCrc != crc1):
+                    
+                    verifyCrc1 = crcProc.calculate3(d1, polyMask)
+                    if (verifyCrc1 != crc1):
                         continue
+                    
+                    verifyCrc2 = crcProc.calculate3(d2, polyMask)
+                    if (verifyCrc2 != crc2):
+                        ### rarely the condition happens
+                        continue
+                    
                     thekey = CRCKey(poly, reversedMode, initVal, -1, 0, ds)
                     if self.progress:
                         sys.stdout.write("\r")
@@ -125,6 +142,17 @@ class BackwardReverse(Reverse):
                 retList.append(ret)
                 
         return retList
+    
+    def intersectBackLists(self, list1, list2):
+        tmpList1 = set()
+        for item in list1:
+            tmpList1.add( item.register )
+            
+        tmpList2 = set()
+        for item in list2:
+            tmpList2.add( item.register )
+            
+        return tmpList1.intersection(tmpList2)
     
     def findXOR(self, data1, crc1, data2, crc2, dataSize = -1, crcSize = -1):
         inputData = data1 ^ data2

@@ -257,7 +257,7 @@ class HwCRCTest(unittest.TestCase):
         xorOut = 0x0
         reverse = bool(random.randint(0, 1))
  
-        crc_func = crcmod.mkCrcFun(inputPoly.data, rev=reverse, initCrc=regInit, xorOut=xorOut)
+        crc_func = crcmod.mkCrcFun(inputPoly.masterData(), rev=reverse, initCrc=regInit, xorOut=xorOut)
         crcLib  = crc_func( data.toASCII() )
 #         print "crc: {:X} {:X}".format( crc, crc2 )
         

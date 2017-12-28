@@ -23,8 +23,6 @@
 
 
 # import logging
-import time
-
 from crc.hwcrc import HwCRC
 from crc.divisioncrc import DivisionCRC
 from crc.modcrc import ModCRC, CRCModCacheMap
@@ -68,18 +66,22 @@ class BackwardReverse(Reverse):
             crc1 = dataPair1[1]
             data2 = dataPair2[0]
             crc2 = dataPair2[1]
-            keys = self.findCRCKey(data1, crc1, data2, crc2, dataSize, crcSize, searchRange)
+            keys = self.findCRCKeyBackward(data1, crc1, data2, crc2, dataSize, crcSize, searchRange)
             
             retList += keys
             
         return retList
       
-    def findCRCKey(self, data1, crc1, data2, crc2, dataSize=-1, crcSize=-1, searchRange=0):
+    def findCRCKeyBackward(self, data1, crc1, data2, crc2, dataSize=-1, crcSize=-1, searchRange=0):
         if dataSize < 0:
             dataSize = max( data1.bit_length(), data2.bit_length() )
         if crcSize < 0:
             crcSize = max( crc1.bit_length(), crc2.bit_length() )
         polyList = self.findXOR(data1, crc1, data2, crc2, dataSize, crcSize)
+        
+        if self.progress:
+            sys.stdout.write("\r")
+            print "Found polys:", polyList
         
         searchStart = dataSize-searchRange
         
@@ -151,7 +153,10 @@ class BackwardReverse(Reverse):
     def createBackwardCRCProcessor(self, dataMask, crc, polyMask):
         raise NotImplementedError
     
-        
+    
+## =========================================================================
+    
+    
 class RevHwCRC(BackwardReverse):
     def __init__(self, printProgress = None):
         BackwardReverse.__init__(self, printProgress)
@@ -179,7 +184,7 @@ class RevModCRC(BackwardReverse):
         BackwardReverse.__init__(self, printProgress)
 
 
-    def findSolution2(self, dataList, dataSize, crcSize, searchRange = 0):
+    def findSolution(self, dataList, dataSize, crcSize, searchRange = 0):
         if len(dataList) < 2:
             return []
         
@@ -196,21 +201,17 @@ class RevModCRC(BackwardReverse):
             crc1 = dataPair1[1]
             data2 = dataPair2[0]
             crc2 = dataPair2[1]
-            keys = self.findCRCKey(data1, crc1, data2, crc2, dataSize, crcSize, searchRange)
+            keys = self.findCRCKeyForward(data1, crc1, data2, crc2, dataSize, crcSize, searchRange)
             
             retList += keys
             
         return retList
     
-    def findCRCKey(self, data1, crc1, data2, crc2, dataSize, crcSize, searchRange=0):
+    def findCRCKeyForward(self, data1, crc1, data2, crc2, dataSize, crcSize, searchRange=0):
         if self.progress:
-            print "Checking {:X} {:X} xor {:X} {:X}".format(data1, crc1, data2, crc2)
-            
-        xorData = data1 ^ data2
-        diffLength = xorData.bit_length()
-        xorCRC = crc1 ^ crc2
-        dataCrc = MessageCRC(xorData, diffLength, xorCRC, crcSize)
-        polyList = self.findPoly(dataCrc)
+            print "Checking {:X} {:X} xor {:X} {:X} {} {}".format(data1, crc1, data2, crc2, dataSize, crcSize)
+        
+        polyList = self.findXOR(data1, crc1, data2, crc2, dataSize, crcSize)
         
         dataString1 = intToASCII(data1)
         dataString2 = intToASCII(data2)
@@ -220,27 +221,25 @@ class RevModCRC(BackwardReverse):
             print "found polys:", polyList
     
         retList = []
-        for poly in polyList:
+        for polyData in polyList:
+            poly = polyData[0]
+            reverse = polyData[1]
             polyAdded = False
 #             print "checking poly: {:X}".format( poly )
             for initReg in xrange(0, regMax):
 #                 print "checking init: {:b}".format( initReg )
                 for xorReg in xrange(0, regMax):
-                    verifyCrc1 = self.calculateStringCRC(poly, False, initReg, xorReg, dataString1 )
+                    crcKey = CRCKey(poly, reverse, initReg, xorReg, 0, dataSize)
+                    
+                    verifyCrc1 = self.calculateStringCRC(crcKey, dataString1 )
                     if (verifyCrc1 != crc1):
                         continue
                         
-                    verifyCrc2 = self.calculateStringCRC(poly, False, initReg, xorReg, dataString2 )
+                    verifyCrc2 = self.calculateStringCRC(crcKey, dataString2 )
                     if (verifyCrc2 != crc2):
                         continue
                     
-                    ret = CRCKey()
-                    ret.poly = poly
-                    ret.init = initReg
-                    ret.xor = xorReg
-                    ret.dataPos = 0
-                    ret.dataLen = data1.bit_length()
-                    retList.append(ret)
+                    retList.append(crcKey)
                     polyAdded = True
                     if self.returnFirst == True:
                         return retList
@@ -251,35 +250,11 @@ class RevModCRC(BackwardReverse):
                 retList.append(ret)
                 
         return retList
-
-    def findPoly(self, xoredDataCrc):
-        crcNum = xoredDataCrc.crcNum
-        poly = 1 << (xoredDataCrc.crcSize)
-        polyMax = poly << 1
-        retList = []
-        dataString = intToASCII(xoredDataCrc.dataNum)
-        
-        while poly < polyMax:
-#             print "checking poly: {:b}".format( poly )
-            ##crc_func = crcmod.mkCrcFun(poly, rev=False, initCrc=0x0, xorOut=0x0)
-            ##polyCRC  = crc_func( dataString )
-
-            polyCRC = self.calculateStringCRC(poly, False, 0x0, 0x0, dataString)
-            if polyCRC == crcNum:
-                retList.append(poly)
-            poly += 1
-        return retList
     
-    def calculateStringCRC(self, poly, reverse, initReg, xorOut, data):
-        #TODO: non-zero 'initReg' not supported
-        #TODO: non-zero 'xorOut' not supported
-        crcKey = CRCKey(poly, reverse, initReg, xorOut)
+    def calculateStringCRC(self, crcKey, data):
         crc_func = CRCModCacheMap.instance.getFunction(crcKey)
 #         crc_func = crcmod.mkCrcFun(poly, rev=reverse, initCrc=initReg, xorOut=xorOut)
         return crc_func( data )
-#         crc_func = crcmod.Crc(poly, rev=reverse, initCrc=initReg, xorOut=xorOut)
-#         crc_func.update( data )
-#         return crc_func.crcValue
 
 
     ### =========================================================
@@ -287,79 +262,5 @@ class RevModCRC(BackwardReverse):
 
     def createCRCProcessor(self):
         return ModCRC()        
-        
-    def createBackwardCRCProcessor(self, dataMask, crc, polyMask):        
-        return DivisionCRCBackward( dataMask, crc, polyMask )
-    
-      
-### ================================================================
-        
-        
-class RightSubstringChain:
-    def __init__(self, processor, startSize = 1):
-        self.processor = processor
-        self.startSize = startSize-1
-    
-    def calculate(self, dataCrc):
-#         print "R Input:", dataCrc
-        testMessage = 0
-        bitMask = 1
-        for i in range(0, dataCrc.dataSize):
-            testMessage |= (bitMask & dataCrc.dataNum)
-            bitMask <<= 1
-            if i < self.startSize:
-                continue
-            tmpData = MessageCRC(testMessage, i+1, dataCrc.crcNum, dataCrc.crcSize)
-#             print "R Item:", tmpData
-            self.processor.calculate(tmpData)
-    
-    
-class LeftSubstringChain:
-    def __init__(self, processor):
-        self.processor = processor
-    
-    def calculate(self, dataCrc):
-#         print "L Input:", dataCrc
-        testMessage = 0
-        bitMask = 1 << (dataCrc.dataSize-1)
-        for i in range(0, dataCrc.dataSize):
-            testMessage = testMessage << 1
-            if bitMask & dataCrc.dataNum:
-                testMessage = testMessage | 0b1
-            tmpData = MessageCRC(testMessage, i+1, dataCrc.crcNum, dataCrc.crcSize)
-#             print "L Item:", tmpData
-            self.processor.calculate(tmpData)
-            bitMask = bitMask >> 1
 
-
-class SideSubstringChain:
-    def __init__(self, processor):
-        self.processor = RightSubstringChain( LeftSubstringChain(processor) )
-        #self.processor = RightSubstringChain( processor )
-    
-    def calculate(self, dataCrc):
-        self.processor.calculate(dataCrc)
-
-
-class RevBFReceiver:
-    def __init__(self):
-        pass
-    
-    def calculate(self, dataCrc):
-        ##self.processor.calculate(dataCrc)
-        print "Finding poly for data: {}".format(dataCrc)
-        tstamp = time.time()
-        calc = RevHwCRC(True)
-        calc.bruteForceData(dataCrc)
-        timeDiff = (time.time()-tstamp)*1000.0
-        print "Time: {:13.8f}ms".format(timeDiff)
-
-
-class BruteForceChain:
-    def __init__(self):
-        self.processor = RightSubstringChain( RevBFReceiver(), 30*4 )
-    
-    def calculate(self, dataCrc):
-        self.processor.calculate(dataCrc)
-    
     

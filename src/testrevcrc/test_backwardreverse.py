@@ -28,13 +28,11 @@ import os
  
 import crcmod
 import random
-from revcrc.backwardreverse import RevHwCRC, RevDivisionCRC, RevModCRC,\
-    RightSubstringChain, LeftSubstringChain, SideSubstringChain
+from revcrc.backwardreverse import RevHwCRC, RevDivisionCRC, RevModCRC
 from crc.hwcrc import HwCRC
 from crc.numbermask import intToASCII
 from crc.crcproc import CRCKey
 from crc.divisioncrc import DivisionCRC
-from revcrc.reverse import MessageCRC
 
   
   
@@ -239,7 +237,7 @@ class RevHwCRCTest(unittest.TestCase):
 #         print "crc {:X} {:X}".format( crc, crc2)
          
         finder = RevHwCRC()
-        foundCRC = finder.findCRCKey(data, crc, data2, crc2, dataSize, crcSize)
+        foundCRC = finder.findCRCKeyBackward(data, crc, data2, crc2, dataSize, crcSize)
          
 #         print "crc:", crcKeyList
         self.assertIn( CRCKey(inputPoly, False, regInit, -1, -1, dataSize ), foundCRC )
@@ -258,7 +256,7 @@ class RevHwCRCTest(unittest.TestCase):
         crc2 = crcProc.calculate2(data2, dataSize, inputPoly, crcSize)
            
         finder = RevHwCRC()
-        foundCRC = finder.findCRCKey(data, crc, data2, crc2, dataSize, crcSize)
+        foundCRC = finder.findCRCKeyBackward(data, crc, data2, crc2, dataSize, crcSize)
  
 #         print "crc:", crcKeyList
         self.assertIn( CRCKey(inputPoly, False, regInit, -1, -1, dataSize ), foundCRC )
@@ -277,7 +275,7 @@ class RevHwCRCTest(unittest.TestCase):
         crc2 = crcProc.calculate2(inputVal2, dataSize, inputPoly, crcSize)
            
         finder = RevHwCRC()
-        foundCRC = finder.findCRCKey(inputVal, crc, inputVal2, crc2, dataSize, crcSize)
+        foundCRC = finder.findCRCKeyBackward(inputVal, crc, inputVal2, crc2, dataSize, crcSize)
   
         self.assertIn( CRCKey(inputPoly, False, regInit, -1, -1, dataSize ), foundCRC )
          
@@ -296,7 +294,7 @@ class RevHwCRCTest(unittest.TestCase):
         crc2 = crcProc.calculate2(inputVal2&mask, dataSize, inputPoly, crcSize)
            
         finder = RevHwCRC()
-        foundCRC = finder.findCRCKey(inputVal, crc, inputVal2, crc2, dataSize, crcSize)
+        foundCRC = finder.findCRCKeyBackward(inputVal, crc, inputVal2, crc2, dataSize, crcSize)
  
 #         print "crc:", crcKeyList
         self.assertIn( CRCKey(inputPoly, False, regInit, -1, -1, dataSize ), foundCRC )
@@ -403,19 +401,19 @@ class RevModCRCTest(unittest.TestCase):
         # Called after the last testfunction was executed
         pass
 
-    def test_findSolution2_empty(self):
+    def test_findSolution_empty(self):
         dataList = []
         finder = RevModCRC()
-        foundCRC = finder.findSolution2(dataList, 8, 8, 0)
+        foundCRC = finder.findSolution(dataList, 8, 8, 0)
         self.assertEqual( foundCRC, [] )
         
-    def test_findSolution2_one(self):
+    def test_findSolution_one(self):
         dataList = [(1,1)]
         finder = RevModCRC()
-        foundCRC = finder.findSolution2(dataList, 8, 8, 0)
+        foundCRC = finder.findSolution(dataList, 8, 8, 0)
         self.assertEqual( foundCRC, [] )
         
-    def test_findSolution2_crc8(self):
+    def test_findSolution_crc8(self):
         dataList = []
          
         crcFun = crcmod.predefined.mkCrcFun("crc-8")        ## init: 0x0, xor: 0x0, poly: 0x107
@@ -430,16 +428,17 @@ class RevModCRCTest(unittest.TestCase):
          
         finder = RevModCRC()
         finder.setReturnOnFirst()
-        foundCRC = finder.findSolution(dataList, 8, 8, 0)
+        foundCRC = finder.findSolution(dataList, 16, 8, 0)
          
 #         print "found:", foundCRC
-        self.assertEqual( len(foundCRC), 1 )
-        crcKey = foundCRC[0]
-        self.assertEqual( crcKey.poly, 0x107 )
-        self.assertEqual( crcKey.init, 0x0 )
-        self.assertEqual( crcKey.xor, 0x0 )
-        self.assertEqual( crcKey.dataPos, 0 )
-        self.assertEqual( crcKey.dataLen, 16 )
+#         self.assertEqual( len(foundCRC), 1 )
+#         crcKey = foundCRC[0]
+#         self.assertEqual( crcKey.poly, 0x107 )
+#         self.assertEqual( crcKey.init, 0x0 )
+#         self.assertEqual( crcKey.xor, 0x0 )
+#         self.assertEqual( crcKey.dataPos, 0 )
+#         self.assertEqual( crcKey.dataLen, 16 )
+        self.assertIn( CRCKey(0x107, False, 0x0, 0x0, 0, 16 ), foundCRC )
 
     def test_findXOR_crcmod_8Arev(self):
         data =  0xF90AD5FF
@@ -511,82 +510,7 @@ class RevModCRCTest(unittest.TestCase):
         
 #         print "found:", foundCRC
         self.assertIn( CRCKey(0x18005, False, 0x0, -1, -1, dataSize ), foundCRC )
-    
-    
-## ===================================================================
-
-
-class ChainMock:
-    def __init__(self):
-        self.input = []
-    
-    def calculate(self, dataCrc):
-        self.input.append(dataCrc)
-        
-    
-class RightSubstringChainTest(unittest.TestCase):
-    def setUp(self):
-        # Called before the first testfunction is executed
-        pass
-  
-    def tearDown(self):
-        # Called after the last testfunction was executed
-        pass
- 
-    def test_calculate(self):
-        output = ChainMock()
-        inputData = MessageCRC(0b1101, 4, 0b1111, 4)
-        processor = RightSubstringChain(output)
-        processor.calculate(inputData)
-#         print output.input
-        self.assertEqual( len(output.input), 4 )
-        self.assertEqual( output.input[2].dataNum, 0b101 )
-        self.assertEqual( output.input[2].dataSize, 3 )
-        self.assertEqual( output.input[3].dataNum, 0b1101 )
-        self.assertEqual( output.input[3].dataSize, 4 )
-        
-        
-        
-class LeftSubstringChainTest(unittest.TestCase):
-    def setUp(self):
-        # Called before the first testfunction is executed
-        pass
-  
-    def tearDown(self):
-        # Called after the last testfunction was executed
-        pass
- 
-    def test_calculate(self):
-        output = ChainMock()
-        inputData = MessageCRC(0b1101, 4, 0b1111, 4)
-        processor = LeftSubstringChain(output)
-        processor.calculate(inputData)
-#         print output.input
-        self.assertEqual( len(output.input), 4 )
-        self.assertEqual( output.input[2].dataNum, 0b110 )
-        self.assertEqual( output.input[2].dataSize, 3 )
-        self.assertEqual( output.input[3].dataNum, 0b1101 )
-        self.assertEqual( output.input[3].dataSize, 4 )
- 
-
-
-class SideSubstringChainTest(unittest.TestCase):
-    def setUp(self):
-        # Called before the first testfunction is executed
-        pass
-  
-    def tearDown(self):
-        # Called after the last testfunction was executed
-        pass
- 
-    def test_calculate(self):
-        output = ChainMock()
-        inputData = MessageCRC(0b1101, 4, 0b1111, 4)
-        processor = SideSubstringChain(output)
-        processor.calculate(inputData)
-#         print output.input
-        self.assertEqual( len(output.input), 10 )
- 
+     
         
  
 if __name__ == "__main__":

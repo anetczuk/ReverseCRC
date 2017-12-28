@@ -24,24 +24,17 @@
 
 from crc.hwcrc import HwCRC
 from crc.numbermask import NumberMask
+from crc.crcproc import CRCProc
 
 
     
 GlobalLookupTables = {}
     
-class LookupCRC:
+class LookupCRC(CRCProc):
     def __init__(self, lookupSize):
+        CRCProc.__init__(self)
         self.lookupSize = lookupSize 
     
-    ## 'poly' with leading '1'
-    def calculate(self, data, poly):
-        return self.calculate2(data, data.bit_length(), poly, poly.bit_length()-1)
-    
-    def calculate2(self, data, dataSize, poly, crcSize):
-        dataMask = NumberMask(data, dataSize)
-        polyMask = NumberMask(poly, crcSize)
-        return self.calculate3(dataMask, polyMask)
-            
     def calculate3(self, dataMask, polyMask):
         lookup = self.prepareTable(polyMask)
 

@@ -22,10 +22,11 @@
 #
 
 
-import crcmod
-from revcrc.backwardreverse import CRCKey
 from revcrc.reverse import Reverse
 from crc.numbermask import NumberMask, generateSubstringsReverse
+from crc.crcproc import CRCKey
+from crc.modcrc import CRCModCacheMap
+# from crc.modcrc import CRCModCacheMap
 
 
 
@@ -168,29 +169,4 @@ class RevCRCCommon(Reverse):
         ##print "comp:", polyCRC, crc
         if polyCRC == crc:
             retList.add( crcKey )
-        
 
-
-class CRCModCacheMap(object):
-    '''
-    Caching results of 'crcmod.mkCrcFun()' gives huge performance boost.
-    '''
-    
-    instance = None
-    
-    def __init__(self):
-        '''
-        Constructor
-        '''
-        self.map = dict()
-
-
-    def getFunction(self, crcKey):
-        if crcKey in self.map:
-            return self.map[crcKey]
-#         print "Creating new function for", crcKey
-        crc_func = crcmod.mkCrcFun(crcKey.poly, rev=crcKey.rev, initCrc=crcKey.init, xorOut=crcKey.xor)
-        self.map.update( [(crcKey, crc_func)] )
-        return crc_func
-    
-CRCModCacheMap.instance = CRCModCacheMap()

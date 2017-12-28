@@ -183,19 +183,17 @@ class ModCRCTest(unittest.TestCase):
         inputPoly = NumberMask(0x181, 8)
         regInit = 0x0F
         xorOut = 0x0F
+        reverse = True
           
-        crc_func = crcmod.mkCrcFun(inputPoly.data, initCrc=regInit, rev=True, xorOut=xorOut)
+        crc_func = crcmod.mkCrcFun(inputPoly.data, initCrc=regInit, rev=reverse, xorOut=xorOut)
         crcLib = crc_func( data.toASCII() )
     
         crcProc = ModCRC()
-        crcProc.setReversed()
+        crcProc.setReversed(reverse)
         crcProc.setXorOutValue( xorOut )
-        crcProc.setInitCRC( regInit, inputPoly.dataSize )
-        
-        revData = data.reversedBytes()
-        revPoly = inputPoly.reversed()
+        crcProc.setRegisterInitValue( regInit )
                   
-        crc = crcProc.calculate3( revData, revPoly)
+        crc = crcProc.calculate3( data, inputPoly)
 #         print "crcx: {:b} {:b}".format( crc, crcLib )
         self.assertEqual( crc, crcLib )
         

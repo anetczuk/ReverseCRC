@@ -22,28 +22,63 @@
 #
 
 
-from crc.hwcrc import HwCRC
-from crc.numbermask import reverseBits
+from crc.crcproc import CRCProc, CRCKey
+import crcmod
+
+
+
+class CRCModCacheMap(object):
+    '''
+    Caching results of 'crcmod.mkCrcFun()' gives huge performance boost.
+    '''
+    
+    instance = None
+    
+    def __init__(self):
+        '''
+        Constructor
+        '''
+        self.map = dict()
+
+
+    def getFunction(self, crcKey):
+        if crcKey in self.map:
+            return self.map[crcKey]
+#         print "Creating new function for", crcKey
+        crc_func = crcmod.mkCrcFun(crcKey.poly, rev=crcKey.rev, initCrc=crcKey.init, xorOut=crcKey.xor)
+        self.map.update( [(crcKey, crc_func)] )
+        return crc_func
+    
+CRCModCacheMap.instance = CRCModCacheMap()
+
 
 
 ##
 ## Compatible with crcmod library
 ##
-class ModCRC(HwCRC):
+class ModCRC(CRCProc):
     def __init__(self):
-        HwCRC.__init__(self)
+        CRCProc.__init__(self)
         
-    def setInitCRC(self, value, crcSize):
-        self.registerInit = value
-        self.registerInit ^= self.xorOut
-        if self.reversed == True:
-            self.registerInit = reverseBits(self.registerInit, crcSize)
+#     def setInitCRC(self, value, crcSize):
+#         self.registerInit = value ^ self.xorOut
+#         if self.reversed == True:
+#             self.registerInit = reverseBits(self.registerInit, crcSize)
         
     def calculate3(self, dataMask, polyMask):
-        if self.reversed == False:
-            return self.calculateMSB(dataMask, polyMask)
-        else:
-            revData = dataMask.reversedBytes()
-            revPoly = polyMask.reversed()
-            return self.calculateLSB(revData, revPoly)
-#             return self.calculateLSB(dataMask, poly)
+        ## crcmod requires leading '1' bit
+        poly = polyMask.dataNum | polyMask.masterBit
+        crc_func = crcmod.mkCrcFun(poly, rev=self.reversed, initCrc=self.registerInit, xorOut=self.xorOut)
+#         crcKey = CRCKey(poly, self.reversed, self.registerInit, self.xorOut)
+#         crc_func = CRCModCacheMap.instance.getFunction(crcKey)
+        dataString = dataMask.toASCII()
+        polyCRC  = crc_func( dataString )
+        return polyCRC
+    
+#         if self.reversed == False:
+#             return self.calculateMSB(dataMask, polyMask)
+#         else:
+#             revData = dataMask.reversedBytes()
+#             revPoly = polyMask.reversed()
+#             return self.calculateLSB(revData, revPoly)
+# #             return self.calculateLSB(dataMask, poly)

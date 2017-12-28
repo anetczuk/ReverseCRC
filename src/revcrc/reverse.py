@@ -34,41 +34,6 @@ class MessageCRC:
         
     def __repr__(self):
         return "<MessageCRC {:X} {} {:X} {}>".format(self.dataNum, self.dataSize, self.crcNum, self.crcSize)
-    
-
-
-class CRCKey:
-    def __init__(self, poly=-1, rev=False, init=-1, xor=-1, dataPos=-1, dataLen=-1):
-        self.poly = poly
-        self.rev = rev
-        self.init = init
-        self.xor = xor
-        self.dataPos = dataPos
-        self.dataLen = dataLen
-
-    def __repr__(self):
-        return "<CRCKey p:0x{:X} dP:{:} dL:{:} r:{:} i:0x{:X} x:0x{:X}>".format(self.poly, self.dataPos, self.dataLen, self.rev, self.init, self.xor)
-    
-    def __eq__(self, other):
-        if self.poly != other.poly:
-            return False
-        if self.rev != other.rev:
-            return False
-        if self.init != other.init:
-            return False
-        if self.xor != other.xor:
-            return False
-        if self.dataPos != other.dataPos:
-            return False
-        if self.dataLen != other.dataLen:
-            return False
-        return True
-    
-    def __ne__(self, other):
-        return ((self == other) == False)
-    
-    def __hash__(self):
-        return hash(str(self.poly) + str(self.init) + str(self.xor))
 
 
 
@@ -110,12 +75,16 @@ class Reverse(object):
             
         self.findSolution(numbersList, dataSize, crcSize)
 
+    #TODO: remove alias method
     def bruteForce3(self, dataCrc):
-        crcNum = dataCrc.crcNum
-        poly = 1 << (dataCrc.crcSize)
+        return self.findPoly(self, dataCrc)
+        
+    def findPoly(self, xoredDataCrc):
+        crcNum = xoredDataCrc.crcNum
+        poly = 1 << (xoredDataCrc.crcSize)
         polyMax = poly << 1
         retList = []
-        dataString = intToASCII(dataCrc.dataNum)
+        dataString = intToASCII(xoredDataCrc.dataNum)
         
         while poly < polyMax:
 #             print "checking poly: {:b}".format( poly )
@@ -164,7 +133,8 @@ class Reverse(object):
         polyNum = NumberMask(0x0, dataCrc.crcSize)
         retList = []
         while poly < polyMax:
-            if self.progress and (poly % 16384) == 16383:
+#             if self.progress and (poly % 16384) == 16383:
+            if self.progress and (poly % 8192) == 8191:
                 sys.stdout.write("\r{:b}".format(poly))
                 sys.stdout.flush()
 
@@ -172,9 +142,9 @@ class Reverse(object):
             polyCRC = crcProc.calculate3(dataMask, polyNum)
             if polyCRC == crc:
                 ##print "Detected poly: {:b}".format(retPoly)
-#                 if self.progress:
-#                     sys.stdout.write("\r")
-#                     print "Found poly: 0b{0:b} 0x{0:X}".format(retPoly)
+                if self.progress:
+                    sys.stdout.write("\r")
+                    print "Found poly: 0b{0:b} 0x{0:X}".format(poly)
 #                 if reverseMode:
 #                     revPoly = reverseBits(poly, self.crcSize)
 #                     retList.append( (revPoly, reverseMode))

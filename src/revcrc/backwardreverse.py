@@ -30,10 +30,11 @@ from crc.divisioncrc import DivisionCRC
 from crc.modcrc import ModCRC
 from revcrc.hwcrcbackward import HwCRCBackward
 from revcrc.divisioncrcbackward import DivisionCRCBackward
-from revcrc.reverse import Reverse, MessageCRC, CRCKey
+from revcrc.reverse import Reverse, MessageCRC
 from crc.numbermask import NumberMask
 import itertools
 import sys
+from crc.crcproc import CRCKey
 
 
     
@@ -182,7 +183,8 @@ class RevModCRC(BackwardReverse):
         
     def createBackwardCRCProcessor(self, dataMask, crc, polyMask):        
         return DivisionCRCBackward( dataMask, crc, polyMask )
-        
+    
+      
 ### ================================================================
         
         

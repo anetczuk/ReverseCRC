@@ -27,7 +27,7 @@ import os
 import crcmod
 from revcrc.revcommon import RevCRCCommon
 from crc.numbermask import intToASCII
-from revcrc.reverse import CRCKey
+from crc.crcproc import CRCKey
 
   
   

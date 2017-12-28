@@ -271,7 +271,8 @@ class HwCRCTest(unittest.TestCase):
             crcInit = reverseBits(regInit^xorOut, crcSize)
             crcProc.setRegisterInitValue( crcInit )
         else:
-            crcProc.setRegisterInitValue( regInit )
+            crcInit = regInit^xorOut
+            crcProc.setRegisterInitValue( crcInit )
         
         crc = crcProc.calculate3(data, inputPoly)
           

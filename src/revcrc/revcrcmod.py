@@ -23,9 +23,11 @@
 
 
 import crcmod
-from revcrc.reverse import Reverse, MessageCRC, CRCKey
+from revcrc.reverse import Reverse, MessageCRC
 from crc.numbermask import intToASCII
 import itertools
+from revcrc.revcommon import CRCModCacheMap
+from crc.crcproc import CRCKey
 
 
 
@@ -72,7 +74,7 @@ class RevCRCMod(Reverse):
         diffLength = xorData.bit_length()
         xorCRC = crc1 ^ crc2
         dataCrc = MessageCRC(xorData, diffLength, xorCRC, crcSize)
-        polyList = self.bruteForce3(dataCrc)
+        polyList = self.findPoly(dataCrc)
         
         dataString1 = intToASCII(data1)
         dataString2 = intToASCII(data2)
@@ -117,7 +119,9 @@ class RevCRCMod(Reverse):
     def calculateStringCRC(self, poly, reverse, initReg, xorOut, data):
         #TODO: non-zero 'initReg' not supported
         #TODO: non-zero 'xorOut' not supported
-        crc_func = crcmod.mkCrcFun(poly, rev=reverse, initCrc=initReg, xorOut=xorOut)
+        crcKey = CRCKey(poly, reverse, initReg, xorOut)
+        crc_func = CRCModCacheMap.instance.getFunction(crcKey)
+#         crc_func = crcmod.mkCrcFun(poly, rev=reverse, initCrc=initReg, xorOut=xorOut)
         return crc_func( data )
 #         crc_func = crcmod.Crc(poly, rev=reverse, initCrc=initReg, xorOut=xorOut)
 #         crc_func.update( data )

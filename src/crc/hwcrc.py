@@ -23,41 +23,14 @@
 
 
 from crc.numbermask import NumberMask
+from crc.crcproc import CRCProc
 
 
 ##
 ##
-class HwCRC:
+class HwCRC(CRCProc):
     def __init__(self):
-        self.reset()
-    
-    def reset(self):
-        self.registerInit = 0x0
-        self.xorOut = 0x0
-        self.reversed = False
-    
-#     def setCRCSize(self, crcSize):
-#         self.crcSize = crcSize
-#         self.masterBit = 0b1 << self.crcSize
-#         self.crcMask = self.masterBit - 1
-    
-    def setRegisterInitValue(self, value):
-        self.registerInit = value
-        
-    def setXorOutValue(self, value):
-        self.xorOut = value
-    
-    def setReversed(self, value = True):
-        self.reversed = value
-        
-    ## 'poly' with leading '1'
-    def calculate(self, data, poly):
-        return self.calculate2(data, data.bit_length(), poly, poly.bit_length()-1)
-    
-    def calculate2(self, data, dataSize, poly, crcSize):
-        dataMask = NumberMask(data, dataSize)
-        polyMask = NumberMask(poly, crcSize)
-        return self.calculate3(dataMask, polyMask)
+        CRCProc.__init__(self)
   
     def calculate3(self, dataMask, polyMask):
         if self.reversed == False:
@@ -119,6 +92,7 @@ class HwCRC:
         b = '{:0{width}b}'.format(num, width=size)
         return int(b[::-1], 2)
 
+    #TODO: remove method
     @staticmethod
     def calcCRC(data, poly):
         crcProc = HwCRC()

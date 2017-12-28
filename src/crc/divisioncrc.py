@@ -22,46 +22,14 @@
 #
 
 
-from crc.numbermask import reverseBits, NumberMask
+from crc.numbermask import NumberMask
+from crc.crcproc import CRCProc
 
 
-class DivisionCRC:
+class DivisionCRC(CRCProc):
     def __init__(self):
-        self.reset()
-        
-    def reset(self):
-        self.registerInit = 0x0
-        self.xorOut = 0x0
-        self.reversed = False
+        CRCProc.__init__(self)
     
-#     def setCRCSize(self, crcSize):
-#         self.crcSize = crcSize
-#         self.masterBit = 0b1 << self.crcSize
-#         self.crcMask = self.masterBit - 1
-    
-    def setRegisterInitValue(self, value):
-        self.registerInit = value
-        
-    def setXorOutValue(self, value):
-        self.xorOut = value
-        
-    def setInitCRC(self, value, crcSize):
-        self.registerInit = value ^ self.xorOut
-        if self.reversed == True:
-            self.registerInit = reverseBits(self.registerInit, crcSize)
-    
-    def setReversed(self, value = True):
-        self.reversed = value
-    
-    ## 'poly' with leading '1'
-    def calculate(self, data, poly):
-        return self.calculate2(data, data.bit_length(), poly, poly.bit_length()-1)
-    
-    def calculate2(self, data, dataSize, poly, crcSize):
-        dataMask = NumberMask(data, dataSize)
-        polyMask = NumberMask(poly, crcSize)
-        return self.calculate3(dataMask, polyMask)
-  
     def calculate3(self, dataMask, polyMask):
         if self.reversed == False:
             return self.calculateMSB(dataMask, polyMask)

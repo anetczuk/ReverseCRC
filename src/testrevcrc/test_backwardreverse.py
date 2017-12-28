@@ -28,11 +28,14 @@ import os
  
 import crcmod
 import random
-from crc.divisioncrc import DivisionCRC
-from crc.hwcrc import HwCRC
-from revcrc.backwardreverse import RevHwCRC, CRCKey, RevDivisionCRC, RevModCRC, MessageCRC,\
+from revcrc.backwardreverse import RevHwCRC, RevDivisionCRC, RevModCRC,\
     RightSubstringChain, LeftSubstringChain, SideSubstringChain
+from crc.hwcrc import HwCRC
 from crc.numbermask import intToASCII
+from crc.crcproc import CRCKey
+from crc.divisioncrc import DivisionCRC
+from revcrc.reverse import MessageCRC
+
   
   
 __scriptdir__ = os.path.dirname(os.path.realpath(__file__))
@@ -449,7 +452,8 @@ class RevModCRCTest(unittest.TestCase):
 #         print "found:", foundCRC
         self.assertIn( CRCKey(0x18005, False, 0x0, -1, -1, dataSize ), foundCRC )
     
-    def test_findSolution_crcmod16buypass(self):
+    ## test casea takes too long
+    def xxxtest_findSolution_crcmod16buypass(self):
         dataList = []
         dataSize = 16
         crcSize = 16
@@ -464,7 +468,7 @@ class RevModCRCTest(unittest.TestCase):
         crc  = crcFun( intToASCII(data) )
         dataList.append( (data, crc) )
         
-        finder = RevModCRC()
+        finder = RevModCRC(True)
         foundCRC = finder.findSolution(dataList, dataSize, crcSize, 0)
         
 #         print "found:", foundCRC

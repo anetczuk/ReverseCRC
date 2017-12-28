@@ -240,7 +240,7 @@ class RevHwCRCTest(unittest.TestCase):
         foundCRC = finder.findCRCKeyBackward(data, crc, data2, crc2, dataSize, crcSize)
          
 #         print "crc:", crcKeyList
-        self.assertIn( CRCKey(inputPoly, False, regInit, -1, -1, dataSize ), foundCRC )
+        self.assertIn( CRCKey(inputPoly, False, regInit, -1, 0, dataSize ), foundCRC )
          
     def test_findCRCKey_8_long(self):
         dataSize = 32                           ## data size does not matter
@@ -259,7 +259,7 @@ class RevHwCRCTest(unittest.TestCase):
         foundCRC = finder.findCRCKeyBackward(data, crc, data2, crc2, dataSize, crcSize)
  
 #         print "crc:", crcKeyList
-        self.assertIn( CRCKey(inputPoly, False, regInit, -1, -1, dataSize ), foundCRC )
+        self.assertIn( CRCKey(inputPoly, False, regInit, -1, 0, dataSize ), foundCRC )
          
     def test_findCRCKey_8_long2(self):
         dataSize = 32                           ## data size does not matter
@@ -277,7 +277,7 @@ class RevHwCRCTest(unittest.TestCase):
         finder = RevHwCRC()
         foundCRC = finder.findCRCKeyBackward(inputVal, crc, inputVal2, crc2, dataSize, crcSize)
   
-        self.assertIn( CRCKey(inputPoly, False, regInit, -1, -1, dataSize ), foundCRC )
+        self.assertIn( CRCKey(inputPoly, False, regInit, -1, 0, dataSize ), foundCRC )
          
     def test_findCRCKey_8_long3(self):
         dataSize = 32                           ## data size does not matter
@@ -297,7 +297,7 @@ class RevHwCRCTest(unittest.TestCase):
         foundCRC = finder.findCRCKeyBackward(inputVal, crc, inputVal2, crc2, dataSize, crcSize)
  
 #         print "crc:", crcKeyList
-        self.assertIn( CRCKey(inputPoly, False, regInit, -1, -1, dataSize ), foundCRC )
+        self.assertIn( CRCKey(inputPoly, False, regInit, -1, 0, dataSize ), foundCRC )
         
     def test_findSolution_c16d16_rev(self):
         dataList = []
@@ -326,7 +326,7 @@ class RevHwCRCTest(unittest.TestCase):
         foundCRC = finder.findSolution(dataList, dataSize, crcSize, 0)
           
 #         print "found data:", foundCRC
-        self.assertIn( CRCKey(inputPoly, reverse, regInit, -1, -1, dataSize ), foundCRC )
+        self.assertIn( CRCKey(inputPoly, reverse, regInit, -1, 0, dataSize ), foundCRC )
 
 
 class RevDivisionCRCTest(unittest.TestCase):
@@ -389,7 +389,7 @@ class RevDivisionCRCTest(unittest.TestCase):
         foundCRC = finder.findSolution(dataList, dataSize, crcSize, 0)
           
 #         print "found data:", foundCRC
-        self.assertIn( CRCKey(inputPoly, reverse, regInit, -1, -1, dataSize ), foundCRC )
+        self.assertIn( CRCKey(inputPoly, reverse, regInit, -1, 0, dataSize ), foundCRC )
 
 
 class RevModCRCTest(unittest.TestCase):

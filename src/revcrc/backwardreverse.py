@@ -77,11 +77,17 @@ class BackwardReverse(Reverse):
             dataSize = max( data1.bit_length(), data2.bit_length() )
         if crcSize < 0:
             crcSize = max( crc1.bit_length(), crc2.bit_length() )
+            
+        if self.progress:
+            print "Checking {:X} {:X} xor {:X} {:X}, {} {}".format(data1, crc1, data2, crc2, dataSize, crcSize)
+            
         polyList = self.findXOR(data1, crc1, data2, crc2, dataSize, crcSize)
         
         if self.progress:
             sys.stdout.write("\r")
-            print "Found polys:", polyList
+#             print "Found polys:", polyList
+            joinString = ", ".join( "(0x{:X}, {})".format(x[0], x[1]) for x in polyList )
+            print "Found polys:", "[{}]".format( joinString )
         
         searchStart = dataSize-searchRange
         
@@ -107,7 +113,7 @@ class BackwardReverse(Reverse):
                     verifyCrc = crcProc.calculate3(d1, polyMask)
                     if (verifyCrc != crc1):
                         continue
-                    thekey = CRCKey(poly, reversedMode, initVal, -1, -1, ds)
+                    thekey = CRCKey(poly, reversedMode, initVal, -1, 0, ds)
                     if self.progress:
                         sys.stdout.write("\r")
                         print "Found key:", thekey
@@ -127,9 +133,9 @@ class BackwardReverse(Reverse):
         if crcSize < 0:
             crcSize = max(crc1.bit_length(), crc2.bit_length())
         
-        if self.progress:
-            messageFormat = "xor-ed input: {:b} {:0" + str(crcSize) + "b}"
-            print messageFormat.format(inputData, inputCRC)
+#         if self.progress:
+#             messageFormat = "xor-ed input: {:b} {:0" + str(crcSize) + "b}"
+#             print messageFormat.format(inputData, inputCRC)
 
 #         messageFormat = "xor-ed input: {:X} {:0" + str(self.crcSize) + "b}"
 #         print messageFormat.format(inputData, inputCRC)

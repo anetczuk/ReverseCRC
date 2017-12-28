@@ -53,7 +53,7 @@ class Reverse(object):
     def setReturnOnFirst(self):
         self.returnFirst = True
 
-    def findSolutionList(self, dataList):
+    def findSolutionList(self, dataList, searchRange = 0):
         if len(dataList) < 1:
             return
 
@@ -73,7 +73,7 @@ class Reverse(object):
         if (self.progress):
             print "List size: {} Data size: {} CRC size: {}".format(len(numbersList), dataSize, crcSize)
             
-        self.findSolution(numbersList, dataSize, crcSize)
+        self.findSolution(numbersList, dataSize, crcSize, searchRange)
 
     def bruteForcePair(self, inputPair):
         dataString = inputPair[0]
@@ -120,9 +120,11 @@ class Reverse(object):
             polyCRC = crcProc.calculate3(dataMask, polyNum)
             if polyCRC == crc:
                 ##print "Detected poly: {:b}".format(retPoly)
-                if self.progress:
-                    sys.stdout.write("\r")
-                    print "Found poly: 0b{0:b} 0x{0:X}".format(poly)
+                
+#                 if self.progress:
+#                     sys.stdout.write("\r")
+#                     print "Found poly: 0b{0:b} 0x{0:X}".format(poly)
+
 #                 if reverseMode:
 #                     revPoly = reverseBits(poly, self.crcSize)
 #                     retList.append( (revPoly, reverseMode))

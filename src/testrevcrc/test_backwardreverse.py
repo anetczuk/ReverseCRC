@@ -49,19 +49,14 @@ class RevHwCRCTest(unittest.TestCase):
         # Called after the last testfunction was executed
         pass
  
-    def test_bruteForce_4_fail(self):
+    def test_bruteForcePoly_4_fail(self):
         finder = RevHwCRC()
-        poly = finder.bruteForce(0b11000010, 0x06, crcSize = 4)
+        poly = finder.bruteForcePoly(0b11000010, 0x06, crcSize = 4)
         self.assertEqual( poly, [] )
         
-    def test_bruteForce_8(self):
+    def test_bruteForcePoly_8(self):
         finder = RevHwCRC()
-        poly = finder.bruteForce(0b11000010, 0x0F, crcSize = 8)
-        self.assertTrue( (0b100011101, False) in poly )
-        
-    def test_bruteForcePair(self):
-        finder = RevHwCRC()
-        poly = finder.bruteForcePair(["C2","0F"])
+        poly = finder.bruteForcePoly(0b11000010, 0x0F, crcSize = 8)
         self.assertTrue( (0b100011101, False) in poly )
         
     def test_findXOR_8_1bit(self):

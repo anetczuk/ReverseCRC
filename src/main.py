@@ -30,10 +30,9 @@ import argparse
 import logging
 import cProfile
 
-from revcrc.input import InputData
+from revcrc.input import DataParser
 import itertools
 from revcrc.backwardreverse import RevHwCRC
-from revcrc.reverse import MessageCRC
 
 
 
@@ -141,7 +140,7 @@ try:
         profiler = cProfile.Profile()
         profiler.enable()
     
-    dataParser = InputData()
+    dataParser = DataParser()
     data = dataParser.parseFile(args.file)
 
 #     dataSet = set(data)
@@ -187,17 +186,12 @@ try:
             subMessage = RevHwCRC.findSubstring(dataNum, crcNum, polyUnderTest)
             if subMessage != -1:
                 print "Found substring: 0x{:X}".format(subMessage)
-    elif args.mode == "BF":
-        chain = BruteForceChain()
-        for i in range(0, len(data)):
-            inputPair = data[i]
-            print "Finding poly for data: {} {}".format(inputPair[0], inputPair[1])
-            dataNum = int(inputPair[0], 16)
-            dataSize = len(inputPair[0]) * 4
-            crcNum = int(inputPair[1], 16)
-            crcSize = len(inputPair[1]) * 4
-            dataCrc = MessageCRC(dataNum, dataSize, crcNum, crcSize)
-            chain.calculate(dataCrc)
+#     elif args.mode == "BF":
+#         finder = RevHwCRC(True)
+# #         finder = RevDivisionCRC(True)
+# #         finder = RevModCRC(True)
+# #         finder = RevCRCCommon(True)
+#         foundCRC = finder.bruteForceList(data, 48)
     elif args.mode == "COMMON":
         finder = RevHwCRC(True)
 #         finder = RevDivisionCRC(True)

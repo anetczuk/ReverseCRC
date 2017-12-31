@@ -29,6 +29,34 @@ import re
 
 
 class InputData:
+    def __init__(self, stringList):
+        self.stringData = stringList          ## list of pairs
+        self.numbersList = []
+        self.dataSize = 0
+        self.crcSize = 0
+    
+    def empty(self):
+        return len(self.stringData) < 1
+    
+    def ready(self):
+        return ((self.dataSize>0) and (self.crcSize>0))
+        
+    def convert(self):
+        self.numbersList = []
+        self.dataSize = 0
+        self.crcSize = 0
+        for i in range(0, len(self.stringData)):
+            dataPair = self.stringData[i]
+            dataString = dataPair[0]
+            crcString = dataPair[1]
+            self.dataSize = max( self.dataSize, len(dataString)*4 )
+            self.crcSize = max( self.crcSize, len(crcString)*4 )
+            data = int(dataString, 16)
+            crc = int(crcString, 16)
+            self.numbersList.append((data, crc))
+    
+    
+class DataParser:
     def __init__(self):
         self.data = []          ## list of pairs
     

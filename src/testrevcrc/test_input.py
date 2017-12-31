@@ -26,14 +26,14 @@ import unittest
 import os
 # import logging
 
-from revcrc.input import InputData
+from revcrc.input import DataParser
  
  
 __scriptdir__ = os.path.dirname(os.path.realpath(__file__))
 # logging.basicConfig(level=logging.INFO)
 
  
-class InputDataTest(unittest.TestCase):
+class DataParserTest(unittest.TestCase):
     def setUp(self):
         # Called before the first testfunction is executed
         pass
@@ -43,37 +43,38 @@ class InputDataTest(unittest.TestCase):
         pass
 
     def test_parse_regular(self):
-        parser = InputData()
+        parser = DataParser()
         msg = "E21EAB43EA0B478F52AF6E034D310D819DBC3F A2B0A"
         parser.parse(msg)
         self.assertEqual( len(parser.data), 1 )
         self.assertEqual( parser.data[0], ("E21EAB43EA0B478F52AF6E034D310D819DBC3F", "A2B0A") )
         
     def test_parse_trim(self):
-        parser = InputData()
+        parser = DataParser()
         msg = "  E21EAB43EA0B478F52AF6E034D310D819DBC3F A2B0A  "
         parser.parse(msg)
         self.assertEqual( len(parser.data), 1 )
         self.assertEqual( parser.data[0], ("E21EAB43EA0B478F52AF6E034D310D819DBC3F", "A2B0A") )
         
     def test_parse_full_comment(self):
-        parser = InputData()
+        parser = DataParser()
         msg = "  #  E21EAB43EA0B478F52AF6E034D310D819DBC3F A2B0A  "
         parser.parse(msg)
         self.assertEqual( len(parser.data), 0 )
         
     def test_parse_full_comment2(self):
-        parser = InputData()
+        parser = DataParser()
         msg = "  //  E21EAB43EA0B478F52AF6E034D310D819DBC3F A2B0A  "
         parser.parse(msg)
         self.assertEqual( len(parser.data), 0 )
         
     def test_parse_end_comment(self):
-        parser = InputData()
+        parser = DataParser()
         msg = "   E21EAB43EA0B478F52AF6E034D310D819DBC3F A2B0A  #xxx "
         parser.parse(msg)
         self.assertEqual( len(parser.data), 1 )
         self.assertEqual( parser.data[0], ("E21EAB43EA0B478F52AF6E034D310D819DBC3F", "A2B0A") )
+
 
 if __name__ == "__main__":
     unittest.main()

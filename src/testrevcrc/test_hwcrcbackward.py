@@ -56,8 +56,8 @@ class HwCRCBackwardTest(unittest.TestCase):
         regInit = 0x0
         xorOut = 0x0
          
-        cb = HwCRCBackward( data, crc, inputPoly, xorOut )
-        retList = cb.calculate()
+        cb = HwCRCBackward( data, crc )
+        retList = cb.calculate(inputPoly, xorOut)
         self.assertIn( HwCRCBackwardState(inputPoly, regInit), retList )
    
     def test_calculate_2(self):
@@ -73,8 +73,8 @@ class HwCRCBackwardTest(unittest.TestCase):
         crcProc.setXorOutValue(xorOut)
         crc = crcProc.calculate3(data, inputPoly)
           
-        cb = HwCRCBackward( data, crc, inputPoly, xorOut )
-        retList = cb.calculate()
+        cb = HwCRCBackward( data, crc )
+        retList = cb.calculate(inputPoly, xorOut)
         self.assertIn( HwCRCBackwardState(inputPoly, regInit), retList )
         
     def test_calculate_2rev(self):
@@ -92,9 +92,9 @@ class HwCRCBackwardTest(unittest.TestCase):
         crcProc.setXorOutValue(xorOut)
         crc = crcProc.calculate3(data, inputPoly)
           
-        cb = HwCRCBackward( data, crc, inputPoly, xorOut )
+        cb = HwCRCBackward( data, crc )
         cb.setReversed(reverse)
-        retList = cb.calculate()
+        retList = cb.calculate(inputPoly, xorOut)
         self.assertIn( HwCRCBackwardState(inputPoly, regInit), retList )
          
     def test_calculate_3(self):
@@ -110,8 +110,8 @@ class HwCRCBackwardTest(unittest.TestCase):
         crcProc.setXorOutValue(xorOut)
         crc = crcProc.calculate3(data, inputPoly)
           
-        cb = HwCRCBackward( data, crc, inputPoly, xorOut )
-        retList = cb.calculate()
+        cb = HwCRCBackward( data, crc )
+        retList = cb.calculate(inputPoly, xorOut)
         self.assertIn( HwCRCBackwardState(inputPoly, regInit), retList )
         
     def test_calculate_4rev(self):
@@ -129,9 +129,9 @@ class HwCRCBackwardTest(unittest.TestCase):
         crcProc.setXorOutValue(xorOut)
         crc = crcProc.calculate3(data, inputPoly)
           
-        cb = HwCRCBackward( data, crc, inputPoly, xorOut )
+        cb = HwCRCBackward( data, crc )
         cb.setReversed(reverse)
-        retList = cb.calculate()
+        retList = cb.calculate(inputPoly, xorOut)
         self.assertIn( HwCRCBackwardState(inputPoly, regInit), retList )
          
     def test_round_c8d8_init_random(self):
@@ -150,9 +150,9 @@ class HwCRCBackwardTest(unittest.TestCase):
         crcFun.setXorOutValue(xorOut)
         crc = crcFun.calculate3(data, inputPoly)
           
-        cb = HwCRCBackward( data, crc, inputPoly, xorOut )
+        cb = HwCRCBackward( data, crc)
         cb.setReversed(reverse)
-        retList = cb.calculate()
+        retList = cb.calculate(inputPoly, xorOut)
         self.assertIn( HwCRCBackwardState(inputPoly, regInit), retList )
         
     def test_round_xor_random(self):
@@ -173,9 +173,9 @@ class HwCRCBackwardTest(unittest.TestCase):
         crcFun.setXorOutValue(xorOut)
         crc = crcFun.calculate3(data, inputPoly)
           
-        cb = HwCRCBackward( data, crc, inputPoly, xorOut )
+        cb = HwCRCBackward( data, crc )
         cb.setReversed(reverse)
-        retList = cb.calculate()
+        retList = cb.calculate(inputPoly, xorOut)
         self.assertIn( HwCRCBackwardState(inputPoly, regInit), retList)
 
     def test_round_init_random(self):
@@ -196,9 +196,9 @@ class HwCRCBackwardTest(unittest.TestCase):
         crcFun.setXorOutValue(xorOut)
         crc = crcFun.calculate3(data, inputPoly)
           
-        cb = HwCRCBackward( data, crc, inputPoly, xorOut )
+        cb = HwCRCBackward( data, crc )
         cb.setReversed(reverse)
-        retList = cb.calculate()
+        retList = cb.calculate(inputPoly, xorOut)
         self.assertIn( HwCRCBackwardState(inputPoly, regInit), retList )
         
     def test_round_DCRC_init_random(self):
@@ -219,9 +219,9 @@ class HwCRCBackwardTest(unittest.TestCase):
         crcFun.setXorOutValue(xorOut)
         crc = crcFun.calculate3(data, inputPoly)
           
-        cb = HwCRCBackward( data, crc, inputPoly, xorOut )
+        cb = HwCRCBackward( data, crc )
         cb.setReversed(reverse)
-        retList = cb.calculate()
+        retList = cb.calculate(inputPoly, xorOut)
         self.assertIn( HwCRCBackwardState(inputPoly, regInit), retList)
 
  

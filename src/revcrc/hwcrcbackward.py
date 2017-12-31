@@ -30,10 +30,13 @@ import math
 class HwCRCBackwardState:
 
     def __init__(self, polyMask, reg = 0x0):
-        self.polyMask = copy.deepcopy(polyMask)
+        self.polyMask = polyMask
         self.crcMSB = self.polyMask.masterBit >> 1
         self.register = reg
         self.valid = True
+
+    def copy(self):
+        return copy.copy(self)
 
     def isValid(self):
         return self.valid
@@ -91,16 +94,18 @@ class HwCRCBackwardState:
  
  
 class HwCRCBackward:
-    def __init__(self, dataMask, crc, polyMask, xorOut = 0):
-        self.dataMask = copy.deepcopy(dataMask)
+    def __init__(self, dataMask, crc):
+        self.dataMask = dataMask
+        self.crc = crc
         self.reversedMode = False
-        self.collector = []
-        self.collector.append( HwCRCBackwardState( polyMask, crc^xorOut) )
  
     def setReversed(self, value = True):
         self.reversedMode = value
  
-    def calculate(self):
+    def calculate(self, polyMask, xorOut = 0):
+        collector = []
+        collector.append( HwCRCBackwardState( polyMask, self.crc^xorOut) )
+        
         dataNum = self.dataMask.dataNum
         dataBit = 1
         if self.reversedMode:
@@ -109,10 +114,9 @@ class HwCRCBackward:
         for _ in range(0, self.dataMask.dataSize):
             currBit = dataNum & dataBit
             receiver = []
-            for c in self.collector:
-                ##c1 = copy.deepcopy(c)
+            for c in collector:
                 c1 = c
-                c2 = copy.deepcopy(c)
+                c2 = c.copy()
                 
                 c1.shiftBit(False, currBit, self.reversedMode)
                 if c1.isValid():
@@ -125,10 +129,10 @@ class HwCRCBackward:
             else:
                 dataBit >>= 1
     #             print "collection:", receiver
-            self.collector = receiver
-#             print "collector:", self.collector
+            collector = receiver
+#             print "collector:", collector
             if len(receiver) < 1:
                 return []
             
-        return self.collector
+        return collector
 

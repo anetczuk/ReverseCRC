@@ -28,7 +28,7 @@ from crc.divisioncrc import DivisionCRC
 from crc.modcrc import ModCRC, CRCModCacheMap
 from revcrc.hwcrcbackward import HwCRCBackward
 from revcrc.divisioncrcbackward import DivisionCRCBackward
-from revcrc.reverse import Reverse, MessageCRC
+from revcrc.reverse import Reverse
 from crc.numbermask import NumberMask, intToASCII
 import itertools
 import sys
@@ -94,16 +94,16 @@ class BackwardReverse(Reverse):
             polyAdded = False
             for ds in range(searchStart, dataSize+1):
                 d1 = NumberMask(data1, ds)
-                cb1 = self.createBackwardCRCProcessor(d1, crc1, polyMask)
+                cb1 = self.createBackwardCRCProcessor(d1, crc1)
                 cb1.setReversed(reversedMode)
-                backList1 = cb1.calculate()
+                backList1 = cb1.calculate(polyMask)
                 if len(backList1) < 1:
                     continue
                 
                 d2 = NumberMask(data2, ds)
-                cb2 = self.createBackwardCRCProcessor(d2, crc2, polyMask)
+                cb2 = self.createBackwardCRCProcessor(d2, crc2)
                 cb2.setReversed(reversedMode)
-                backList2 = cb2.calculate()
+                backList2 = cb2.calculate(polyMask)
                 if len(backList2) < 1:
                     continue
 # 
@@ -148,30 +148,6 @@ class BackwardReverse(Reverse):
             tmpList2.add( item.register )
             
         return tmpList1.intersection(tmpList2)
-    
-    def findXOR(self, data1, crc1, data2, crc2, dataSize = -1, crcSize = -1):
-        if dataSize < 0:
-            dataSize = max(data1.bit_length(), data2.bit_length())
-        if crcSize < 0:
-            crcSize = max(crc1.bit_length(), crc2.bit_length())
-        return self.findPolyXOR(data1, crc1, data2, crc2, dataSize, crcSize)
-    
-    def findPolyXOR(self, data1, crc1, data2, crc2, dataSize, crcSize):
-        inputData = data1 ^ data2
-        inputCRC = crc1 ^ crc2
-        
-#         if self.progress:
-#             messageFormat = "xor-ed input: {:b} {:0" + str(crcSize) + "b}"
-#             print messageFormat.format(inputData, inputCRC)
-
-#         messageFormat = "xor-ed input: {:X} {:0" + str(self.crcSize) + "b}"
-#         print messageFormat.format(inputData, inputCRC)
-        
-        dataCrc = MessageCRC(inputData, dataSize, inputCRC, crcSize)
-        retList = []
-        retList += self.bruteForceMode(dataCrc, False)
-        retList += self.bruteForceMode(dataCrc, True)
-        return retList
       
     def calculateNumberCRC(self, polyMask, reverse, initReg, xorOut, dataMask):
         crcProc = self.createCRCProcessor()
@@ -183,7 +159,7 @@ class BackwardReverse(Reverse):
     def createCRCProcessor(self):
         raise NotImplementedError
     
-    def createBackwardCRCProcessor(self, dataMask, crc, polyMask):
+    def createBackwardCRCProcessor(self, dataMask, crc):
         raise NotImplementedError
     
     
@@ -197,8 +173,8 @@ class RevHwCRC(BackwardReverse):
     def createCRCProcessor(self):
         return HwCRC()
         
-    def createBackwardCRCProcessor(self, dataMask, crc, polyMask):        
-        return HwCRCBackward( dataMask, crc, polyMask )
+    def createBackwardCRCProcessor(self, dataMask, crc):        
+        return HwCRCBackward( dataMask, crc )
     
     
 class RevDivisionCRC(BackwardReverse):
@@ -208,13 +184,13 @@ class RevDivisionCRC(BackwardReverse):
     def createCRCProcessor(self):
         return DivisionCRC()
         
-    def createBackwardCRCProcessor(self, dataMask, crc, polyMask):     
-        return DivisionCRCBackward( dataMask, crc, polyMask )
+    def createBackwardCRCProcessor(self, dataMask, crc):     
+        return DivisionCRCBackward( dataMask, crc )
     
     
-class RevModCRC(BackwardReverse):
+class RevModCRC(Reverse):
     def __init__(self, printProgress = None):
-        BackwardReverse.__init__(self, printProgress)
+        Reverse.__init__(self, printProgress)
 
 
     def findSolution(self, dataList, dataSize, crcSize, searchRange = 0):

@@ -75,6 +75,30 @@ class Reverse(object):
             
         self.findSolution(numbersList, dataSize, crcSize, searchRange)
 
+    def findXOR(self, data1, crc1, data2, crc2, dataSize = -1, crcSize = -1):
+        if dataSize < 0:
+            dataSize = max(data1.bit_length(), data2.bit_length())
+        if crcSize < 0:
+            crcSize = max(crc1.bit_length(), crc2.bit_length())
+        return self.findPolyXOR(data1, crc1, data2, crc2, dataSize, crcSize)
+    
+    def findPolyXOR(self, data1, crc1, data2, crc2, dataSize, crcSize):
+        inputData = data1 ^ data2
+        inputCRC = crc1 ^ crc2
+        
+#         if self.progress:
+#             messageFormat = "xor-ed input: {:b} {:0" + str(crcSize) + "b}"
+#             print messageFormat.format(inputData, inputCRC)
+
+#         messageFormat = "xor-ed input: {:X} {:0" + str(self.crcSize) + "b}"
+#         print messageFormat.format(inputData, inputCRC)
+        
+        dataCrc = MessageCRC(inputData, dataSize, inputCRC, crcSize)
+        retList = []
+        retList += self.bruteForceMode(dataCrc, False)
+        retList += self.bruteForceMode(dataCrc, True)
+        return retList
+
     def bruteForcePair(self, inputPair):
         dataString = inputPair[0]
         crcString = inputPair[1]
@@ -108,7 +132,7 @@ class Reverse(object):
 #             dataMask.reverseBytes()
         poly = (0x1 << dataCrc.crcSize)
         polyMax = (poly << 1) 
-        polyNum = NumberMask(0x0, dataCrc.crcSize)
+        polyMask = NumberMask(0x0, dataCrc.crcSize)
         retList = []
         while poly < polyMax:
 #             if self.progress and (poly % 16384) == 16383:
@@ -116,8 +140,9 @@ class Reverse(object):
                 sys.stdout.write("\r{:b}".format(poly))
                 sys.stdout.flush()
 
-            polyNum.setNumber(poly)
-            polyCRC = crcProc.calculate3(dataMask, polyNum)
+            polyMask.setNumber(poly)
+#             print "calcxxx:", dataMask
+            polyCRC = crcProc.calculate3(dataMask, polyMask)
             if polyCRC == crc:
                 ##print "Detected poly: {:b}".format(retPoly)
                 

@@ -23,7 +23,6 @@
 
 
 import copy
-import math
 from crc.numbermask import NumberMask
 
 
@@ -80,9 +79,10 @@ class DivisionCRCBackwardState:
         self.dataMask.popMSZeros(num)
         
     def __repr__(self):
-        regSize4 = int(math.ceil( float(self.crcSize)/4 ))
-        messageFormat = "<DCRCBState dm:{} pm{} r:0x{:0" + str(regSize4) + "X}>"
-        return messageFormat.format(self.dataMask, self.polyMask, self.register)
+        return "<DCRCBState dm:{} pm{} r:0x{:X}>".format( self.dataMask, self.polyMask, self.register )
+#         regSize4 = int(math.ceil( float(self.crcSize)/4 ))
+#         messageFormat = "<DCRCBState dm:{} pm{} r:0x{:0" + str(regSize4) + "X}>"
+#         return messageFormat.format(self.dataMask, self.polyMask, self.register)
     
     def __eq__(self, other):
         if self.dataMask != other.dataMask:
@@ -104,53 +104,57 @@ class DivisionCRCBackwardState:
 ## Finds registry init value
 ##
 class DivisionCRCBackward:
-    def __init__(self, dataMask, crc, polyMask, xorOut = 0):
+    def __init__(self, dataMask, crc):
         self.dataMask = copy.deepcopy(dataMask)
-        self.crcSize = polyMask.dataSize
+        self.crc = crc
         self.reversedMode = False
-        self.collector = []
-        self.collector.append( DivisionCRCBackwardState( polyMask, crc^xorOut) )
 
     def setReversed(self, value = True):
         self.reversedMode = value
 
-    def calculate(self):
+    def calculate(self, polyMask, xorOut = 0):
+        crcSize = polyMask.dataSize
+        collector = []
+        collector.append( DivisionCRCBackwardState( polyMask, self.crc^xorOut) )
+        
         ### shift crc zeros        
-        self._roundZeros()
+        collector = self._roundZeros(collector, crcSize)
             
-        initShift = min(self.crcSize, self.dataMask.dataSize)
+        initShift = min(crcSize, self.dataMask.dataSize)
         
         ## divide
-        divideShifts = self.dataMask.dataSize - self.crcSize
-        self._round(divideShifts)
+        divideShifts = self.dataMask.dataSize - crcSize
+        collector = self._round(collector, divideShifts)
         
-        if len(self.collector) < 1:
+        if len(collector) < 1:
             return []
         
         ## init shift register
-        self._initShift(initShift)
+        self._initShift(collector, initShift)
             
-        return self.collector
+        return collector
     
-    def _roundZeros(self):
+    def _roundZeros(self, collector, crcSize):
+        retList = []
         if self.reversedMode == False:
-            self.dataMask.pushLSZeros(self.crcSize)
-            self._round(self.crcSize)
-            self.dataMask.popLSZeros(self.crcSize)
-            for c in self.collector:
-                c.popLSZeros(self.crcSize)
+            self.dataMask.pushLSZeros(crcSize)
+            retList = self._round(collector, crcSize)
+            self.dataMask.popLSZeros(crcSize)
+            for c in retList:
+                c.popLSZeros(crcSize)
         else:
-            self.dataMask.pushMSZeros(self.crcSize)
-            self._round(self.crcSize)
-            self.dataMask.popMSZeros(self.crcSize)
-            for c in self.collector:
-                c.popMSZeros(self.crcSize)            
-#         print "collector:", self.collector
+            self.dataMask.pushMSZeros(crcSize)
+            retList = self._round(collector, crcSize)
+            self.dataMask.popMSZeros(crcSize)
+            for c in retList:
+                c.popMSZeros(crcSize)
+#         print "collector:", retList
+        return retList
         
-    def _round(self, num=1):
+    def _round(self, collector, num=1):
         for _ in range(0, num):
             receiver = []
-            for c in self.collector:
+            for c in collector:
                 ##c1 = copy.deepcopy(c)
                 c1 = c
                 c2 = copy.deepcopy(c)
@@ -162,23 +166,24 @@ class DivisionCRCBackward:
                 if self.isProper(c2):
                     receiver.append(c2)
     #             print "collection:", receiver
-            self.collector = receiver
-#             print "collector:", self.collector
+            collector = receiver
+#             print "collector:", collector
             if len(receiver) < 1:
-                return
+                return []
+        return collector
             
-    def _initShift(self, shiftLength):
+    def _initShift(self, collector, shiftLength):
 #         initBits = self.dataMask.getMSB(shiftLength)
-#         for c in self.collector:
+#         for c in collector:
 #             c.initXor(initBits, shiftLength)
             
         if self.reversedMode == False:
             initBits = self.dataMask.getMSB(shiftLength)
-            for c in self.collector:
+            for c in collector:
                 c.initXorMSB(initBits, shiftLength)
         else:
             initBits = self.dataMask.getLSB(shiftLength)
-            for c in self.collector:
+            for c in collector:
                 c.initXorLSB(initBits, shiftLength)
 
     

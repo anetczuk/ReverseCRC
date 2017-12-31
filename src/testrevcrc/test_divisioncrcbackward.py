@@ -122,8 +122,8 @@ class DivisionCRCBackwardTest(unittest.TestCase):
         regInit = 0x0
         xorOut = 0
         
-        cb = DivisionCRCBackward( data, crc, inputPoly, xorOut )
-        retList = cb.calculate()
+        cb = DivisionCRCBackward( data, crc )
+        retList = cb.calculate(inputPoly, xorOut)
         self.assertIn(DivisionCRCBackwardState(inputPoly, regInit, data), retList)
         
     def test_round_cd8_2(self):
@@ -139,8 +139,8 @@ class DivisionCRCBackwardTest(unittest.TestCase):
         crcProc.setXorOutValue(xorOut)
         crc = crcProc.calculate3(data, inputPoly)
          
-        cb = DivisionCRCBackward( data, crc, inputPoly, xorOut )
-        retList = cb.calculate()
+        cb = DivisionCRCBackward( data, crc )
+        retList = cb.calculate(inputPoly, xorOut)
         self.assertIn(DivisionCRCBackwardState(inputPoly, 0x0, data), retList)
         
     def test_round_cd8_3(self):
@@ -156,8 +156,8 @@ class DivisionCRCBackwardTest(unittest.TestCase):
         crcProc.setXorOutValue(xorOut)
         crc = crcProc.calculate3(data, inputPoly)
          
-        cb = DivisionCRCBackward( data, crc, inputPoly, xorOut )
-        retList = cb.calculate()
+        cb = DivisionCRCBackward( data, crc )
+        retList = cb.calculate(inputPoly, xorOut)
         self.assertIn(DivisionCRCBackwardState(inputPoly, 0x0, data), retList)
         
     def test_round_cd8_3rev(self):
@@ -175,9 +175,9 @@ class DivisionCRCBackwardTest(unittest.TestCase):
         crcProc.setXorOutValue(xorOut)
         crc = crcProc.calculate3(data, inputPoly)
          
-        cb = DivisionCRCBackward( data, crc, inputPoly, xorOut )
+        cb = DivisionCRCBackward( data, crc )
         cb.setReversed(reverse)
-        retList = cb.calculate()
+        retList = cb.calculate(inputPoly, xorOut)
         self.assertIn(DivisionCRCBackwardState(inputPoly, 0x0, data), retList)
 
     def test_round_c8d9_rev(self):
@@ -195,9 +195,9 @@ class DivisionCRCBackwardTest(unittest.TestCase):
         crcProc.setXorOutValue(xorOut)
         crc = crcProc.calculate3(data, inputPoly)
          
-        cb = DivisionCRCBackward( data, crc, inputPoly, xorOut )
+        cb = DivisionCRCBackward( data, crc )
         cb.setReversed(reverse)
-        retList = cb.calculate()
+        retList = cb.calculate(inputPoly, xorOut)
         self.assertIn(DivisionCRCBackwardState(inputPoly, 0x0, data), retList)
         
     def test_round_c8d16(self):
@@ -213,8 +213,8 @@ class DivisionCRCBackwardTest(unittest.TestCase):
         crcProc.setXorOutValue(xorOut)
         crc = crcProc.calculate3(data, inputPoly)
          
-        cb = DivisionCRCBackward( data, crc, inputPoly, xorOut )
-        retList = cb.calculate()
+        cb = DivisionCRCBackward( data, crc )
+        retList = cb.calculate(inputPoly, xorOut)
         self.assertIn(DivisionCRCBackwardState(inputPoly, 0x0, data), retList)
         
     def test_round_c8d16_rev(self):
@@ -232,9 +232,9 @@ class DivisionCRCBackwardTest(unittest.TestCase):
         crcProc.setXorOutValue(xorOut)
         crc = crcProc.calculate3(data, inputPoly)
          
-        cb = DivisionCRCBackward( data, crc, inputPoly, xorOut )
+        cb = DivisionCRCBackward( data, crc )
         cb.setReversed(reverse)
-        retList = cb.calculate()
+        retList = cb.calculate(inputPoly, xorOut)
         self.assertIn(DivisionCRCBackwardState(inputPoly, 0x0, data), retList)
         
     def test_round_c8d8_init_random(self):
@@ -253,9 +253,9 @@ class DivisionCRCBackwardTest(unittest.TestCase):
         crcFun.setXorOutValue(xorOut)
         crc = crcFun.calculate3(data, inputPoly)
           
-        cb = DivisionCRCBackward( data, crc, inputPoly, xorOut )
+        cb = DivisionCRCBackward( data, crc )
         cb.setReversed(reverse)
-        retList = cb.calculate()
+        retList = cb.calculate(inputPoly, xorOut)
         self.assertIn(DivisionCRCBackwardState(inputPoly, regInit, data), retList)
         
     def test_round_xor_random(self):
@@ -276,9 +276,9 @@ class DivisionCRCBackwardTest(unittest.TestCase):
         crcFun.setXorOutValue(xorOut)
         crc = crcFun.calculate3(data, inputPoly)
           
-        cb = DivisionCRCBackward( data, crc, inputPoly, xorOut )
+        cb = DivisionCRCBackward( data, crc )
         cb.setReversed(reverse)
-        retList = cb.calculate()
+        retList = cb.calculate(inputPoly, xorOut)
         self.assertIn(DivisionCRCBackwardState(inputPoly, regInit, data), retList)
 
     def test_round_init_random(self):
@@ -299,9 +299,9 @@ class DivisionCRCBackwardTest(unittest.TestCase):
         crcFun.setXorOutValue(xorOut)
         crc = crcFun.calculate3(data, inputPoly)
           
-        cb = DivisionCRCBackward( data, crc, inputPoly, xorOut )
+        cb = DivisionCRCBackward( data, crc )
         cb.setReversed(reverse)
-        retList = cb.calculate()
+        retList = cb.calculate(inputPoly, xorOut)
         self.assertIn(DivisionCRCBackwardState(inputPoly, regInit, data), retList)
         
     def test_round_DCRC_init_random(self):
@@ -322,9 +322,9 @@ class DivisionCRCBackwardTest(unittest.TestCase):
         crcFun.setXorOutValue(xorOut)
         crc = crcFun.calculate3(data, inputPoly)
           
-        cb = DivisionCRCBackward( data, crc, inputPoly, xorOut )
+        cb = DivisionCRCBackward( data, crc )
         cb.setReversed(reverse)
-        retList = cb.calculate()
+        retList = cb.calculate(inputPoly, xorOut)
         self.assertIn(DivisionCRCBackwardState(inputPoly, regInit, data), retList)
 
 

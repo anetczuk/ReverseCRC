@@ -58,6 +58,8 @@ def reverseBits(num, sizeBits = -1):
         ret |= (val & 1)
         val >>= 1
     return ret
+#     b = '{:0{width}b}'.format(num, width=sizeBits)
+#     return int(b[::-1], 2)
 
 def reverseBytes(num, sizeBytes = -1):
     if sizeBytes < 0:
@@ -165,7 +167,6 @@ class NumberMask:
         self.setNumber(data)
     
     def setNumber(self, newValue):
-#         self.data = newValue
         self.dataNum = (newValue & (self.dataMask))
     
     def calculateCache(self):

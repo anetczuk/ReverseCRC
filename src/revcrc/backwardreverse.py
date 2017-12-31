@@ -72,16 +72,11 @@ class BackwardReverse(Reverse):
             
         return retList
       
-    def findCRCKeyBackward(self, data1, crc1, data2, crc2, dataSize=-1, crcSize=-1, searchRange=0):
-        if dataSize < 0:
-            dataSize = max( data1.bit_length(), data2.bit_length() )
-        if crcSize < 0:
-            crcSize = max( crc1.bit_length(), crc2.bit_length() )
-            
+    def findCRCKeyBackward(self, data1, crc1, data2, crc2, dataSize, crcSize, searchRange=0):
         if self.progress:
             print "Checking {:X} {:X} xor {:X} {:X}, {} {}".format(data1, crc1, data2, crc2, dataSize, crcSize)
             
-        polyList = self.findXOR(data1, crc1, data2, crc2, dataSize, crcSize)
+        polyList = self.findPolyXOR(data1, crc1, data2, crc2, dataSize, crcSize)
         
         if self.progress:
             sys.stdout.write("\r")
@@ -155,11 +150,15 @@ class BackwardReverse(Reverse):
         return tmpList1.intersection(tmpList2)
     
     def findXOR(self, data1, crc1, data2, crc2, dataSize = -1, crcSize = -1):
-        inputData = data1 ^ data2
-        inputCRC = crc1 ^ crc2
-
+        if dataSize < 0:
+            dataSize = max(data1.bit_length(), data2.bit_length())
         if crcSize < 0:
             crcSize = max(crc1.bit_length(), crc2.bit_length())
+        return self.findPolyXOR(data1, crc1, data2, crc2, dataSize, crcSize)
+    
+    def findPolyXOR(self, data1, crc1, data2, crc2, dataSize, crcSize):
+        inputData = data1 ^ data2
+        inputCRC = crc1 ^ crc2
         
 #         if self.progress:
 #             messageFormat = "xor-ed input: {:b} {:0" + str(crcSize) + "b}"
@@ -168,11 +167,11 @@ class BackwardReverse(Reverse):
 #         messageFormat = "xor-ed input: {:X} {:0" + str(self.crcSize) + "b}"
 #         print messageFormat.format(inputData, inputCRC)
         
-        if dataSize < 0:
-            dataSize = max(data1.bit_length(), data2.bit_length())
-        
         dataCrc = MessageCRC(inputData, dataSize, inputCRC, crcSize)
-        return self.bruteForceData(dataCrc)
+        retList = []
+        retList += self.bruteForceMode(dataCrc, False)
+        retList += self.bruteForceMode(dataCrc, True)
+        return retList
       
     def calculateNumberCRC(self, polyMask, reverse, initReg, xorOut, dataMask):
         crcProc = self.createCRCProcessor()

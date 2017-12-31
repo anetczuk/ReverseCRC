@@ -99,7 +99,7 @@ class Reverse(object):
         retList += self.bruteForceMode(dataCrc, True)
         return retList
     
-    def bruteForceMode(self, dataCrc, reverseMode=False):
+    def bruteForceMode(self, dataCrc, reverseMode):
         crcProc = self.createCRCProcessor()
         crcProc.setReversed(reverseMode)
         crc = dataCrc.crcNum

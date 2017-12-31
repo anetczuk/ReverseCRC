@@ -43,53 +43,40 @@ class HwCRC(CRCProc):
  
         dataNum = dataMask.dataNum
         dataBit = (dataMask.masterBit >> 1)
+        polyMasterBit = polyMask.masterBit
 
         crcMSB = (polyMask.masterBit >> 1)
-        crcMask = polyMask.masterBit-1
+        poly = polyMask.dataNum | polyMasterBit
  
-        ##for _ in range(0, dataMask.dataSize):
-        while(dataBit > 0):
+        while(dataBit > 0):                             ## while is faster than 'for'
             if (dataNum & dataBit) > 0:
                 register ^= crcMSB
             dataBit >>= 1
             register <<= 1
-            if (register & polyMask.masterBit) > 0:
-                register ^= polyMask.dataNum
-                register &= crcMask
-                  
-        if self.xorOut != 0:
-            register ^= self.xorOut
-            
-        return register
+            if (register & polyMasterBit) > 0:
+                register ^= poly                        ## master bit will be xor-ed out to '0'
+
+        return register ^ self.xorOut
 
     ## 'poly' without leading '1'
     def calculateLSB(self, dataMask, polyMask):         
         register = self.registerInit
   
         dataNum = dataMask.dataNum
+        dataSize = dataMask.dataSize
+        polyNum = polyMask.dataNum
         dataBit = 1
   
-        for _ in range(0, dataMask.dataSize):
+        for _ in xrange(0, dataSize):          ## for is faster than while
             if (dataNum & dataBit) > 0:
                 register ^= 1
-            if (register & 1) > 0:
-                register >>= 1
-                register ^= polyMask.dataNum
-            else:
-                register >>= 1
+            lastBit = register & 1
+            register >>= 1
+            if lastBit > 0:
+                register ^= polyNum
             dataBit <<= 1
-  
-        if self.xorOut != 0:
-            register ^= self.xorOut
-          
-        return register
 
-
-    #TODO: remove method
-    @staticmethod
-    def reverseBits(num, size):
-        b = '{:0{width}b}'.format(num, width=size)
-        return int(b[::-1], 2)
+        return register ^ self.xorOut
 
     #TODO: remove method
     @staticmethod

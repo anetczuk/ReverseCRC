@@ -242,14 +242,15 @@ class NumberMask:
         return revData
     
     def getMSB(self, length):
-        retBits = 0
+        retVal = 0
+        retBit = 1 << (length-1)
         dataBit = (self.masterBit >> 1)
-        for _ in range(0, length):
-            retBits <<= 1
+        for _ in xrange(0, length):
             if (self.dataNum & dataBit) > 0:
-                retBits |= 1
+                retVal |= retBit
+            retBit >>= 1
             dataBit >>= 1
-        return retBits
+        return retVal    
     
     def getLSB(self, length):
         bitsMask = (1 << length) -1 

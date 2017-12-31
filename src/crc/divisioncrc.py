@@ -41,50 +41,31 @@ class DivisionCRC(CRCProc):
         ## MSB first
         
         ## with leading '1' to xor out bit on shifting
-        genPoly = polyMask.dataNum | polyMask.masterBit
-        
+        polyMasterBit = polyMask.masterBit
+        genPoly = polyMask.dataNum | polyMasterBit
         dataNum = dataMask.dataNum
   
         ## init shift register
         initShift = min(polyMask.dataSize, dataMask.dataSize)
         register = dataMask.getMSB(initShift) ^ self.registerInit
         dataBit = (dataMask.masterBit >> (initShift+1))
-        ## old version
-#         register = 0
-#         dataBit = (dataMask.masterBit >> 1)
-#         initShift = min(self.crcSize, dataMask.dataSize)
-#         ### copy first 'initShift' from input
-#         for _ in range(0, initShift):
-#             register <<= 1
-#             if (dataNum & dataBit) > 0:
-#                 register |= 1
-#             dataBit >>= 1
-#         register ^= self.registerInit
-          
+
         ## divide
-        for _ in range(initShift, dataMask.dataSize):
+        for _ in xrange(initShift, dataMask.dataSize):
             register <<= 1
             if (dataNum & dataBit) > 0:
                 register |= 1
-            if (register & polyMask.masterBit) > 0:
+            if (register & polyMasterBit) > 0:
                 register ^= genPoly
             dataBit >>= 1
-              
-#         if register == 0:
-#             return register
-#         if self.xorOut != 0:
-#             register ^= self.xorOut
-            
+
         ### shift crc zeros
-        for _ in range(0, polyMask.dataSize):
+        for _ in xrange(0, polyMask.dataSize):
             register <<= 1
-            if (register & polyMask.masterBit) > 0:
+            if (register & polyMasterBit) > 0:
                 register ^= genPoly
-                 
-        if self.xorOut != 0:
-            register ^= self.xorOut
-            
-        return register
+        
+        return register ^ self.xorOut
     
     ## old implementation is very helpful when defining backward algorithm
     ## 'poly' without leading '1'
@@ -92,52 +73,31 @@ class DivisionCRC(CRCProc):
         ## LSB first
         
         dataNum = dataMask.dataNum
+        polyNum = polyMask.dataNum
+        polyMasterBit = polyMask.masterBit
  
         ## init shift register
         initShift = min(polyMask.dataSize, dataMask.dataSize)
         register = dataMask.getLSB(initShift) ^ self.registerInit
         dataBit = (1 << initShift)
-        ## old version
-#         register = 0
-#         dataBit = 1
-#         msbPoly = (self.masterBit >> 1)
-#         
-#         initShift = min(self.crcSize, dataMask.dataSize)
-#         for _ in range(0, initShift):
-#             register >>= 1
-#             if (dataNum & dataBit) > 0:
-#                 register |= msbPoly
-#             dataBit <<= 1
-# #         register ^= reverseBits(self.registerInit, self.crcSize)
-#         register ^= self.registerInit
-         
-        ## divide
-        for _ in range(initShift, dataMask.dataSize):
-            if (dataNum & dataBit) > 0:
-                register |= polyMask.masterBit
-            if (register & 1) > 0:
-                register >>= 1
-                register ^= polyMask.dataNum
-            else:
-                register >>= 1
-            dataBit <<= 1
 
-#         if register == 0:
-#             return register
-#         if self.xorOut != 0:
-#             register ^= self.xorOut
+        ## divide
+        for _ in xrange(initShift, dataMask.dataSize):
+            if (dataNum & dataBit) > 0:
+                register |= polyMasterBit
+            lastBit = register & 1
+            register >>= 1
+            if lastBit > 0:
+                register ^= polyNum
+            dataBit <<= 1
              
         ### shift crc zeros
-        for _ in range(0, polyMask.dataSize):
-            if (register & 1) > 0:
-                register >>= 1
-                register ^= polyMask.dataNum
-            else:
-                register >>= 1
-
-        if self.xorOut != 0:
-            register ^= self.xorOut
-            
-        return register
+        for _ in xrange(0, polyMask.dataSize):
+            lastBit = register & 1
+            register >>= 1
+            if lastBit > 0:
+                register ^= polyNum
+        
+        return register ^ self.xorOut
     
     

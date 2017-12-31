@@ -200,6 +200,31 @@ class NumberMaskTest(unittest.TestCase):
 #         print "ret list:", subList
         self.assertEqual(subList, set([ SubNumber(0x1, 1, 0), SubNumber(0x1, 2, 0), 
                                         SubNumber(0x1, 3, 0), SubNumber(0x9, 4, 0) ]) )
+        
+    def test_getMSB_zero(self):
+        data = NumberMask(0xA, 0)
+        msb = data.getMSB(2)
+        self.assertEqual(msb, 0)
+        
+    def test_getMSB_first(self):
+        data = NumberMask(0xF, 1)
+        msb = data.getMSB(1)
+        self.assertEqual(msb, 1)
+        
+    def test_getMSB_one(self):
+        data = NumberMask(0x8, 4)
+        msb = data.getMSB(1)
+        self.assertEqual(msb, 1)
+        
+    def test_getMSB(self):
+        data = NumberMask(0xA, 4)
+        msb = data.getMSB(2)
+        self.assertEqual(msb, 2)
+        
+    def test_getMSB_greater(self):
+        data = NumberMask(0xA, 4)
+        msb = data.getMSB(6)
+        self.assertEqual(msb, 0x28)
 
 
 

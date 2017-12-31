@@ -32,7 +32,7 @@ import cProfile
 
 from revcrc.input import InputData
 import itertools
-from revcrc.backwardreverse import RevHwCRC, RevDivisionCRC
+from revcrc.backwardreverse import RevHwCRC
 from revcrc.reverse import MessageCRC
 
 

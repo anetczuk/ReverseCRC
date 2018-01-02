@@ -30,6 +30,7 @@ import logging
 
 import crcmod
 import random
+from crc.numbermask import NumberMask
 
 
 
@@ -69,18 +70,25 @@ try:
     dataSize = int(args.datasize)
     poly = int(args.poly, 16)
     polySize = poly.bit_length()
+    initCrc = 0x0
     xor = int(args.xor, 16)
     rev = args.reversed
     
-    print "## pres:{} ds:{} poly:0x{:X} rev:{} xor:0x{:X}".format( preSize, dataSize, poly, rev, xor )
-    crc_func = crcmod.mkCrcFun(poly, rev=rev, initCrc=0x0, xorOut=xor)
-    messageFormat = "{} {:0" + str(polySize/4) + "X}"
+    print "## pres:{} ds:{} poly:0x{:X} rev:{} initcrx:0x{:X} xor:0x{:X}".format( preSize, dataSize, poly, rev, initCrc, xor )
+    crc_func = crcmod.mkCrcFun(poly, rev=rev, initCrc=initCrc, xorOut=xor)
+    
+    dataFullSize = preSize+dataSize
+    dataFormat = "{:0" + str(dataFullSize/4) + "X}"
+    polyFormat = "{:0" + str(polySize/4) + "X}"
+    messageFormat = dataFormat + " " + polyFormat
+    
     for _ in xrange(0, samples):
         preamble = randomHexString(preSize)
         data = randomHexString(dataSize)
-        message = preamble + data
-        polyCRC  = crc_func( message )
-        print messageFormat.format(message, polyCRC)
+        messageNum = int(preamble + data, 16)
+        messageMask = NumberMask( messageNum, dataFullSize*4 )
+        polyCRC  = crc_func( messageMask.toASCII() )
+        print messageFormat.format(messageMask.dataNum, polyCRC)
     
 finally:
     pass

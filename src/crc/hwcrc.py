@@ -56,7 +56,7 @@ class HwCRC(CRCProc):
             if (register & polyMasterBit) > 0:
                 register ^= poly                        ## master bit will be xor-ed out to '0'
 
-        return register ^ self.xorOut
+        return (register ^ self.xorOut) & polyMask.dataMask
 
     ## 'poly' without leading '1'
     def calculateLSB(self, dataMask, polyMask):         
@@ -76,7 +76,7 @@ class HwCRC(CRCProc):
                 register ^= polyNum
             dataBit <<= 1
 
-        return register ^ self.xorOut
+        return (register ^ self.xorOut) & polyMask.dataMask
 
     #TODO: remove method
     @staticmethod

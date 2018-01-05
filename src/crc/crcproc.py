@@ -34,7 +34,7 @@ class CRCKey:
         self.dataLen = dataLen
 
     def __repr__(self):
-        return "<CRCKey p:0x{:X} dP:{:} dL:{:} r:{:} i:0x{:X} x:0x{:X}>".format(self.poly, self.dataPos, self.dataLen, self.rev, self.init, self.xor)
+        return "<CRCKey p:0x{:X} r:{:} i:0x{:X} x:0x{:X} dP:{:} dL:{:}>".format(self.poly, self.rev, self.init, self.xor, self.dataPos, self.dataLen)
     
     def __eq__(self, other):
         if self.poly != other.poly:
@@ -89,6 +89,11 @@ class CRCProc(object):
     def setReversed(self, value = True):
         self.reversed = value  
 
+    def setValues(self, crcKey):
+        self.setReversed( crcKey.rev )
+        self.setXorOutValue( crcKey.xor )
+        self.setRegisterInitValue( crcKey.init )
+    
     ## 'poly' with leading '1'
     def calculate(self, data, poly):
         return self.calculate2(data, data.bit_length(), poly, poly.bit_length()-1)
@@ -98,6 +103,6 @@ class CRCProc(object):
         polyMask = NumberMask(poly, crcSize)
         return self.calculate3(dataMask, polyMask)
         
-    def calculate3(self):
+    def calculate3(self, dataMask, polyMask):
         raise NotImplementedError
     

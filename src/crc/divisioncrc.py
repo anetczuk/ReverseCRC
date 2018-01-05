@@ -65,7 +65,7 @@ class DivisionCRC(CRCProc):
             if (register & polyMasterBit) > 0:
                 register ^= genPoly
         
-        return register ^ self.xorOut
+        return (register ^ self.xorOut) & polyMask.dataMask
     
     ## old implementation is very helpful when defining backward algorithm
     ## 'poly' without leading '1'
@@ -98,6 +98,6 @@ class DivisionCRC(CRCProc):
             if lastBit > 0:
                 register ^= polyNum
         
-        return register ^ self.xorOut
+        return (register ^ self.xorOut) & polyMask.dataMask
     
     

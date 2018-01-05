@@ -68,8 +68,9 @@ class ModCRC(CRCProc):
     def calculate3(self, dataMask, polyMask):
         ## crcmod requires leading '1' bit
         poly = polyMask.dataNum | polyMask.masterBit
-        crc_func = crcmod.mkCrcFun(poly, rev=self.reversed, initCrc=self.registerInit, xorOut=self.xorOut)
-#         crcKey = CRCKey(poly, self.reversed, self.registerInit, self.xorOut)
+        currXor = self.xorOut & polyMask.dataMask
+        crc_func = crcmod.mkCrcFun(poly, rev=self.reversed, initCrc=self.registerInit, xorOut=currXor)
+#         crcKey = CRCKey(poly, self.reversed, self.registerInit, currXor)
 #         crc_func = CRCModCacheMap.instance.getFunction(crcKey)
         dataString = dataMask.toASCII()
         polyCRC  = crc_func( dataString )

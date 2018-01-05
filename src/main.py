@@ -186,12 +186,12 @@ try:
             subMessage = RevHwCRC.findSubstring(dataNum, crcNum, polyUnderTest)
             if subMessage != -1:
                 print "Found substring: 0x{:X}".format(subMessage)
-#     elif args.mode == "BF":
-#         finder = RevHwCRC(True)
-# #         finder = RevDivisionCRC(True)
-# #         finder = RevModCRC(True)
-# #         finder = RevCRCCommon(True)
-#         foundCRC = finder.bruteForceList(data, 48)
+    elif args.mode == "BF":
+        finder = RevHwCRC(True)
+#         finder = RevDivisionCRC(True)
+#         finder = RevModCRC(True)
+#         finder = RevCRCCommon(True)
+        foundCRC = finder.bruteForceList(data, 48)
     elif args.mode == "COMMON":
         finder = RevHwCRC(True)
 #         finder = RevDivisionCRC(True)

@@ -224,7 +224,7 @@ class HwCRCBackwardTest(unittest.TestCase):
         retList = cb.calculate(inputPoly, xorOut)
         self.assertIn( HwCRCBackwardState(inputPoly, regInit), retList)
 
- 
+        
  
 if __name__ == "__main__":
     unittest.main()

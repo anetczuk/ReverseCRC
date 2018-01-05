@@ -29,24 +29,23 @@ import re
 
 
 class InputData:
-    def __init__(self, stringList):
-        self.stringData = stringList          ## list of pairs
-        self.numbersList = []
-        self.dataSize = 0
-        self.crcSize = 0
+    def __init__(self, numbersList = [], dataSize = 0, crcSize = 0):
+        self.numbersList = numbersList
+        self.dataSize = dataSize
+        self.crcSize = crcSize
     
     def empty(self):
-        return len(self.stringData) < 1
+        return len(self.numbersList) < 1
     
     def ready(self):
         return ((self.dataSize>0) and (self.crcSize>0))
         
-    def convert(self):
+    def convert(self, stringList):
         self.numbersList = []
         self.dataSize = 0
         self.crcSize = 0
-        for i in range(0, len(self.stringData)):
-            dataPair = self.stringData[i]
+        for i in xrange(0, len(stringList)):
+            dataPair = stringList[i]
             dataString = dataPair[0]
             crcString = dataPair[1]
             self.dataSize = max( self.dataSize, len(dataString)*4 )

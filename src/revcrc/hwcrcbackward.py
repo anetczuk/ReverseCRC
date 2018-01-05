@@ -73,7 +73,7 @@ class HwCRCBackwardState:
         
     def __repr__(self):
         regSize4 = int(math.ceil( float(self.polyMask.dataSize)/4 ))
-        messageFormat = "<CRCBState pm:{} r:0x{:0" + str(regSize4) + "X} v:{}>"
+        messageFormat = "<HwCRCBState pm:{} r:0x{:0" + str(regSize4) + "X} v:{}>"
         return messageFormat.format(self.polyMask, self.register, self.valid)
     
     def __eq__(self, other):

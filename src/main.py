@@ -45,7 +45,7 @@ def brutePoly(inputPair):
         print "Found poly: {}".format(crcPoly)
 
         
-def findXOR(inputPair1, inputPair2):
+def doFindXOR(inputPair1, inputPair2):
     data1String = inputPair1[0]
     crc1String = inputPair1[1]
     crc1String = crc1String[:4]         ## substring
@@ -115,7 +115,7 @@ if __name__ != '__main__':
 
 
 parser = argparse.ArgumentParser(description='Finding CRC algorithm from data')
-parser.add_argument('--mode', action='store', required=True, choices=["FS", "XOR", "SS", "BF", "COMMON"], help='Mode' )
+parser.add_argument('--mode', action='store', required=True, choices=["FS", "XOR", "SS", "BF", "COMMON", "POLY"], help='Mode' )
 parser.add_argument('--file', action='store', required=True, help='File with data' )
 parser.add_argument('--profile', action='store_const', const=True, default=False, help='Profile the code' )
 parser.add_argument('--pfile', action='store', default=None, help='Profiler output file' )
@@ -162,13 +162,13 @@ try:
         for i in range(0, cLen):
             sys.stdout.write( str(i) + "/" + str(cLen) + " "  )
             combPair = comb[i]
-            findXOR(combPair[0], combPair[1])
+            doFindXOR(combPair[0], combPair[1])
         
 #         for i in range(0, len(data)-1):
-#             findXOR(data[i], data[i+1])
+#             doFindXOR(data[i], data[i+1])
             
 #         for i in range(0, len(data)-1, 2):
-#             findXOR(data[i], data[i+1])
+#             doFindXOR(data[i], data[i+1])
     elif args.mode == "KEY":
         for i in range(0, len(data)-1, 2):
             findKey(data[i], data[i+1])
@@ -192,6 +192,12 @@ try:
 #         finder = RevModCRC(True)
 #         finder = RevCRCCommon(True)
         foundCRC = finder.bruteForceList(data, 48)
+    elif args.mode == "POLY":
+        finder = RevHwCRC(True)
+#         finder = RevDivisionCRC(True)
+#         finder = RevModCRC(True)
+#         finder = RevCRCCommon(True)
+        foundCRC = finder.findPolysList(data, 48)
     elif args.mode == "COMMON":
         finder = RevHwCRC(True)
 #         finder = RevDivisionCRC(True)

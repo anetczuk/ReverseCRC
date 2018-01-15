@@ -23,7 +23,34 @@
 from crc.numbermask import reverseBits, NumberMask
 
 
+class PolyKey:
+    def __init__(self, poly=-1, rev=False, dataPos=-1, dataLen=-1):
+        self.poly = poly
+        self.rev = rev
+        self.dataPos = dataPos
+        self.dataLen = dataLen
 
+    def __repr__(self):
+        return "<PolyKey p:0x{:X} r:{:} dP:{:} dL:{:}>".format(self.poly, self.rev, self.dataPos, self.dataLen)
+    
+    def __eq__(self, other):
+        if self.poly != other.poly:
+            return False
+        if self.rev != other.rev:
+            return False
+        if self.dataPos != other.dataPos:
+            return False
+        if self.dataLen != other.dataLen:
+            return False
+        return True
+    
+    def __ne__(self, other):
+        return ((self == other) == False)
+    
+    def __hash__(self):
+        return hash(str(self.poly) + str(self.rev))
+    
+    
 class CRCKey:
     def __init__(self, poly=-1, rev=False, init=-1, xor=-1, dataPos=-1, dataLen=-1):
         self.poly = poly

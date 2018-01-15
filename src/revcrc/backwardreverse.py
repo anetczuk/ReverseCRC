@@ -75,8 +75,11 @@ class BackwardReverse(Reverse):
     def findCRCKeyBackward(self, data1, crc1, data2, crc2, dataSize, crcSize, searchRange=0):
         if self.progress:
             print "Checking {:X} {:X} xor {:X} {:X}, {} {}".format(data1, crc1, data2, crc2, dataSize, crcSize)
-            
-        polyList = self.findPolyXOR(data1, crc1, data2, crc2, dataSize, crcSize)
+        
+        foundList = self.findPolysPair( (data1, crc1), (data2, crc2), dataSize, crcSize, 0 )
+        polyList = []
+        for item in foundList:
+            polyList.append( (item.poly, item.rev) )
         
         if self.progress:
             sys.stdout.write("\r")

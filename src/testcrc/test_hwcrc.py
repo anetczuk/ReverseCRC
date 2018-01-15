@@ -129,8 +129,9 @@ class HwCRCTest(unittest.TestCase):
         self.assertEqual( crc, 0b000 )
         
     def test_calculate_leading(self):
-        crc1 = HwCRC.calcCRC(     0b11010011101100, 0b1011)
-        crc2 = HwCRC.calcCRC(0b0000011010011101100, 0b1011)
+        crcProc = HwCRC()
+        crc1 = crcProc.calculate(     0b11010011101100, 0b1011)
+        crc2 = crcProc.calculate(0b0000011010011101100, 0b1011)
         self.assertEqual( crc1, crc2 )
 
     def test_calculate_8(self):

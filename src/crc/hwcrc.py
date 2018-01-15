@@ -78,9 +78,4 @@ class HwCRC(CRCProc):
 
         return (register ^ self.xorOut) & polyMask.dataMask
 
-    #TODO: remove method
-    @staticmethod
-    def calcCRC(data, poly):
-        crcProc = HwCRC()
-        return crcProc.calculate(data, poly)
 

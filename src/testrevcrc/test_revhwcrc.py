@@ -31,7 +31,7 @@ import random
 from revcrc.backwardreverse import RevHwCRC
 from crc.hwcrc import HwCRC
 from crc.numbermask import intToASCII
-from crc.crcproc import CRCKey
+from crc.crcproc import CRCKey, PolyKey
 
   
   
@@ -56,7 +56,7 @@ class RevHwCRCTest(unittest.TestCase):
     def test_bruteForcePoly_8(self):
         finder = RevHwCRC()
         poly = finder.bruteForcePoly(0b11000010, 0x0F, crcSize = 8)
-        self.assertTrue( (0b100011101, False) in poly )
+        self.assertIn( (0b100011101, False), poly )
         
     def test_findXOR_8_1bit(self):
         finder = RevHwCRC()
@@ -323,6 +323,35 @@ class RevHwCRCTest(unittest.TestCase):
 #         print "found data:", foundCRC
         self.assertIn( CRCKey(inputPoly, reverse, regInit, -1, 0, dataSize ), foundCRC )
 
+    def test_findPolys_poly(self):
+        dataList = []
+        dataSize = 16
+        crcSize = 8
+        inputPoly = 0x185
+        regInit = 0x0
+        xorOut = 0x0
+        reverse = False
+        
+        ## init: 0, xor: 0, rev, poly: 0x18005
+        crcFun = HwCRC()
+        crcFun.setReversed(reverse)
+        crcFun.setXorOutValue(xorOut)
+        crcFun.setRegisterInitValue(regInit)
+
+        data1 = 0xABCD
+        crc1  = crcFun.calculate2(data1, dataSize, inputPoly, crcSize)
+        dataList.append( (data1, crc1) )
+          
+        data2 = data1 ^ 0x0010
+        crc2  = crcFun.calculate2(data2, dataSize, inputPoly, crcSize)
+        dataList.append( (data2, crc2) )
+          
+        finder = RevHwCRC()
+        foundCRC = finder.findPolysNumbers(dataList, dataSize, crcSize, 0)
+          
+#         print "found data:", foundCRC
+        self.assertIn( PolyKey(inputPoly, reverse, 0, dataSize ), foundCRC )
+        
     def test_bruteForceNumbers_poly(self):
         dataList = []
         dataSize = 16
@@ -351,7 +380,7 @@ class RevHwCRCTest(unittest.TestCase):
           
 #         print "found data:", foundCRC
         self.assertIn( CRCKey(inputPoly, reverse, regInit, xorOut, 0, dataSize ), foundCRC )
-        
+
     def test_bruteForceNumbers_poly2(self):
         dataList = []
         dataSize = 80

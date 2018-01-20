@@ -31,78 +31,7 @@ import logging
 import cProfile
 
 from revcrc.input import DataParser
-import itertools
 from revcrc.backwardreverse import RevHwCRC
-
-
-
-def brutePoly(inputPair):
-    ##inputPair[1] = inputPair[1][::-1]    ## reverse
-    
-    print "Finding poly for data: {} {}".format(inputPair[0], inputPair[1])
-    crcPoly = RevHwCRC.bruteForcePair(inputPair, True)
-    if len(crcPoly) > 0:
-        print "Found poly: {}".format(crcPoly)
-
-        
-def doFindXOR(inputPair1, inputPair2):
-    data1String = inputPair1[0]
-    crc1String = inputPair1[1]
-    crc1String = crc1String[:4]         ## substring
-    
-    crc1Size = len(crc1String) * 4
-        
-    data1 = int(data1String, 16)
-    crc1 = int(crc1String, 16)
-    
-    data2String = inputPair2[0]
-    crc2String = inputPair2[1]
-    crc2String = crc2String[:4]         ## substring
-    
-    print "Finding poly for data: {} {} {} {}".format(data1String, crc1String, data2String, crc2String )
-    
-    data2 = int(data2String, 16)
-    crc2 = int(crc2String, 16)
-
-    reverse = RevHwCRC(False)
-#     reverse.findXOR2(data1, crc1, data2, crc2)
-#     retList = reverse.findCRCKeyBackward(data1, crc1, data2, crc2)
-    retList = reverse.findXOR2(data1, crc1, data2, crc2, crcSize = crc1Size)
-#     if len(retList) > 0:
-#         print "Found polys:", retList
-
-    for ret in retList:
-        print "Found data: 0x{:X}".format(ret)
-        
-        
-def combinations( dataList, subListLen ):
-    return list(itertools.combinations(dataList, subListLen))
-
-
-def findKey(inputPair1, inputPair2):
-    print "Finding poly for data: {} {} {} {}".format(inputPair1[0], inputPair1[1], inputPair2[0], inputPair2[1], )
-
-    data1String = inputPair1[0]
-    crc1String = inputPair1[1]
-    
-    crc1Size = len(crc1String) * 4
-        
-    data1 = int(data1String, 16)
-    crc1 = int(crc1String, 16)
-    
-    data2String = inputPair2[0]
-    crc2String = inputPair2[1]
-    data2 = int(data2String, 16)
-    crc2 = int(crc2String, 16)
-
-    reverse = RevHwCRC(False)
-#     reverse.findXOR2(data1, crc1, data2, crc2)
-    retList = reverse.findCRCKeyBackward(data1, crc1, data2, crc2, crcSize = crc1Size)
-#     if len(retList) > 0:
-#         print "Found polys:", retList
-
-    for ret in retList:
-        print "Found data: {}".format(ret)
 
     
     
@@ -115,7 +44,7 @@ if __name__ != '__main__':
 
 
 parser = argparse.ArgumentParser(description='Finding CRC algorithm from data')
-parser.add_argument('--mode', action='store', required=True, choices=["FS", "XOR", "SS", "BF", "COMMON", "POLY"], help='Mode' )
+parser.add_argument('--mode', action='store', required=True, choices=["BF", "POLY", "COMMON"], help='Mode' )
 parser.add_argument('--file', action='store', required=True, help='File with data' )
 parser.add_argument('--profile', action='store_const', const=True, default=False, help='Profile the code' )
 parser.add_argument('--pfile', action='store', default=None, help='Profiler output file' )
@@ -143,67 +72,28 @@ try:
     dataParser = DataParser()
     data = dataParser.parseFile(args.file)
 
-#     dataSet = set(data)
-#     for i in dataSet:
-#         inputPair = i
-#         dataString = inputPair[0]
-#         crcString = inputPair[1]
-#         print dataString, crcString
-#     sys.exit( 1 )
     
-    
-    if   args.mode == "FS":
-        for i in range(0, len(data)):
-            inputPair = data[i]
-            brutePoly(inputPair)
-    elif args.mode == "XOR":
-        comb = combinations( data, 2 )
-        cLen = len(comb)
-        for i in range(0, cLen):
-            sys.stdout.write( str(i) + "/" + str(cLen) + " "  )
-            combPair = comb[i]
-            doFindXOR(combPair[0], combPair[1])
-        
-#         for i in range(0, len(data)-1):
-#             doFindXOR(data[i], data[i+1])
-            
-#         for i in range(0, len(data)-1, 2):
-#             doFindXOR(data[i], data[i+1])
-    elif args.mode == "KEY":
-        for i in range(0, len(data)-1, 2):
-            findKey(data[i], data[i+1])
-    elif args.mode == "SS":
-        for i in range(0, len(data)):
-            inputPair = data[i]
-            dataNum = int(inputPair[0], 16)
-            crcNum = int(inputPair[1], 16)
-            polyUnderTest = 0x101231
-    #         polyUnderTest = 0x123273
-    #         polyUnderTest = 0x110210
-    #         polyUnderTest = 0x154294
-    #         polyUnderTest = 0x10CE3C
-            print "Finding substring for data: {:X} {:X} 0x{:X}".format(dataNum, crcNum, polyUnderTest)
-            subMessage = RevHwCRC.findSubstring(dataNum, crcNum, polyUnderTest)
-            if subMessage != -1:
-                print "Found substring: 0x{:X}".format(subMessage)
-    elif args.mode == "BF":
+    if   args.mode == "BF":
+        ## finding full key by forward algorithm
         finder = RevHwCRC(True)
 #         finder = RevDivisionCRC(True)
 #         finder = RevModCRC(True)
 #         finder = RevCRCCommon(True)
-        foundCRC = finder.bruteForceList(data, 48)
+        foundCRC = finder.bruteForceInput(data, 48)
     elif args.mode == "POLY":
+        ## find polygons by xor-ing data pairs
         finder = RevHwCRC(True)
 #         finder = RevDivisionCRC(True)
 #         finder = RevModCRC(True)
 #         finder = RevCRCCommon(True)
-        foundCRC = finder.findPolysList(data, 48)
+        foundCRC = finder.findPolysInput(data, 48)
     elif args.mode == "COMMON":
+        ## finding full key by backward algorithm
         finder = RevHwCRC(True)
 #         finder = RevDivisionCRC(True)
 #         finder = RevModCRC(True)
 #         finder = RevCRCCommon(True)
-        foundCRC = finder.findSolutionList(data, 48)
+        foundCRC = finder.findSolutionInput(data, 48)
     else:
         print "Invalid mode:", args.mode
         sys.exit(1)

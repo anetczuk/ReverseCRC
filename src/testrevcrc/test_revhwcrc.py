@@ -50,13 +50,13 @@ class RevHwCRCTest(unittest.TestCase):
  
     def test_bruteForcePoly_4_fail(self):
         finder = RevHwCRC()
-        poly = finder.bruteForcePoly(0b11000010, 0x06, crcSize = 4)
+        poly = finder.bruteForcePoly(0b11000010, 0x06, 8, 4)
         self.assertEqual( poly, [] )
         
     def test_bruteForcePoly_8(self):
         finder = RevHwCRC()
-        poly = finder.bruteForcePoly(0b11000010, 0x0F, crcSize = 8)
-        self.assertIn( (0b100011101, False), poly )
+        poly = finder.bruteForcePoly(0b11000010, 0x0F, 8, 8)
+        self.assertIn( PolyKey(0b100011101, False, 0, 8), poly )
         
     def test_findXOR_8_1bit(self):
         finder = RevHwCRC()
@@ -208,11 +208,6 @@ class RevHwCRCTest(unittest.TestCase):
         finder = RevHwCRC()
         foundCRC = finder.findSolution(dataList, 16, 16, 0)
         self.assertEqual( foundCRC, [] )
-        
-    def test_findSubstring_found(self):
-        finder = RevHwCRC()
-        sumMessage = finder.findSubstring(0x3210A53937C7, 0b01011001, 0x1D, 8)
-        self.assertEqual( sumMessage, 0xA53937C7 )
 
     def test_findCRCKey_8(self):
         data =  0xC2
@@ -232,7 +227,7 @@ class RevHwCRCTest(unittest.TestCase):
 #         print "crc {:X} {:X}".format( crc, crc2)
          
         finder = RevHwCRC()
-        foundCRC = finder.findCRCKeyBackward(data, crc, data2, crc2, dataSize, crcSize)
+        foundCRC = finder.findCRCKeyBackward(data, crc, data2, crc2, dataSize, crcSize, 48)
          
 #         print "crc:", crcKeyList
         self.assertIn( CRCKey(inputPoly, False, regInit, -1, 0, dataSize ), foundCRC )

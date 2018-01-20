@@ -60,13 +60,8 @@ class Reverse(object):
     
     def setReturnOnFirst(self):
         self.returnFirst = True
-
-    def findSolutionList(self, dataList, searchRange = 0):
-        dInput = InputData()
-        dInput.convert(dataList)
-        self.findSolutionNumbers(dInput, searchRange)
         
-    def findSolutionNumbers(self, inputData, searchRange = 0):
+    def findSolutionInput(self, inputData, searchRange = 0):
         if inputData.empty():
             return
         if inputData.ready() == False:
@@ -91,11 +86,6 @@ class Reverse(object):
 
     ## ==========================================================
 
-        
-    def bruteForceList(self, dataList, searchRange = 0):
-        dInput = InputData(dataList)
-        dInput.convert(dataList)
-        self.bruteForceInput(dInput, searchRange)
          
     def bruteForceNumbers(self, numbersList, dataSize, crcSize, searchRange = 0):
         dInput = InputData(numbersList, dataSize, crcSize)
@@ -207,11 +197,6 @@ class Reverse(object):
             sys.stdout.flush()
         return retList
 
-    def findPolysList(self, dataList, searchRange = 0):
-        dInput = InputData(dataList)
-        dInput.convert(dataList)
-        self.findPolysInput(dInput, searchRange)
-
     def findPolysNumbers(self, numbersList, dataSize, crcSize, searchRange = 0):
         dInput = InputData(numbersList, dataSize, crcSize)
         return self.findPolysInput(dInput, searchRange)
@@ -252,33 +237,18 @@ class Reverse(object):
         crc1 = dataCrcPair1[1]
         data2 = dataCrcPair2[0]
         crc2 = dataCrcPair2[1]
-        
-        xorData = data1 ^ data2
-        xorCRC = crc1 ^ crc2
-        xorDataCrc = MessageCRC(xorData, dataSize, xorCRC, crcSize)
-        
         if self.progress:
             print "Checking {:X} {:X} xor {:X} {:X}, {} {}".format(data1, crc1, data2, crc2, dataSize, crcSize)
-                
-        ## finding polys
-        keyList = []
-        keyList += self.findBruteForcePoly(xorDataCrc, False, searchRange)
-        keyList += self.findBruteForcePoly(xorDataCrc, True, searchRange)
-        return keyList
+        xorData = data1 ^ data2
+        xorCRC = crc1 ^ crc2        
+        return self.bruteForcePoly(xorData, xorCRC, dataSize, crcSize, searchRange)
 
-    def bruteForcePoly(self, data, crc, dataSize = -1, crcSize = -1):
-        if dataSize < 0:
-            dataSize = data.bit_length()
-        if crcSize < 0:
-            crcSize = crc.bit_length()
+    def bruteForcePoly(self, data, crc, dataSize, crcSize, searchRange = 0):
         dataCrc = MessageCRC(data, dataSize, crc, crcSize)
         polyList = []
-        polyList += self.findBruteForcePoly(dataCrc, False, 0)
-        polyList += self.findBruteForcePoly(dataCrc, True, 0)
-        retList = []
-        for item in polyList:
-            retList.append( (item.poly, item.rev) )
-        return retList
+        polyList += self.findBruteForcePoly(dataCrc, False, searchRange)
+        polyList += self.findBruteForcePoly(dataCrc, True, searchRange)
+        return polyList
 
     def findBruteForcePoly(self, dataCrc, reverseMode, searchRange = 0):
         crcProc = self.createCRCProcessor()
@@ -309,35 +279,10 @@ class Reverse(object):
             sys.stdout.write("\r")
             sys.stdout.flush()
         return retList
-
-    #TODO: remove method
-    def findSubstring(self, dataNum, crcNum, polyUnderTest, polySize):
-        dataSize = dataNum.bit_length()
-           
-        testMessage = 0
-        bitMask = 1
-        polyMask = NumberMask(polyUnderTest, polySize)
-        for ds in range(0, dataSize):
-            testMessage = testMessage | (bitMask & dataNum)        ## in each iteration adds one bit to variable
-            bitMask = bitMask << 1
-               
-            ## print "Testing: 0x{:X}".format(testMessage)
-               
-#             crcProc = HwCRC()
-#             crc = crcProc.calculate2(testMessage, testMessage.bit_length(), polyUnderTest, polySize)
-            ##print "Found: {} {}".format(crc, crcNum)
-            dataMask = NumberMask(testMessage, ds)
-            crc = self.calculateNumberCRC(polyMask, False, 0x0, 0x0, dataMask)
-            if crc == crcNum:
-                return testMessage
-        return -1
     
     ##============================================================
 
     def findSolution(self, dataList, dataSize, crcSize, searchRange = 0):
-        raise NotImplementedError
-
-    def calculateNumberCRC(self, polyMask, reverse, initReg, xorOut, dataMask):
         raise NotImplementedError
 
     

@@ -59,23 +59,25 @@ class DataParser:
     def __init__(self):
         self.data = []          ## list of pairs
     
-    ## data is a list of pairs
+    ## returns InputData object
     def parseFile(self, path):
         self.data = []
         if not os.path.exists(path):
             ## file not exists
             logging.info("file '{}' not exists".format(path))
-            return self.data
+            return InputData()
         if os.path.getsize(path) < 1:
             ## file is empty
             logging.info("file '{}' is empty".format(path))
-            return self.data
+            return InputData()
         
         logging.info("Opening log file: {}".format(path))
         with open(path, 'r') as f:
             for line in f:
                 self.parse( line )
-        return self.data
+        retObj = InputData()
+        retObj.convert(self.data)
+        return retObj
 
 
     def parse(self, msg):
@@ -90,6 +92,6 @@ class DataParser:
             return
         retList = re.findall('(\S+)\s+(\S+)\s*', trimmed)
         for pair in retList:
-            ##val = int(pair[1], 16)
-            ##self.data.append( (pair[0], val) )
-            self.data.append( (pair[0], pair[1]) )
+            data = pair[0]
+            crc = pair[1]
+            self.data.append( (data, crc) )

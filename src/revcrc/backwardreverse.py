@@ -87,7 +87,7 @@ class BackwardReverse(Reverse):
             joinString = ", ".join( "(0x{:X}, {})".format(x[0], x[1]) for x in polyList )
             print "Found polys:", "[{}]".format( joinString )
         
-        searchStart = dataSize-searchRange
+        searchStart = max(0, dataSize-searchRange)
         
         retList = []
         for polyPair in polyList:
@@ -96,6 +96,7 @@ class BackwardReverse(Reverse):
             reversedMode = polyPair[1]
             polyAdded = False
             for ds in range(searchStart, dataSize+1):
+                ##print "Shifting:", data1, ds, searchStart, (dataSize+1), searchRange
                 d1 = NumberMask(data1, ds)
                 cb1 = self.createBackwardCRCProcessor(d1, crc1)
                 cb1.setReversed(reversedMode)
@@ -151,13 +152,6 @@ class BackwardReverse(Reverse):
             tmpList2.add( item.register )
             
         return tmpList1.intersection(tmpList2)
-      
-    def calculateNumberCRC(self, polyMask, reverse, initReg, xorOut, dataMask):
-        crcProc = self.createCRCProcessor()
-        crcProc.setReversed(reverse)
-        crcProc.setXorOutValue(xorOut)
-        crcProc.setRegisterInitValue(initReg)
-        return crcProc.calculate3(dataMask, polyMask)
         
     def createCRCProcessor(self):
         raise NotImplementedError

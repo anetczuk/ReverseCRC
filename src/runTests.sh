@@ -27,6 +27,7 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 
+coverage=0
 repeats=1
 untilfailure=0
 runtest=""
@@ -42,6 +43,9 @@ case $i in
     -rt=*|--runtest=*)      runtest="${i#*=}"
                             shift
                             ;;
+    --coverage)             coverage=1
+                            shift                   # past argument with no value
+                            ;;
     *)                      ;;                      # unknown option
 esac
 done
@@ -53,10 +57,18 @@ cd $SCRIPT_DIR
 
 function calltests {
     if [ -n "$runtest" ]; then
-        python -m unittest $runtest
+        if [ $coverage -ne 0 ]; then
+            coverage run -m unittest $runtest
+        else
+            python -m unittest $runtest
+        fi
         err_code=$?
     else
-        python -m unittest discover $@
+        if [ $coverage -ne 0 ]; then
+            coverage run -m unittest discover $@
+        else
+            python -m unittest discover $@
+        fi
         err_code=$?
     fi 
     if [ $err_code -ne 0 ]; then
@@ -65,6 +77,12 @@ function calltests {
     fi
 }
 
+
+if [ $coverage -ne 0 ]; then
+    ## run code coverage on tests
+    calltests
+    exit $err_code
+fi
 
 if [ $repeats -eq 1 ] && [ $untilfailure -eq 0 ]; then
     ## no repeating -- just single call

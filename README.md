@@ -13,6 +13,14 @@ Repository contains followint implementations of CRC:
 _DivisionCRC_ and _HwCRC_ have its backward versions which allows to find polynomials from input messages.
 
 
+### Code additional features
+
+Following techniques were used in the project:
+* Unit testing 
+* Code profiling (cProfile)
+* Code coverage (Coverage.py)
+
+
 ### References
 
 * https://en.wikipedia.org/wiki/Cyclic_redundancy_check - general description of CRC algorithm

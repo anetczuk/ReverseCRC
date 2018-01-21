@@ -70,7 +70,7 @@ class Reverse(object):
         if (self.progress):
             print "List size: {} Data size: {} CRC size: {}".format(len(inputData.numbersList), inputData.dataSize, inputData.crcSize)
             
-        self.findSolution(inputData.numbersList, inputData.dataSize, inputData.crcSize, searchRange)
+        return self.findSolution(inputData.numbersList, inputData.dataSize, inputData.crcSize, searchRange)
 
     def findXOR(self, data1, crc1, data2, crc2, dataSize = -1, crcSize = -1):
         if dataSize < 0:
@@ -266,7 +266,6 @@ class Reverse(object):
                 sys.stdout.flush()
 
             polyMask.setNumber(poly)
-#             print "calcxxx:", dataMask
             polyCRC = crcProc.calculate3(dataMask, polyMask)
             if polyCRC == crc:
 #                 if self.progress:

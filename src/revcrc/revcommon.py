@@ -23,16 +23,11 @@
 
 
 from revcrc.reverse import Reverse
-from crc.numbermask import NumberMask, generateSubstringsReverse
+from crc.numbermask import NumberMask
 from crc.crcproc import CRCKey
 from crc.modcrc import CRCModCacheMap
 # from crc.modcrc import CRCModCacheMap
 
-
-
-def get_all_substrings(input_string):
-    length = len(input_string)
-    return [input_string[i:j+1] for i in xrange(length) for j in xrange(i,length)]
   
   
 
@@ -54,12 +49,10 @@ class RevCRCCommon(Reverse):
         
         dataPair = dataList[0]
         retList = self.findCRCKeyBits( NumberMask(dataPair[0], dataSize), dataPair[1], crcSize, searchRange)
-#         retList = self.findCRCKeyBytes( NumberMask(dataPair[0], dataSize), dataPair[1], crcSize, searchRange)
         
         for i in xrange(1, len(dataList)):
             dataPair = dataList[i]
             keys = self.findCRCKeyBits( NumberMask(dataPair[0], dataSize), dataPair[1], crcSize, searchRange)
-#             keys = self.findCRCKeyBytes( NumberMask(dataPair[0], dataSize), dataPair[1], crcSize, searchRange)
             retList.intersection( keys )
             
         return retList
@@ -82,30 +75,6 @@ class RevCRCCommon(Reverse):
                 key.dataLen = sub.size
             retList |= subRet
             
-        if self.progress and len(retList)>0:
-            print "Found keys:", retList
-            
-        return retList
-    
-    def findCRCKeyBytes(self, dataMask, crcNum, crcSize, searchRange):
-        if self.progress:
-            print "Checking {:X} {:X}".format(dataMask.data, crcNum)
-            
-        retList = set()
-                
-        dataString = dataMask.toASCII()
-        subList = generateSubstringsReverse(dataString, 0)
-        for sub in subList:
-            substr = sub.data
-#                 if self.progress:
-#                     subnum = asciiToInt(substr)
-#                     print "Checking substring {:X}".format(subnum)
-            subRet = self.findCRC(substr, crcNum, crcSize)
-            for key in subRet:
-                key.dataPos = sub.pos*8
-                key.dataLen = sub.size*8
-            retList |= subRet
-             
         if self.progress and len(retList)>0:
             print "Found keys:", retList
             

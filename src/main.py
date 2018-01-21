@@ -79,21 +79,21 @@ try:
 #         finder = RevDivisionCRC(True)
 #         finder = RevModCRC(True)
 #         finder = RevCRCCommon(True)
-        foundCRC = finder.bruteForceInput(data, 48)
+        finder.bruteForceInput(data, 48)
     elif args.mode == "POLY":
         ## find polygons by xor-ing data pairs
         finder = RevHwCRC(True)
 #         finder = RevDivisionCRC(True)
 #         finder = RevModCRC(True)
 #         finder = RevCRCCommon(True)
-        foundCRC = finder.findPolysInput(data, 48)
+        finder.findPolysInput(data, 48)
     elif args.mode == "COMMON":
         ## finding full key by backward algorithm
         finder = RevHwCRC(True)
 #         finder = RevDivisionCRC(True)
 #         finder = RevModCRC(True)
 #         finder = RevCRCCommon(True)
-        foundCRC = finder.findSolutionInput(data, 48)
+        finder.findSolutionInput(data, 48)
     else:
         print "Invalid mode:", args.mode
         sys.exit(1)

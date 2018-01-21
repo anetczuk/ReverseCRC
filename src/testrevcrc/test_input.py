@@ -26,11 +26,33 @@ import unittest
 import os
 # import logging
 
-from revcrc.input import DataParser
+from revcrc.input import DataParser, InputData
  
  
 __scriptdir__ = os.path.dirname(os.path.realpath(__file__))
 # logging.basicConfig(level=logging.INFO)
+
+
+
+class InputDataTest(unittest.TestCase):
+    def setUp(self):
+        # Called before the first testfunction is executed
+        pass
+ 
+    def tearDown(self):
+        # Called after the last testfunction was executed
+        pass
+
+    def test_convert(self):
+        data = [("E21EAB43EA0B478F52AF6E034D310D819DBC3F", "A2B0A")]
+        
+        parser = InputData()
+        parser.convert( data )
+
+        self.assertEqual( parser.dataSize, 152 )
+        self.assertEqual( parser.crcSize, 20 )
+        self.assertIn( (5042640062004119076411731879610313259117034559L, 666378), parser.numbersList )
+
 
  
 class DataParserTest(unittest.TestCase):

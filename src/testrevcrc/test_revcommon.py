@@ -28,6 +28,7 @@ import crcmod
 from revcrc.revcommon import RevCRCCommon
 from crc.numbermask import intToASCII
 from crc.crcproc import CRCKey
+from revcrc.input import InputData
 
   
   
@@ -51,7 +52,7 @@ class RevCRCCommonTest(unittest.TestCase):
         foundCRC = list( foundCRC )
         self.assertEqual( foundCRC, [] )
         
-    def test_findSolution_8a(self):
+    def test_findSolutionInput_8a(self):
         dataList = []
         
         crcFun = crcmod.predefined.mkCrcFun("crc-8")        ## init: 0x0, xor: 0x0, poly: 0x107
@@ -61,7 +62,7 @@ class RevCRCCommonTest(unittest.TestCase):
         dataList.append( (data, crc) )
         
         finder = RevCRCCommon()
-        foundCRC = finder.findSolution(dataList, 8, 8)
+        foundCRC = finder.findSolutionInput( InputData(dataList, 8, 8) )
         foundCRC = list( foundCRC )
 
 #         print "found:", foundCRC

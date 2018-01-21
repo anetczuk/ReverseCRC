@@ -24,7 +24,7 @@
 
 import unittest
 from crc.numbermask import intToASCII, reverseBits, NumberMask,\
-    generateSubstrings, SubNumber, generateSubstringsReverse
+    generateSubstrings, SubNumber, generateSubstringsReverse, asciiToInt
 
 
 
@@ -50,6 +50,11 @@ class GlobalTest(unittest.TestCase):
         
         val = intToASCII(0x0, 16)
         self.assertEqual( len(val), 2 )
+        
+    def test_asciiToInt(self):
+        asciival = intToASCII(0xAABB, 32)
+        revval = asciiToInt(asciival)
+        self.assertEqual( revval, 0xAABB )
         
     def test_reverseBits(self):
         val = reverseBits( 0b11000001 )

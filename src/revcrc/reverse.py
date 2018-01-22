@@ -22,7 +22,6 @@
 #
 from crc.numbermask import NumberMask
 import sys
-from revcrc.input import InputData
 import itertools
 from crc.crcproc import CRCKey, PolyKey
 
@@ -61,35 +60,9 @@ class Reverse(object):
     def setReturnOnFirst(self):
         self.returnFirst = True
         
-    def findSolutionInput(self, inputData, searchRange = 0):
-        if inputData.empty():
-            return
-        if inputData.ready() == False:
-            return
-            
-        if (self.progress):
-            print "List size: {} Data size: {} CRC size: {}".format(len(inputData.numbersList), inputData.dataSize, inputData.crcSize)
-            
-        return self.findSolution(inputData.numbersList, inputData.dataSize, inputData.crcSize, searchRange)
-
-    def findXOR(self, data1, crc1, data2, crc2, dataSize = -1, crcSize = -1):
-        if dataSize < 0:
-            dataSize = max(data1.bit_length(), data2.bit_length())
-        if crcSize < 0:
-            crcSize = max(crc1.bit_length(), crc2.bit_length())
-        polyList = self.findPolysPair( (data1, crc1), (data2, crc2), dataSize, crcSize, 0 )
-        retList = []
-        for item in polyList:
-            retList.append( (item.poly, item.rev) )
-        return retList
-
-
+        
     ## ==========================================================
-
-         
-    def bruteForceNumbers(self, numbersList, dataSize, crcSize, searchRange = 0):
-        dInput = InputData(numbersList, dataSize, crcSize)
-        return self.bruteForceInput(dInput, searchRange)
+        
     
     def bruteForceInput(self, inputData, searchRange = 0):
         if inputData.empty():
@@ -122,16 +95,67 @@ class Reverse(object):
             
         return retList
 
+    def findPolysInput(self, inputData, searchRange = 0):
+        if inputData.empty():
+            return
+        if inputData.ready() == False:
+            return
+        
+        numbersList = inputData.numbersList
+        if (self.progress):
+            print "List size: {} Data size: {} CRC size: {}".format(len(numbersList), inputData.dataSize, inputData.crcSize)
+        
+        retList = []
+        comb = list( itertools.combinations( numbersList, 2 ) )
+        cLen = len(comb)
+        
+        if (self.progress):
+            print "Combinations number:", cLen
+        
+        for i in range(0, cLen):
+            combPair = comb[i]
+            numberPair1 = combPair[0]
+            numberPair2 = combPair[1]
+            
+            data1 = numberPair1[0]
+            crc1 = numberPair1[1]
+            data2 = numberPair2[0]
+            crc2 = numberPair2[1]
+            keys = self.findPolysXOR(data1, crc1, data2, crc2, inputData.dataSize, inputData.crcSize, searchRange)
+
+            if (self.progress):
+                print "Found polys:", keys
+
+            retList += keys
+            
+        return retList
+
+    def findSolutionInput(self, inputData, searchRange = 0):
+        if inputData.empty():
+            return
+        if inputData.ready() == False:
+            return
+            
+        if (self.progress):
+            print "List size: {} Data size: {} CRC size: {}".format(len(inputData.numbersList), inputData.dataSize, inputData.crcSize)
+            
+        return self.findSolution(inputData.numbersList, inputData.dataSize, inputData.crcSize, searchRange)
+
+
+    ## ==========================================================
+
+
     def findBruteForce(self, dataCrcPair1, dataCrcPair2, dataSize, crcSize, searchRange = 0):
-        keyList = self.findPolysPair(dataCrcPair1, dataCrcPair2, dataSize, crcSize, searchRange)
-        
-#         print "keys:", keyList
-        
-        ## finding xor value
         data1 = dataCrcPair1[0]
         crc1 = dataCrcPair1[1]
         data2 = dataCrcPair2[0]
         crc2 = dataCrcPair2[1]
+        
+        keyList = self.findPolysXOR(data1, crc1, data2, crc2, dataSize, crcSize, searchRange)
+        
+#         print "keys:", keyList
+        
+        ## finding xor value
 
         dataCrc1 = MessageCRC(data1, dataSize, crc1, crcSize)
         dataCrc2 = MessageCRC(data2, dataSize, crc2, crcSize)
@@ -196,55 +220,13 @@ class Reverse(object):
             sys.stdout.write("\r")
             sys.stdout.flush()
         return retList
-
-    def findPolysNumbers(self, numbersList, dataSize, crcSize, searchRange = 0):
-        dInput = InputData(numbersList, dataSize, crcSize)
-        return self.findPolysInput(dInput, searchRange)
-
-    def findPolysInput(self, inputData, searchRange = 0):
-        if inputData.empty():
-            return
-        if inputData.ready() == False:
-            return
-        
-        numbersList = inputData.numbersList
-        if (self.progress):
-            print "List size: {} Data size: {} CRC size: {}".format(len(numbersList), inputData.dataSize, inputData.crcSize)
-        
-        retList = []
-        comb = list( itertools.combinations( numbersList, 2 ) )
-        cLen = len(comb)
-        
-        if (self.progress):
-            print "Combinations number:", cLen
-        
-        for i in range(0, cLen):
-            combPair = comb[i]
-            numberPair1 = combPair[0]
-            numberPair2 = combPair[1]
-            
-            keys = self.findPolysPair(numberPair1, numberPair2, inputData.dataSize, inputData.crcSize, searchRange)
-
-            if (self.progress):
-                print "Found polys:", keys
-
-            retList += keys
-            
-        return retList
-        
-    def findPolysPair(self, dataCrcPair1, dataCrcPair2, dataSize, crcSize, searchRange = 0):
-        data1 = dataCrcPair1[0]
-        crc1 = dataCrcPair1[1]
-        data2 = dataCrcPair2[0]
-        crc2 = dataCrcPair2[1]
+    
+    def findPolysXOR(self, data1, crc1, data2, crc2, dataSize, crcSize, searchRange = 0):
         if self.progress:
             print "Checking {:X} {:X} xor {:X} {:X}, {} {}".format(data1, crc1, data2, crc2, dataSize, crcSize)
         xorData = data1 ^ data2
-        xorCRC = crc1 ^ crc2        
-        return self.bruteForcePoly(xorData, xorCRC, dataSize, crcSize, searchRange)
-
-    def bruteForcePoly(self, data, crc, dataSize, crcSize, searchRange = 0):
-        dataCrc = MessageCRC(data, dataSize, crc, crcSize)
+        xorCRC = crc1 ^ crc2
+        dataCrc = MessageCRC(xorData, dataSize, xorCRC, crcSize)
         polyList = []
         polyList += self.findBruteForcePoly(dataCrc, False, searchRange)
         polyList += self.findBruteForcePoly(dataCrc, True, searchRange)
@@ -278,10 +260,15 @@ class Reverse(object):
             sys.stdout.write("\r")
             sys.stdout.flush()
         return retList
+
     
     ##============================================================
 
+
     def findSolution(self, dataList, dataSize, crcSize, searchRange = 0):
+        raise NotImplementedError
+
+    def createCRCProcessor(self):
         raise NotImplementedError
 
     

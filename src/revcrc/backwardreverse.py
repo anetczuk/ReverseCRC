@@ -76,7 +76,7 @@ class BackwardReverse(Reverse):
         if self.progress:
             print "Checking {:X} {:X} xor {:X} {:X}, {} {}".format(data1, crc1, data2, crc2, dataSize, crcSize)
         
-        foundList = self.findPolysPair( (data1, crc1), (data2, crc2), dataSize, crcSize, 0 )
+        foundList = self.findPolysXOR( data1, crc1, data2, crc2, dataSize, crcSize, 0 )
         polyList = []
         for item in foundList:
             polyList.append( (item.poly, item.rev) )
@@ -152,9 +152,6 @@ class BackwardReverse(Reverse):
             tmpList2.add( item.register )
             
         return tmpList1.intersection(tmpList2)
-        
-    def createCRCProcessor(self):
-        raise NotImplementedError
     
     def createBackwardCRCProcessor(self, dataMask, crc):
         raise NotImplementedError
@@ -217,7 +214,7 @@ class RevModCRC(Reverse):
         if self.progress:
             print "Checking {:X} {:X} xor {:X} {:X} {} {}".format(data1, crc1, data2, crc2, dataSize, crcSize)
         
-        polyList = self.findXOR(data1, crc1, data2, crc2, dataSize, crcSize)
+        polyList = self.findPolysXOR( data1, crc1, data2, crc2, dataSize, crcSize, 0 )
         
         dataString1 = intToASCII(data1)
         dataString2 = intToASCII(data2)
@@ -227,9 +224,9 @@ class RevModCRC(Reverse):
             print "found polys:", polyList
     
         retList = []
-        for polyData in polyList:
-            poly = polyData[0]
-            reverse = polyData[1]
+        for item in polyList:
+            poly = item.poly
+            reverse = item.rev
             polyAdded = False
 #             print "checking poly: {:X}".format( poly )
             for initReg in xrange(0, regMax):

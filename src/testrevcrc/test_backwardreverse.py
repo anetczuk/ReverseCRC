@@ -29,7 +29,7 @@ import os
 import crcmod
 from revcrc.backwardreverse import RevDivisionCRC, RevModCRC
 from crc.numbermask import intToASCII
-from crc.crcproc import CRCKey
+from crc.crcproc import CRCKey, PolyKey
 from crc.divisioncrc import DivisionCRC
 
   
@@ -48,7 +48,7 @@ class RevDivisionCRCTest(unittest.TestCase):
         # Called after the last testfunction was executed
         pass
     
-    def test_findXOR_c8d24_rev(self):
+    def test_findPolysXOR_c8d24_rev(self):
         data  = 0xFD50D7
         data2 = 0xFD53D7
         inputPoly = 0x1BF
@@ -66,10 +66,10 @@ class RevDivisionCRCTest(unittest.TestCase):
 #         print "crc: {:X} {:X}".format( crc, crc2 )
          
         finder = RevDivisionCRC()
-        polyList = finder.findXOR(data, crc, data2, crc2, crcSize = crcSize)
+        polyList = finder.findPolysXOR( data, crc, data2, crc2, 24, crcSize)
         
 #         print "polys:", "[{}]".format( ", ".join("0x{:X}".format(x) for x in polyList) )
-        self.assertTrue( (inputPoly, True) in polyList )
+        self.assertTrue( PolyKey(inputPoly, True, 0, 24) in polyList )
 
         
     def test_findSolution_c16d16(self):
@@ -179,10 +179,10 @@ class RevModCRCTest(unittest.TestCase):
 #         self.assertEqual( crcKey.dataLen, 16 )
         self.assertIn( CRCKey(0x107, False, 0x0, 0x0, 0, 16 ), foundCRC )
 
-    def test_findXOR_crcmod_8Arev(self):
+    def test_findPolysXOR_crcmod_8Arev(self):
         data =  0xF90AD5FF
         data2 = 0xF90AD5FD
-#         dataSize = 32
+        dataSize = 32
         inputPoly = 0x10A
         regInit = 0x00
         xorOut = 0x00
@@ -195,12 +195,11 @@ class RevModCRCTest(unittest.TestCase):
 #         print "data: {:X}/{:X} {:X}/{:X}".format( data, revData1, data2, revData2 )
         
         finder = RevModCRC()
-        polyList = finder.findXOR(data, crc, data2, crc2, crcSize = crcSize)
-#         polyList = finder.findXOR(data, crc, data2, crc2)
+        polyList = finder.findPolysXOR(data, crc, data2, crc2, dataSize, crcSize)
         
 #         revPoly = reverseBits(inputPoly, crcSize)
 #         print "polys: {:X}".format(inputPoly), "[{}]".format( ", ".join("(0x{:X} {})".format(pair[0], pair[1]) for pair in polyList) )
-        self.assertIn( (inputPoly, True), polyList )
+        self.assertIn( PolyKey(inputPoly, True, 0, dataSize), polyList )
     
     #TODO: try fixing
     def xxxtest_findSolution_crcmod16(self):

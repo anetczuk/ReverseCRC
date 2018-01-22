@@ -32,6 +32,7 @@ from revcrc.backwardreverse import RevHwCRC
 from crc.hwcrc import HwCRC
 from crc.numbermask import intToASCII
 from crc.crcproc import CRCKey, PolyKey
+from revcrc.input import InputData
 
   
   
@@ -48,59 +49,49 @@ class RevHwCRCTest(unittest.TestCase):
         # Called after the last testfunction was executed
         pass
  
-    def test_bruteForcePoly_4_fail(self):
+    def test_findPolysXOR_8_1bit(self):
         finder = RevHwCRC()
-        poly = finder.bruteForcePoly(0b11000010, 0x06, 8, 4)
-        self.assertEqual( poly, [] )
+        polyList = finder.findPolysXOR(0x34EC, 0b100, 0x34ED, 0b111, 16, 8)
+        self.assertTrue( PolyKey(0x103, False, 0, 16) in polyList )
         
-    def test_bruteForcePoly_8(self):
-        finder = RevHwCRC()
-        poly = finder.bruteForcePoly(0b11000010, 0x0F, 8, 8)
-        self.assertIn( PolyKey(0b100011101, False, 0, 8), poly )
+        polyList = finder.findPolysXOR(0x34EE, 0b010, 0x34EF, 0b001, 16, 8)
+        self.assertTrue( PolyKey(0x103, False, 0, 16) in polyList )
         
-    def test_findXOR_8_1bit(self):
-        finder = RevHwCRC()
-        polyList = finder.findXOR(0x34EC, 0b100, 0x34ED, 0b111, crcSize = 8)
-        self.assertTrue( (0x103, False) in polyList )
-        
-        polyList = finder.findXOR(0x34EE, 0b010, 0x34EF, 0b001, crcSize = 8)
-        self.assertTrue( (0x103, False) in polyList )
-        
-    def test_findXOR_8_2bit(self):
+    def test_findPolysXOR_8_2bit(self):
         finder = RevHwCRC()
         
-        polyList = finder.findXOR(0xA53937C7, 0b01011001, 0xA53937CF, 0b10110001, crcSize = 8)
-        self.assertTrue( (0x11D, False) in polyList )
+        polyList = finder.findPolysXOR(0xA53937C7, 0b01011001, 0xA53937CF, 0b10110001, 32, 8)
+        self.assertTrue( PolyKey(0x11D, False, 0, 32) in polyList )
         
-        polyList = finder.findXOR(0x0000A53937CB, 0b11000101, 0x0000A53937CF, 0b10110001, crcSize = 8)
-        self.assertTrue( (0x11D, False) in polyList )
+        polyList = finder.findPolysXOR(0x0000A53937CB, 0b11000101, 0x0000A53937CF, 0b10110001, 32, 8)
+        self.assertTrue( PolyKey(0x11D, False, 0, 32) in polyList )
         
-        polyList = finder.findXOR(0x1234A53937CB, 0b11000101, 0x1234A53937CF, 0b10110001, crcSize = 8)
-        self.assertTrue( (0x11D, False) in polyList )
+        polyList = finder.findPolysXOR(0x1234A53937CB, 0b11000101, 0x1234A53937CF, 0b10110001, 48, 8)
+        self.assertTrue( PolyKey(0x11D, False, 0, 48) in polyList )
         
-        polyList = finder.findXOR(0xA53937CF, 0x8C, 0xA53937CE, 0x91, crcSize = 8)
-        self.assertTrue( (0x11D, False) in polyList )
+        polyList = finder.findPolysXOR(0xA53937CF, 0x8C, 0xA53937CE, 0x91, 32, 8)
+        self.assertTrue( PolyKey(0x11D, False, 0, 32) in polyList )
         
-        polyList = finder.findXOR(0xA53937CF, 0x8C, 0xA53937C7, 0x64, crcSize = 8)
-        self.assertTrue( (0x11D, False) in polyList )
+        polyList = finder.findPolysXOR(0xA53937CF, 0x8C, 0xA53937C7, 0x64, 32, 8)
+        self.assertTrue( PolyKey(0x11D, False, 0, 32) in polyList )
         
-    def test_findXOR_8_3bit(self):
+    def test_findPolysXOR_8_3bit(self):
         finder = RevHwCRC()
-        polyList = finder.findXOR(0x1234, 0xF1, 0x1235, 0xF6, crcSize = 8)
-        self.assertTrue( (0x107, False) in polyList )
+        polyList = finder.findPolysXOR(0x1234, 0xF1, 0x1235, 0xF6, 16, 8)
+        self.assertTrue( PolyKey(0x107, False, 0, 16) in polyList )
     
-    def test_findXOR_leading(self):        
+    def test_findPolysXOR_leading(self):        
         finder = RevHwCRC()
-        polyList = finder.findXOR(0x001234, 0xF1, 0x001235, 0xF6, crcSize = 8)
-        self.assertTrue( (0x107, False) in polyList )
+        polyList = finder.findPolysXOR(0x001234, 0xF1, 0x001235, 0xF6, 16, 8)
+        self.assertTrue( PolyKey(0x107, False, 0, 16) in polyList )
     
-    def test_findXOR_xorout(self):        
+    def test_findPolysXOR_xorout(self):        
         finder = RevHwCRC()
         xorOut = 0xAB
-        polyList = finder.findXOR(0x1234, 0xF1^xorOut, 0x1235, 0xF6^xorOut, crcSize = 8)
-        self.assertTrue( (0x107, False) in polyList )
+        polyList = finder.findPolysXOR(0x1234, 0xF1^xorOut, 0x1235, 0xF6^xorOut, 16, 8)
+        self.assertTrue( PolyKey(0x107, False, 0, 16) in polyList )
     
-    def test_findXOR_8_init_xorOut(self):
+    def test_findPolysXOR_8_init_xorOut(self):
         dataSize = 42                           ## data size does not matter
         inputPoly = 0x1D5
         inputVal =  0xA53937CF
@@ -113,10 +104,10 @@ class RevHwCRCTest(unittest.TestCase):
         crc2 = crcProc.calculate2(inputVal2, dataSize, inputPoly, 8)
         
         finder = RevHwCRC()
-        poly = finder.findXOR(inputVal, crc, inputVal2, crc2, crcSize = 8)
-        self.assertTrue( (inputPoly, False) in poly )
+        poly = finder.findPolysXOR(inputVal, crc, inputVal2, crc2, dataSize, 8)
+        self.assertTrue( PolyKey(inputPoly, False, 0, dataSize) in poly )
 
-    def test_findXOR_crcmod_8A(self):
+    def test_findPolysXOR_crcmod_8A(self):
         data =  0xF90AD50F
         data2 = 0xF90AD50D
         inputPoly = 0x10A
@@ -130,12 +121,12 @@ class RevHwCRCTest(unittest.TestCase):
 #         print "crc: {:X} {:X}".format( crc, crc2 )
          
         finder = RevHwCRC()
-        polyList = finder.findXOR(data, crc, data2, crc2, crcSize = crcSize)
+        polyList = finder.findPolysXOR(data, crc, data2, crc2, 32, crcSize)
          
 #         print "polys:", "[{}]".format( ", ".join("0x{:X}".format(x) for x in polyList) )
-        self.assertTrue( (inputPoly, False) in polyList )
+        self.assertTrue( PolyKey(inputPoly, False, 0, 32) in polyList )
         
-    def test_findXOR_crcmod_8_random(self):
+    def test_findPolysXOR_crcmod_8_random(self):
         data =  0xF90AD50D769553D3110A4535D37
         data2 = 0xF90AD50D769553D311024535537
 #         inputPoly = 0x1B7
@@ -150,12 +141,12 @@ class RevHwCRCTest(unittest.TestCase):
 #         print "crc: {:X} {:X}".format( crc, crc2 )
          
         finder = RevHwCRC()
-        polyList = finder.findXOR(data, crc, data2, crc2, crcSize = crcSize)
+        polyList = finder.findPolysXOR(data, crc, data2, crc2, 108, crcSize)
          
 #         print "polys:", "[{}]".format( ", ".join("0x{:X}".format(x) for x in polyList) )
-        self.assertTrue( (inputPoly, False) in polyList )
+        self.assertTrue( PolyKey(inputPoly, False, 0, 108) in polyList )
         
-    def test_findXOR_crcmod_8_random2(self):
+    def test_findPolysXOR_crcmod_8_random2(self):
         data =  0xF90AD50D769553D31102453553F
         data2 = 0xF90AD50D769553D313624535537
 #         inputPoly = 0x1B7
@@ -170,12 +161,12 @@ class RevHwCRCTest(unittest.TestCase):
 #         print "crc: {:X} {:X}".format( crc, crc2 )
          
         finder = RevHwCRC()
-        polyList = finder.findXOR(data, crc, data2, crc2, crcSize = crcSize)
+        polyList = finder.findPolysXOR(data, crc, data2, crc2, 108, crcSize)
          
 #         print "polys:", "[{}]".format( ", ".join("0x{:X}".format(x) for x in polyList) )
-        self.assertTrue( (inputPoly, False) in polyList )
+        self.assertTrue( PolyKey(inputPoly, False, 0, 108) in polyList )
 
-    def test_findXOR_crcmod_8_random3(self):
+    def test_findPolysXOR_crcmod_8_random3(self):
         dataSize = 64
         data =  int(random.random()*0xFFFFFFFFFFFFFFFF + 1)
         data2 = int(random.random()*0xFFFFFFFFFFFFFFFF + 1)
@@ -191,12 +182,12 @@ class RevHwCRCTest(unittest.TestCase):
 #         print "crc: {:X} {:X}".format( crc, crc2 )
           
         finder = RevHwCRC()
-        polyList = finder.findXOR(data, crc, data2, crc2, dataSize, crcSize)
+        polyList = finder.findPolysXOR(data, crc, data2, crc2, dataSize, crcSize)
           
 #         print "data: 0x{:X} 0x{:X} 0x{:X} 0x{:X} 0x{:X}".format( data, data2, inputPoly, regInit, xorOut )
 #         print "polys:", "[{}]".format( ", ".join("0x{:X}".format(x) for x in polyList) )
-        self.assertTrue( (inputPoly, False) in polyList )
-        
+        self.assertTrue( PolyKey(inputPoly, False, 0, dataSize) in polyList )
+
     def test_findSolution_empty(self):
         dataList = []
         finder = RevHwCRC()
@@ -318,7 +309,7 @@ class RevHwCRCTest(unittest.TestCase):
 #         print "found data:", foundCRC
         self.assertIn( CRCKey(inputPoly, reverse, regInit, -1, 0, dataSize ), foundCRC )
 
-    def test_findPolys_poly(self):
+    def test_findPolysInput_poly(self):
         dataList = []
         dataSize = 16
         crcSize = 8
@@ -342,7 +333,8 @@ class RevHwCRCTest(unittest.TestCase):
         dataList.append( (data2, crc2) )
           
         finder = RevHwCRC()
-        foundCRC = finder.findPolysNumbers(dataList, dataSize, crcSize, 0)
+        inputData = InputData(dataList, dataSize, crcSize)
+        foundCRC = finder.findPolysInput(inputData, 0)
           
 #         print "found data:", foundCRC
         self.assertIn( PolyKey(inputPoly, reverse, 0, dataSize ), foundCRC )
@@ -371,7 +363,8 @@ class RevHwCRCTest(unittest.TestCase):
         dataList.append( (data2, crc2) )
           
         finder = RevHwCRC()
-        foundCRC = finder.bruteForceNumbers(dataList, dataSize, crcSize, 0)
+        dInput = InputData(dataList, dataSize, crcSize)
+        foundCRC = finder.bruteForceInput(dInput, 0)
           
 #         print "found data:", foundCRC
         self.assertIn( CRCKey(inputPoly, reverse, regInit, xorOut, 0, dataSize ), foundCRC )
@@ -400,7 +393,8 @@ class RevHwCRCTest(unittest.TestCase):
         dataList.append( (data2, crc2) )
           
         finder = RevHwCRC()
-        foundCRC = finder.bruteForceNumbers(dataList, dataSize, crcSize, 0)
+        dInput = InputData(dataList, dataSize, crcSize)
+        foundCRC = finder.bruteForceInput(dInput, 0)
           
 #         print "found data:", foundCRC
         self.assertIn( CRCKey(inputPoly, reverse, regInit, xorOut, 0, dataSize ), foundCRC )
@@ -429,7 +423,8 @@ class RevHwCRCTest(unittest.TestCase):
         dataList.append( (data2, crc2) )
           
         finder = RevHwCRC()
-        foundCRC = finder.bruteForceNumbers(dataList, dataSize, crcSize, 0)
+        dInput = InputData(dataList, dataSize, crcSize)
+        foundCRC = finder.bruteForceInput(dInput, 0)
           
 #         print "found data:", foundCRC
         self.assertIn( CRCKey(inputPoly, reverse, regInit, xorOut, 0, dataSize ), foundCRC )
@@ -458,7 +453,8 @@ class RevHwCRCTest(unittest.TestCase):
         dataList.append( (data2, crc2) )
           
         finder = RevHwCRC()
-        foundCRC = finder.bruteForceNumbers(dataList, dataSize, crcSize, 0)
+        dInput = InputData(dataList, dataSize, crcSize)
+        foundCRC = finder.bruteForceInput(dInput, 0)
           
 #         print "found data:", foundCRC
         self.assertIn( CRCKey(inputPoly, reverse, regInit, xorOut, 0, dataSize ), foundCRC )

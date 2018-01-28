@@ -201,8 +201,28 @@ class RevModCRCTest(unittest.TestCase):
 #         print "polys: {:X}".format(inputPoly), "[{}]".format( ", ".join("(0x{:X} {})".format(pair[0], pair[1]) for pair in polyList) )
         self.assertIn( PolyKey(inputPoly, True, 0, dataSize), polyList )
     
-    #TODO: try fixing
-    def xxxtest_findCommon_crcmod16(self):
+    def test_findCommon_crcmod16buypass(self):
+        dataList = []
+        dataSize = 16
+        crcSize = 16
+        
+        crcFun = crcmod.predefined.mkCrcFun("crc-16-buypass")        ## init: 0, xor: 0, poly: 0x18005
+        
+        data = 0xABCD
+        crc  = crcFun( intToASCII(data) )
+        dataList.append( (data, crc) )
+        
+        data = data ^ 0x0010
+        crc  = crcFun( intToASCII(data) )
+        dataList.append( (data, crc) )
+        
+        finder = RevModCRC()
+        foundCRC = finder.findCommon(dataList, dataSize, crcSize, 0)
+        
+#         print "found:", foundCRC
+        self.assertIn( CRCKey(0x18005, False, 0x0, 0x0, 0, dataSize ), foundCRC )
+    
+    def test_findCommon_crcmod16(self):
         dataList = []
         dataSize = 16
         crcSize = 16
@@ -225,30 +245,8 @@ class RevModCRCTest(unittest.TestCase):
         foundCRC = finder.findCommon(dataList, dataSize, crcSize, 0)
           
 #         print "found:", foundCRC
-        self.assertIn( CRCKey(0x18005, False, 0x0, -1, -1, dataSize ), foundCRC )
-    
-    ## test case takes too long
-    def xxxtest_findCommon_crcmod16buypass(self):
-        dataList = []
-        dataSize = 16
-        crcSize = 16
-        
-        crcFun = crcmod.predefined.mkCrcFun("crc-16-buypass")        ## init: 0, xor: 0, poly: 0x18005
-        
-        data = 0xABCD
-        crc  = crcFun( intToASCII(data) )
-        dataList.append( (data, crc) )
-        
-        data = data ^ 0x0010
-        crc  = crcFun( intToASCII(data) )
-        dataList.append( (data, crc) )
-        
-        finder = RevModCRC(True)
-        foundCRC = finder.findCommon(dataList, dataSize, crcSize, 0)
-        
-#         print "found:", foundCRC
-        self.assertIn( CRCKey(0x18005, False, 0x0, -1, -1, dataSize ), foundCRC )
-     
+        self.assertIn( CRCKey(0x18005, True, 0x0, 0x0, 0, dataSize ), foundCRC )
+
         
  
 if __name__ == "__main__":

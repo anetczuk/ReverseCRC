@@ -26,48 +26,31 @@
 from crc.hwcrc import HwCRC
 from crc.divisioncrc import DivisionCRC
 from crc.modcrc import ModCRC
-from revcrc.hwcrcbackward import HwCRCBackward
-from revcrc.divisioncrcbackward import DivisionCRCBackward
 from revcrc.reverse import Reverse
 
     
 
-##
-##
-class BackwardReverse(Reverse):
-    
-    ## crcSize  -- size of crc in bits
-#     def __init__(self, crcSize, printProgress = None):
+
+class RevHwCRC(Reverse):
     def __init__(self, printProgress = None):
         Reverse.__init__(self, printProgress)
-        
-    def createBackwardCRCProcessor(self, dataMask, crc):
-        raise NotImplementedError
-    
-    
-## =========================================================================
-    
-    
-class RevHwCRC(BackwardReverse):
-    def __init__(self, printProgress = None):
-        BackwardReverse.__init__(self, printProgress)
 
     def createCRCProcessor(self):
         return HwCRC()
         
-    def createBackwardCRCProcessor(self, dataMask, crc):        
-        return HwCRCBackward( dataMask, crc )
+#     def createBackwardCRCProcessor(self, dataMask, crc):        
+#         return HwCRCBackward( dataMask, crc )
     
     
-class RevDivisionCRC(BackwardReverse):
+class RevDivisionCRC(Reverse):
     def __init__(self, printProgress = None):
-        BackwardReverse.__init__(self, printProgress)
+        Reverse.__init__(self, printProgress)
 
     def createCRCProcessor(self):
         return DivisionCRC()
         
-    def createBackwardCRCProcessor(self, dataMask, crc):     
-        return DivisionCRCBackward( dataMask, crc )
+#     def createBackwardCRCProcessor(self, dataMask, crc):     
+#         return DivisionCRCBackward( dataMask, crc )
     
     
 class RevModCRC(Reverse):

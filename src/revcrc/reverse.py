@@ -24,6 +24,9 @@ from crc.numbermask import NumberMask
 import sys
 import itertools
 from crc.crcproc import CRCKey, PolyKey
+from crc.hwcrc import HwCRC
+from crc.divisioncrc import DivisionCRC
+from crc.modcrc import ModCRC
 
 
 
@@ -373,5 +376,40 @@ class Reverse(object):
 
     def createCRCProcessor(self):
         raise NotImplementedError
+
+    
+    
+## ===================================================================
+
+
+
+class RevHwCRC(Reverse):
+    def __init__(self, printProgress = None):
+        Reverse.__init__(self, printProgress)
+
+    def createCRCProcessor(self):
+        return HwCRC()
+        
+#     def createBackwardCRCProcessor(self, dataMask, crc):        
+#         return HwCRCBackward( dataMask, crc )
+    
+    
+class RevDivisionCRC(Reverse):
+    def __init__(self, printProgress = None):
+        Reverse.__init__(self, printProgress)
+
+    def createCRCProcessor(self):
+        return DivisionCRC()
+        
+#     def createBackwardCRCProcessor(self, dataMask, crc):     
+#         return DivisionCRCBackward( dataMask, crc )
+    
+    
+class RevModCRC(Reverse):
+    def __init__(self, printProgress = None):
+        Reverse.__init__(self, printProgress)
+
+    def createCRCProcessor(self):
+        return ModCRC()
 
     

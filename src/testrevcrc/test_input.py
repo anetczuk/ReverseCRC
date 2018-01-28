@@ -36,11 +36,11 @@ __scriptdir__ = os.path.dirname(os.path.realpath(__file__))
 
 class InputDataTest(unittest.TestCase):
     def setUp(self):
-        # Called before the first testfunction is executed
+        # Called before testfunction is executed
         pass
  
     def tearDown(self):
-        # Called after the last testfunction was executed
+        # Called after testfunction was executed
         pass
 
     def test_convert(self):
@@ -57,11 +57,11 @@ class InputDataTest(unittest.TestCase):
  
 class DataParserTest(unittest.TestCase):
     def setUp(self):
-        # Called before the first testfunction is executed
+        # Called before testfunction is executed
         pass
  
     def tearDown(self):
-        # Called after the last testfunction was executed
+        # Called after testfunction was executed
         pass
 
     def test_parse_regular(self):

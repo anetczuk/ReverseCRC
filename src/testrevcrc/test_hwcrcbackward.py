@@ -40,11 +40,11 @@ __scriptdir__ = os.path.dirname(os.path.realpath(__file__))
   
 class HwCRCBackwardTest(unittest.TestCase):
     def setUp(self):
-        # Called before the first testfunction is executed
+        # Called before testfunction is executed
         pass
   
     def tearDown(self):
-        # Called after the last testfunction was executed
+        # Called after testfunction was executed
         pass
  
     def test_calculate_check(self):

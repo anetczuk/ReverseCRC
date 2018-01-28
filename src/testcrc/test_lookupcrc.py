@@ -29,11 +29,11 @@ from crc.lookupcrc import LookupCRC
 
 class LookupCRCTest(unittest.TestCase):
     def setUp(self):
-        # Called before the first testfunction is executed
+        # Called before testfunction is executed
         pass
  
     def tearDown(self):
-        # Called after the last testfunction was executed
+        # Called after testfunction was executed
         pass
       
     def test_calculate_2(self):

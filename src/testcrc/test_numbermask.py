@@ -30,11 +30,11 @@ from crc.numbermask import intToASCII, reverseBits, NumberMask,\
 
 class GlobalTest(unittest.TestCase):
     def setUp(self):
-        # Called before the first testfunction is executed
+        # Called before testfunction is executed
         pass
  
     def tearDown(self):
-        # Called after the last testfunction was executed
+        # Called after testfunction was executed
         pass
       
     def test_intToASCII(self):

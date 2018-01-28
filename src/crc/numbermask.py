@@ -83,7 +83,8 @@ class SubNumber(object):
         return intToASCII(self.data, self.size)
         
     def __repr__(self):
-        return "<SubNumber {} {} {}>".format(self.data, self.size, self.pos)
+        digits = int(math.ceil( float(self.size)/4 ))
+        return ("<SubNumber 0x{0:0" + str(digits) + "X}/{0} {1} {2}>").format(self.data, self.size, self.pos)
 
     def __eq__(self, other):
         if self.data != other.data:
@@ -259,17 +260,18 @@ class NumberMask:
     def toASCII(self):
         return intToASCII(self.dataNum)
     
-    def generateSubnumbers(self, maxPos = -1, maxLen = -1):
+    def generateSubnumbers(self, maxPos = -1, minLen = -1):
         valSet = set()
         retSet = set()
-        lenMask = 1
         if maxPos < 0:
             maxPos = self.dataSize-1
-        for l in xrange(self.dataSize):
-            xpos = min(self.dataSize-l, maxPos+1)
-            for x in xrange(xpos):
-                val = (self.dataNum >> x) &  lenMask
-                valLen = l+1
+        if minLen < 1:
+            minLen = 1
+        lenMask = (1 << minLen) - 1 
+        for valLen in xrange(minLen, self.dataSize+1):
+            xpos = min(self.dataSize-valLen, maxPos)
+            for x in xrange(xpos+1):
+                val = (self.dataNum >> x) & lenMask
                 t = (val, valLen)
                 if (t in valSet) == False:
                     valSet.add( t )
@@ -280,7 +282,7 @@ class NumberMask:
     
     def __repr__(self):
         digits = int(math.ceil( float(self.dataSize)/4 ))
-        return ("<NumberMask 0x{:0" + str(digits) + "X} {}>").format(self.dataNum, self.dataSize)
+        return ("<NumberMask 0x{0:0" + str(digits) + "X}/{0} {1}>").format(self.dataNum, self.dataSize)
 
     def __eq__(self, other):
         if self.dataNum != other.dataNum:

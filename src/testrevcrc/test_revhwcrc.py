@@ -188,103 +188,30 @@ class RevHwCRCTest(unittest.TestCase):
 #         print "polys:", "[{}]".format( ", ".join("0x{:X}".format(x) for x in polyList) )
         self.assertTrue( PolyKey(inputPoly, False, 0, dataSize) in polyList )
 
-    def test_findSolution_empty(self):
+    def test_findCommon8_empty(self):
         dataList = []
         finder = RevHwCRC()
-        foundCRC = finder.findSolution(dataList, 16, 16, 0)
+        foundCRC = finder.findCommon(dataList, 8, 8)
+        foundCRC = list( foundCRC )
+        self.assertEqual( foundCRC, [] )
+
+    def test_findCommon16_empty(self):
+        dataList = []
+        finder = RevHwCRC()
+        foundCRC = finder.findCommon(dataList, 16, 16, 0)
         self.assertEqual( foundCRC, set() )
         
-    def test_findSolution_one(self):
-        dataList = [(1,1)]
+    def test_findCommon_one(self):
+        dataList = [(2,1)]
         finder = RevHwCRC()
-        foundCRC = finder.findSolution(dataList, 16, 16, 0)
+        foundCRC = finder.findCommon(dataList, 16, 16, 0)
         self.assertEqual( foundCRC, set() )
 
-    def test_findCRCKey_8(self):
-        data =  0xC2
-        data2 = data ^ 0b00010000
-        dataSize = 8
-        inputPoly = 0x11D
-        regInit = 0x52
-        crcSize = 8
-         
-#         print "XXX {:X} {:X}".format( data, data2)
-         
-        crcProc = HwCRC()
-        crcProc.setRegisterInitValue(regInit)
-        crc = crcProc.calculate2(data, dataSize, inputPoly, crcSize)
-        crc2 = crcProc.calculate2(data2, dataSize, inputPoly, crcSize)
-         
-#         print "crc {:X} {:X}".format( crc, crc2)
-         
-        finder = RevHwCRC()
-        foundCRC = finder.findCRCKeyBackward(data, crc, data2, crc2, dataSize, crcSize, 48)
-         
-#         print "crc:", crcKeyList
-        self.assertIn( CRCKey(inputPoly, False, regInit, -1, 0, dataSize ), foundCRC )
-         
-    def test_findCRCKey_8_long(self):
-        dataSize = 32                           ## data size does not matter
-        inputPoly = 0x11D
-        crcSize = 8
-        data =  0xA53937CF
-        data2 = data ^ 0b00001000      ## data diff does not matter
-        regInit = 0xA5
-           
-        crcProc = HwCRC()
-        crcProc.setRegisterInitValue(regInit)
-        crc = crcProc.calculate2(data, dataSize, inputPoly, crcSize)
-        crc2 = crcProc.calculate2(data2, dataSize, inputPoly, crcSize)
-           
-        finder = RevHwCRC()
-        foundCRC = finder.findCRCKeyBackward(data, crc, data2, crc2, dataSize, crcSize)
- 
-#         print "crc:", crcKeyList
-        self.assertIn( CRCKey(inputPoly, False, regInit, -1, 0, dataSize ), foundCRC )
-         
-    def test_findCRCKey_8_long2(self):
-        dataSize = 32                           ## data size does not matter
-        inputPoly = 0x11D
-        crcSize = 8
-        inputVal =  0xA53937CF
-        inputVal2 = inputVal ^ 0b01001000      ## data diff does not matter
-        regInit = 0xA5
-           
-        crcProc = HwCRC()
-        crcProc.setRegisterInitValue(regInit)
-        crc = crcProc.calculate2(inputVal, dataSize, inputPoly, crcSize)
-        crc2 = crcProc.calculate2(inputVal2, dataSize, inputPoly, crcSize)
-           
-        finder = RevHwCRC()
-        foundCRC = finder.findCRCKeyBackward(inputVal, crc, inputVal2, crc2, dataSize, crcSize)
-  
-        self.assertIn( CRCKey(inputPoly, False, regInit, -1, 0, dataSize ), foundCRC )
-         
-    def test_findCRCKey_8_long3(self):
-        dataSize = 32                           ## data size does not matter
-        inputPoly = 0x1F51D
-        crcSize = 16
-        inputVal =  0xE2DCA53937CF
-        inputVal2 = inputVal ^ 0x7000      ## data diff does not matter
-        regInit = 0xF7A5
-        mask = (1 << dataSize) -1
-           
-        crcProc = HwCRC()
-        crcProc.setRegisterInitValue(regInit)
-        crc = crcProc.calculate2(inputVal&mask, dataSize, inputPoly, crcSize)
-        crc2 = crcProc.calculate2(inputVal2&mask, dataSize, inputPoly, crcSize)
-           
-        finder = RevHwCRC()
-        foundCRC = finder.findCRCKeyBackward(inputVal, crc, inputVal2, crc2, dataSize, crcSize)
- 
-#         print "crc:", crcKeyList
-        self.assertIn( CRCKey(inputPoly, False, regInit, -1, 0, dataSize ), foundCRC )
-        
-    def test_findSolution_c16d16_rev(self):
+    def test_findCommon_c16d16_rev(self):
         dataList = []
         dataSize = 16
-        crcSize = 8
-        inputPoly = 0x185
+        crcSize = 16
+        inputPoly = 0x18005
         regInit = 0x0
         xorOut = 0x0
         reverse = True
@@ -304,10 +231,125 @@ class RevHwCRCTest(unittest.TestCase):
         dataList.append( (data2, crc2) )
           
         finder = RevHwCRC()
-        foundCRC = finder.findSolution(dataList, dataSize, crcSize, 0)
+        foundCRC = finder.findCommon(dataList, dataSize, crcSize, 0)
           
 #         print "found data:", foundCRC
-        self.assertIn( CRCKey(inputPoly, reverse, regInit, -1, 0, dataSize ), foundCRC )
+        self.assertIn( CRCKey(inputPoly, reverse, regInit, xorOut, 0, dataSize ), foundCRC )
+        
+    def test_findCommonInput_8a(self):
+        dataList = []
+        
+        crcFun = crcmod.predefined.mkCrcFun("crc-8")        ## init: 0x0, xor: 0x0, poly: 0x107
+        
+        data = 0xAB
+        crc  = crcFun( intToASCII(data) )
+        dataList.append( (data, crc) )
+        
+        finder = RevHwCRC()
+        foundCRC = finder.findCommonInput( InputData(dataList, 8, 8) )
+        foundCRC = list( foundCRC )
+
+#         print "found:", foundCRC
+        self.assertIn( CRCKey(0x107, False, 0x0, 0x0, 0, 8), foundCRC )
+        
+    def test_findCommon_8b(self):
+        dataList = []
+        
+        crcFun = crcmod.predefined.mkCrcFun("crc-8")        ## init: 0x0, xor: 0x0, poly: 0x107
+        
+        data = 0xABCD
+        crc  = crcFun( intToASCII(data) )
+        dataList.append( (data, crc) )
+        
+        finder = RevHwCRC()
+        foundCRC = finder.findCommon(dataList, 16, 8)
+        foundCRC = list( foundCRC )
+
+#         print "found:", foundCRC
+        self.assertIn( CRCKey(0x107, False, 0x0, 0x0, 0, 16), foundCRC )
+
+    def test_findCommon_crc16buypass(self):
+        dataList = []
+         
+        crcFun = crcmod.predefined.mkCrcFun("crc-16-buypass")       ## p:0x18005 r:False i:0x0000 x:0x0000
+         
+        data = 0xDCBA4321
+        crc  = crcFun( intToASCII(data) )
+        dataList.append( (data, crc) )
+         
+        data = data ^ 0x0010
+        crc  = crcFun( intToASCII(data) )
+        dataList.append( (data, crc) )
+         
+        finder = RevHwCRC()
+        foundCRC = finder.findCommon(dataList, 32, 16)
+        foundCRC = list( foundCRC )
+         
+#         print "found:", foundCRC
+        self.assertIn( CRCKey(0x18005, False, 0x0, 0x0, 0, 32), foundCRC )
+        
+    #TODO: try to fix test
+    def xxxtest_findCommon_crc16(self):
+        dataList = []
+         
+        crcFun = crcmod.predefined.mkCrcFun("crc-16")       ## p:0x18005 r:True i:0x0000 x:0x0000
+         
+        data = 0x4B4D
+        crc  = crcFun( intToASCII(data) )
+        dataList.append( (0x42440000 | data, crc) )
+         
+        data = data ^ 0x0010
+        crc  = crcFun( intToASCII(data) )
+        dataList.append( (0x47440000 | data, crc) )
+         
+        finder = RevHwCRC()
+        foundCRC = finder.findCommon(dataList, 32, 16)
+        foundCRC = list( foundCRC )
+         
+#         print "found:", foundCRC
+        self.assertIn( CRCKey(0x18005, True, 0x0, 0x0, 0, 16), foundCRC )
+        
+    #TODO: try to fix test
+    def xxxtest_findCommon_crc16_d32(self):
+        dataList = []
+         
+        crcFun = crcmod.predefined.mkCrcFun("crc-16")       ## p:0x18005 r:True i:0x0000 x:0x0000
+         
+        data1 = 0x1234ABCD
+        crc1  = crcFun( intToASCII(data1) )
+        dataList.append( (data1, crc1) )
+         
+        data2 = data1 ^ 0x0010
+        crc2  = crcFun( intToASCII(data2) )
+        dataList.append( (data2, crc2) )
+         
+        finder = RevHwCRC()
+        foundCRC = finder.findCommon(dataList, 32, 16)
+        foundCRC = list( foundCRC )
+         
+#         print "found:", foundCRC
+        self.assertIn( CRCKey(0x18005, True, 0x0, 0x0, 0, 32), foundCRC )
+        
+    #TODO: try to fix test
+    def xxxtest_findCommon_crc16dnp(self):
+        dataList = []
+         
+        crcFun = crcmod.predefined.mkCrcFun("crc-16-dnp")        ## poly: 0x13D65, rev, init: 0xFFFF, xor: 0xFFFF 
+         
+        data = 0xABCD
+        crc  = crcFun( intToASCII(data) )
+        dataList.append( (data, crc) )
+         
+        data = data ^ 0x0010
+        crc  = crcFun( intToASCII(data) )
+        dataList.append( (data, crc) )
+         
+        finder = RevHwCRC()
+        foundCRC = finder.findCommon(dataList, 16, 16)
+        foundCRC = list( foundCRC )
+         
+#         print "found:", foundCRC
+        self.assertIn( CRCKey(0x13D65, True, 0xFFFF, 0xFFFF, 0, 16), foundCRC )
 
     def test_findPolysInput_poly(self):
         dataList = []

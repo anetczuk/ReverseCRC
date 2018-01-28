@@ -99,7 +99,7 @@ try:
 #         finder = RevDivisionCRC(True)
 #         finder = RevModCRC(True)
 #         finder = RevCRCCommon(True)
-        retList = finder.findSolutionInput(data, 48)
+        retList = finder.findCommonInput(data, 48)
         print "Discovered keys[{:}]:".format( len(retList) )
         for key in retList:
             print key

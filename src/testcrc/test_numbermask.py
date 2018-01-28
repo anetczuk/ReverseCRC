@@ -98,6 +98,22 @@ class GlobalTest(unittest.TestCase):
 
 
 
+class SubNumberTest(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+
+    def tearDown(self):
+        pass
+
+
+    def test_repr(self):
+        data = SubNumber(1, 2, 3)
+        self.assertEqual(data.__repr__(), "<SubNumber 0x1/1 2 3>")
+        
+
+        
 class NumberMaskTest(unittest.TestCase):
 
     def setUp(self):
@@ -205,6 +221,12 @@ class NumberMaskTest(unittest.TestCase):
 #         print "ret list:", subList
         self.assertEqual(subList, set([ SubNumber(0x1, 1, 0), SubNumber(0x1, 2, 0), 
                                         SubNumber(0x1, 3, 0), SubNumber(0x9, 4, 0) ]) )
+        
+    def test_generateSubnumbers_2len(self):
+        data = NumberMask(0x9, 4)
+        subList = data.generateSubnumbers(0, 4)
+#         print "ret list:", subList
+        self.assertEqual(subList, set([ SubNumber(0x9, 4, 0) ]) )
         
     def test_getMSB_zero(self):
         data = NumberMask(0xA, 0)

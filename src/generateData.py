@@ -74,7 +74,7 @@ try:
     xor = int(args.xor, 16)
     rev = args.reversed
     
-    print "## pres:{} ds:{} poly:0x{:X} rev:{} initcrx:0x{:X} xor:0x{:X}".format( preSize, dataSize, poly, rev, initCrc, xor )
+    print "## pres:{} ds:{} poly:0x{:X} rev:{} initcrc:0x{:X} xor:0x{:X}".format( preSize, dataSize, poly, rev, initCrc, xor )
     crc_func = crcmod.mkCrcFun(poly, rev=rev, initCrc=initCrc, xorOut=xor)
     
     dataFullSize = preSize+dataSize

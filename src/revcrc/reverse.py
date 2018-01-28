@@ -105,7 +105,7 @@ class Reverse(object):
         if (self.progress):
             print "List size: {} Data size: {} CRC size: {}".format(len(numbersList), inputData.dataSize, inputData.crcSize)
         
-        retList = []
+        retList = set()
         comb = list( itertools.combinations( numbersList, 2 ) )
         cLen = len(comb)
         
@@ -121,12 +121,14 @@ class Reverse(object):
             crc1 = numberPair1[1]
             data2 = numberPair2[0]
             crc2 = numberPair2[1]
+            
             keys = self.findPolysXOR(data1, crc1, data2, crc2, inputData.dataSize, inputData.crcSize, searchRange)
 
             if (self.progress):
-                print "Found polys:", keys
+                keysSet = set(keys)
+                print "Found polys:", keysSet
 
-            retList += keys
+            retList.update( keys )
             
         return retList
 

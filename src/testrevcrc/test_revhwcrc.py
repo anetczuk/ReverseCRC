@@ -192,13 +192,13 @@ class RevHwCRCTest(unittest.TestCase):
         dataList = []
         finder = RevHwCRC()
         foundCRC = finder.findSolution(dataList, 16, 16, 0)
-        self.assertEqual( foundCRC, [] )
+        self.assertEqual( foundCRC, set() )
         
     def test_findSolution_one(self):
         dataList = [(1,1)]
         finder = RevHwCRC()
         foundCRC = finder.findSolution(dataList, 16, 16, 0)
-        self.assertEqual( foundCRC, [] )
+        self.assertEqual( foundCRC, set() )
 
     def test_findCRCKey_8(self):
         data =  0xC2

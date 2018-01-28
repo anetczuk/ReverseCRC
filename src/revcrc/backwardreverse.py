@@ -48,9 +48,9 @@ class BackwardReverse(Reverse):
         
     def findSolution(self, dataList, dataSize, crcSize, searchRange = 0):
         if len(dataList) < 2:
-            return []
+            return set()
         
-        retList = []
+        retList = set()
         comb = list( itertools.combinations( dataList, 2 ) )
         cLen = len(comb)
         
@@ -68,14 +68,11 @@ class BackwardReverse(Reverse):
             crc2 = dataPair2[1]
             keys = self.findCRCKeyBackward(data1, crc1, data2, crc2, dataSize, crcSize, searchRange)
             
-            retList += keys
+            retList.update( keys )
             
         return retList
       
     def findCRCKeyBackward(self, data1, crc1, data2, crc2, dataSize, crcSize, searchRange=0):
-        if self.progress:
-            print "Checking {:X} {:X} xor {:X} {:X}, {} {}".format(data1, crc1, data2, crc2, dataSize, crcSize)
-        
         foundList = self.findPolysXOR( data1, crc1, data2, crc2, dataSize, crcSize, 0 )
         polyList = []
         for item in foundList:
@@ -94,7 +91,7 @@ class BackwardReverse(Reverse):
             poly = polyPair[0]
             polyMask = NumberMask(poly, crcSize)
             reversedMode = polyPair[1]
-            polyAdded = False
+#             polyAdded = False
             for ds in range(searchStart, dataSize+1):
                 ##print "Shifting:", data1, ds, searchStart, (dataSize+1), searchRange
                 d1 = NumberMask(data1, ds)
@@ -110,7 +107,9 @@ class BackwardReverse(Reverse):
                 backList2 = cb2.calculate(polyMask)
                 if len(backList2) < 1:
                     continue
-# 
+                
+                ## print "Back list:", backList1, backList2
+
                 backList = self.intersectBackLists(backList1, backList2)
                 if len(backList) < 1:
                     continue 
@@ -134,11 +133,13 @@ class BackwardReverse(Reverse):
                         sys.stdout.write("\r")
                         print "Found key:", thekey
                     retList.append( thekey )
-                    polyAdded = True
-            if polyAdded == False:
-                ret = CRCKey()
-                ret.poly = poly
-                retList.append(ret)
+#                     polyAdded = True
+                    
+#             if polyAdded == False:
+#                 ret = CRCKey()
+#                 ret.poly = poly
+#                 retList.append(ret)
+#                 print "Key not found", ret
                 
         return retList
     
@@ -186,12 +187,11 @@ class RevModCRC(Reverse):
     def __init__(self, printProgress = None):
         Reverse.__init__(self, printProgress)
 
-
     def findSolution(self, dataList, dataSize, crcSize, searchRange = 0):
         if len(dataList) < 2:
-            return []
+            return set()
         
-        retList = []
+        retList = set()
         comb = list( itertools.combinations( dataList, 2 ) )
         
         cLen = len(comb)
@@ -206,7 +206,7 @@ class RevModCRC(Reverse):
             crc2 = dataPair2[1]
             keys = self.findCRCKeyForward(data1, crc1, data2, crc2, dataSize, crcSize, searchRange)
             
-            retList += keys
+            retList.update( keys )
             
         return retList
     
@@ -258,10 +258,6 @@ class RevModCRC(Reverse):
         crc_func = CRCModCacheMap.instance.getFunction(crcKey)
 #         crc_func = crcmod.mkCrcFun(poly, rev=reverse, initCrc=initReg, xorOut=xorOut)
         return crc_func( data )
-
-
-    ### =========================================================
-
 
     def createCRCProcessor(self):
         return ModCRC()        

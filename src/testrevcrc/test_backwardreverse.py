@@ -144,13 +144,13 @@ class RevModCRCTest(unittest.TestCase):
         dataList = []
         finder = RevModCRC()
         foundCRC = finder.findSolution(dataList, 8, 8, 0)
-        self.assertEqual( foundCRC, [] )
+        self.assertEqual( foundCRC, set() )
         
     def test_findSolution_one(self):
         dataList = [(1,1)]
         finder = RevModCRC()
         foundCRC = finder.findSolution(dataList, 8, 8, 0)
-        self.assertEqual( foundCRC, [] )
+        self.assertEqual( foundCRC, set() )
         
     def test_findSolution_crc8(self):
         dataList = []

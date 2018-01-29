@@ -26,4 +26,6 @@ if [ $coverage -eq 0 ]; then
 else
     ## requires coverage.py
     coverage run -m main "${args[@]}"
+    ## generate html pages in htmlcov directory based on coverage data
+    coverage html
 fi

@@ -31,7 +31,7 @@ import logging
 import cProfile
 
 from revcrc.input import DataParser
-from revcrc.backwardreverse import RevHwCRC
+from revcrc.reverse import RevHwCRC
 
     
     
@@ -47,7 +47,7 @@ parser = argparse.ArgumentParser(description='Finding CRC algorithm from data')
 parser.add_argument('--mode', action='store', required=True, choices=["BF", "POLY", "COMMON"], help='Mode' )
 parser.add_argument('--file', action='store', required=True, help='File with data' )
 parser.add_argument('--profile', action='store_const', const=True, default=False, help='Profile the code' )
-parser.add_argument('--pfile', action='store', default=None, help='Profiler output file' )
+parser.add_argument('--pfile', action='store', default=None, help='Profile the code and output data to file' )
  
  
 args = parser.parse_args()

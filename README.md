@@ -21,6 +21,29 @@ Following techniques were used in the project:
 * Code coverage (Coverage.py)
 
 
+#### Profiler
+
+To run main application it needs to run one of following comands:
+* *find.sh {params} --profile*
+* *find.sh {params} --pfile={output file}*
+In first case output will be displayed on stdout. In second case output will be stored inside *{output file}*. 
+
+Tests can be run with profiler by one of following commands:
+* *test_runner.py {params} --profile*
+* *test_runner.py {params} --pfile={output file}*
+
+
+#### Code coverage
+
+Executing application with code coverage can be done by following call: *find.sh {params} --coverage*
+After the call _htmlcov_ directory will be created inside run directory.
+
+Running code coverage on tests is done by *test_runner.py*.
+Call command: *test_runner.py --coverage*
+As a result *htmlcov* directory will be created inside run directory.
+
+
+
 ### References
 
 * https://en.wikipedia.org/wiki/Cyclic_redundancy_check - general description of CRC algorithm

@@ -31,6 +31,7 @@ coverage=0
 repeats=1
 untilfailure=0
 runtest=""
+profile_output=""
 
 for i in "$@"; do
 case $i in
@@ -46,6 +47,9 @@ case $i in
     --coverage)             coverage=1
                             shift                   # past argument with no value
                             ;;
+    --pfile=*)              profile_output="${i#*=}"
+                            shift
+                            ;;
     *)                      ;;                      # unknown option
 esac
 done
@@ -55,22 +59,10 @@ done
 cd $SCRIPT_DIR
 
 
+
 function calltests {
-    if [ -n "$runtest" ]; then
-        if [ $coverage -ne 0 ]; then
-            coverage run -m unittest $runtest
-        else
-            python -m unittest $runtest
-        fi
-        err_code=$?
-    else
-        if [ $coverage -ne 0 ]; then
-            coverage run -m unittest discover $@
-        else
-            python -m unittest discover $@
-        fi
-        err_code=$?
-    fi 
+    python -m unittest $call_params
+    local err_code=$?
     if [ $err_code -ne 0 ]; then
         echo "Tests failed: $err_code"
         exit $err_code
@@ -78,16 +70,42 @@ function calltests {
 }
 
 
+call_params=""
+if [ -n "$runtest" ]; then
+    call_params="$runtest"
+else
+    call_params="discover $@"
+fi
+
+
 if [ $coverage -ne 0 ]; then
     ## run code coverage on tests
-    calltests
+    echo "Executing code coverage"
+    
+    coverage run -m unittest $call_params
+    err_code=$?
+    if [ $err_code -ne 0 ]; then
+        echo "Tests failed: $err_code"
+    fi
+    
+    ## generate html pages in htmlcov directory based on coverage data
+    coverage html
+    
     exit $err_code
 fi
+if [ -n "$profile_output" ]; then
+    echo "Profiler, unsupported"
+    ##python -m cProfile -m unittest discover
+    #python unittest.py discover
+    exit 1
+fi
+
 
 if [ $repeats -eq 1 ] && [ $untilfailure -eq 0 ]; then
     ## no repeating -- just single call
     calltests
-    exit $err_code
+    ## if call passed then no errors
+    exit 0
 fi
 
 
@@ -96,6 +114,11 @@ counter=0
 while [ $repeats -gt 0 ] || [ $untilfailure -ne 0 ]; do
     let counter=counter+1
     echo -e "\n\nTests iteration: $counter"
+    
     calltests
+    ## if call passed then no errors
+    
     let repeats=repeats-1 
 done
+
+exit 0

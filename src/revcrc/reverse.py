@@ -187,68 +187,87 @@ class Reverse(object):
         return retList
         
     def findCRC(self, subNum, crcMask):
+        dataMask = subNum.toNumberMask()
         retList = set()
         if crcMask.dataSize == 8:
-            self.checkCRC(subNum, crcMask, CRCKey(0x107, False, 0x0, 0x0), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x139, True, 0x0, 0x0), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x11D, False, 0xFD, 0x0), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x107, False, 0x55, 0x55), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x131, True, 0x0, 0x0), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x107, True, 0xFF, 0x0), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x19B, True, 0x0, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x107, False, 0x0, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x139, True, 0x0, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x11D, False, 0xFD, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x107, False, 0x55, 0x55), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x131, True, 0x0, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x107, True, 0xFF, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x19B, True, 0x0, 0x0), retList)
         elif crcMask.dataSize == 16:
-            self.checkCRC(subNum, crcMask, CRCKey(0x18005, True, 0x0, 0x0), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x18005, False, 0x0, 0x0), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x18005, False, 0x800D, 0x0), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x10589, False, 0x0001, 0x0001), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x13D65, True, 0xFFFF, 0xFFFF), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x13D65, False, 0xFFFF, 0xFFFF), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x11021, False, 0x0, 0xFFFF), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x18005, True, 0xFFFF, 0xFFFF), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x11021, True, 0xFFFF, 0x0), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x11021, True, 0x554D, 0x0), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x18BB7, False, 0x0, 0x0), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x1A097, False, 0x0, 0x0), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x18005, True, 0x0, 0xFFFF), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x11021, True, 0x0, 0xFFFF), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x11021, False, 0x0, 0x0), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x18005, True, 0xFFFF, 0x0), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x11021, True, 0x0, 0x0), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x11021, False, 0xFFFF, 0x0), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x11021, False, 0x1D0F, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x18005, True, 0x0, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x18005, False, 0x0, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x18005, False, 0x800D, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x10589, False, 0x0001, 0x0001), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x13D65, True, 0xFFFF, 0xFFFF), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x13D65, False, 0xFFFF, 0xFFFF), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x11021, False, 0x0, 0xFFFF), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x18005, True, 0xFFFF, 0xFFFF), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x11021, True, 0xFFFF, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x11021, True, 0x554D, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x18BB7, False, 0x0, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x1A097, False, 0x0, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x18005, True, 0x0, 0xFFFF), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x11021, True, 0x0, 0xFFFF), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x11021, False, 0x0, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x18005, True, 0xFFFF, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x11021, True, 0x0, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x11021, False, 0xFFFF, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x11021, False, 0x1D0F, 0x0), retList)
         elif crcMask.dataSize == 24:
-            self.checkCRC(subNum, crcMask, CRCKey(0x1864CFB, False, 0xB704CE, 0x0), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x15D6DCB, False, 0xFEDCBA, 0x0), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x15D6DCB, False, 0xABCDEF, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x1864CFB, False, 0xB704CE, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x15D6DCB, False, 0xFEDCBA, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x15D6DCB, False, 0xABCDEF, 0x0), retList)
         elif crcMask.dataSize == 32:
-            self.checkCRC(subNum, crcMask, CRCKey(0x104C11DB7, True, 0x0, 0xFFFFFFFF), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x104C11DB7, False, 0x0, 0xFFFFFFFF), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x11EDC6F41, True, 0x0, 0xFFFFFFFF), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x1A833982B, True, 0x0, 0xFFFFFFFF), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x104C11DB7, False, 0xFFFFFFFF, 0x0), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x104C11DB7, False, 0xFFFFFFFF, 0xFFFFFFFF), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x1814141AB, False, 0x0, 0x0), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x104C11DB7, True, 0xFFFFFFFF, 0x0), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x1000000AF, False, 0x0, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x104C11DB7, True, 0x0, 0xFFFFFFFF), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x104C11DB7, False, 0x0, 0xFFFFFFFF), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x11EDC6F41, True, 0x0, 0xFFFFFFFF), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x1A833982B, True, 0x0, 0xFFFFFFFF), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x104C11DB7, False, 0xFFFFFFFF, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x104C11DB7, False, 0xFFFFFFFF, 0xFFFFFFFF), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x1814141AB, False, 0x0, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x104C11DB7, True, 0xFFFFFFFF, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x1000000AF, False, 0x0, 0x0), retList)
         elif crcMask.dataSize == 64:
-            self.checkCRC(subNum, crcMask, CRCKey(0x1000000000000001B, True, 0x0, 0x0), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x142F0E1EBA9EA3693, False, 0x0, 0xFFFFFFFFFFFFFFFF), retList)
-            self.checkCRC(subNum, crcMask, CRCKey(0x1AD93D23594C935A9, True, 0xFFFFFFFFFFFFFFFF, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x1000000000000001B, True, 0x0, 0x0), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x142F0E1EBA9EA3693, False, 0x0, 0xFFFFFFFFFFFFFFFF), retList)
+            self.checkCRC(dataMask, crcMask, CRCKey(0x1AD93D23594C935A9, True, 0xFFFFFFFFFFFFFFFF, 0x0), retList)
         return retList
  
-    def checkCRC(self, subNum, crcMask, crcKey, retList):
-        ## subNum: SubNumber
+    def checkCRC(self, dataMask, crcMask, crcKey, retList):
+        ## dataMask: NumberMask
         ## crcMask: NumberMask
         ## crcKey: CRCKey
         
-        ##print "Checking data:", subNum, crc, crcMaskKey
+        ##print "Checking data:", dataMask, crc, crcMaskKey
     
         crcProc = self.createCRCProcessor()
         crcProc.setValues(crcKey)
         
-        polyCRC = crcProc.calculate2(subNum.data, subNum.size, crcKey.poly, crcMask.dataSize)
+        polyMask = NumberMask(crcKey.poly, crcMask.dataSize)
+        
+        polyCRC = crcProc.calculate3(dataMask, polyMask)
         if polyCRC == crcMask.dataNum:
             retList.add( crcKey )
+            ## we assume that if key was found then testing on reversed input will fail
+            return
+            
+        if crcKey.rev == False:
+            return
+        
+        #TODO: try to achieve compatibility without reversing 
+        ## check reversed input (crcmod compatibility)
+        crcProc.setInitCRC( crcKey.init, crcMask.dataSize )        
+        revDataMask = dataMask.reversedBytes()
+        polyMask.reverse()
+            
+        polyCRC = crcProc.calculate3(revDataMask, polyMask)
+        if polyCRC == crcMask.dataNum:
+            retList.add( crcKey )
+        
 
 
     ## ==========================================================

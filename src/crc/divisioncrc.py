@@ -69,6 +69,7 @@ class DivisionCRC(CRCProc):
     
     ## old implementation is very helpful when defining backward algorithm
     ## 'poly' without leading '1'
+    ## 'dataMask' and 'polyMask' have to be reversed
     def calculateLSB(self, dataMask, polyMask):
         ## LSB first
         

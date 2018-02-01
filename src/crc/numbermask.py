@@ -77,15 +77,18 @@ class SubNumber(object):
     def __init__(self, data, dataSize, pos):
         self.data = data
         self.size = dataSize
-        self.pos = pos
-        
+        self.pos = pos                              ## informative, do not affect data
+    
     def toASCII(self):
         return intToASCII(self.data, self.size)
-        
+    
+    def toNumberMask(self):
+        return NumberMask(self.data, self.size)
+    
     def __repr__(self):
         digits = int(math.ceil( float(self.size)/4 ))
         return ("<SubNumber 0x{0:0" + str(digits) + "X}/{0} {1} {2}>").format(self.data, self.size, self.pos)
-
+    
     def __eq__(self, other):
         if self.data != other.data:
             return False

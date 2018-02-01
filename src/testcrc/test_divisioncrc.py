@@ -207,6 +207,55 @@ class DivisionCRCTest(unittest.TestCase):
 #         print "values: {} poly:{:X} init:{:X} xorOut:{:08b} rev:{} crc:{:08b} crcmod:{:08b} crcxor:{:08b}".format( data, inputPoly, regInit, xorOut, reverse, crc, crcLib, crc^crcLib )
 #         self.assertEqual( crc, crcLib, "Data: {} 0x{:X} 0x{:X} 0x{:X} {}".format(data, inputPoly, regInit, xorOut, reverse ) )
         self.assertEqual( crc, crcLib )
+
+    def test_crcmod_c8d16_rev(self):
+        data = NumberMask(0xE3F2, 16)
+        inputPoly = NumberMask(0x1F0, 8)
+        regInit = 0x0
+        xorOut = 0x0
+        reverse = True
+ 
+        crc_func = crcmod.mkCrcFun(inputPoly.masterData(), rev=reverse, initCrc=regInit, xorOut=xorOut)
+        crcLib  = crc_func( data.toASCII() )
+#         print "crc: {:X} {:X}".format( crc, crc2 )
+        
+        crcProc = DivisionCRC()
+        crcProc.setReversed(reverse)
+        crcProc.setXorOutValue( xorOut )
+        crcProc.setRegisterInitValue( regInit )
+        
+        data.reverseBytes()
+        inputPoly.reverse()
+        
+        crc = crcProc.calculate3(data, inputPoly)
+          
+#         print "values: {} poly:{:X} init:{:X} xorOut:{:08b} rev:{} crc:{:08b} crcmod:{:08b} crcxor:{:08b}".format( data, inputPoly, regInit, xorOut, reverse, crc, crcLib, crc^crcLib )
+        self.assertEqual( crc, crcLib )
+        
+    def test_crcmod_c8d16_revB(self):
+        data = NumberMask(0xE3F2, 16)
+        inputPoly = NumberMask(0x1F0, 8)
+        regInit = 0x0
+        xorOut = 0x0
+        reverse = True
+ 
+        revInputPoly = inputPoly.reversed()
+        revData = data.reversedBytes()
+ 
+        crc_func = crcmod.mkCrcFun(revInputPoly.masterData(), rev=reverse, initCrc=regInit, xorOut=xorOut)
+        crcLib  = crc_func( revData.toASCII() )
+#         print "crc: {:X} {:X}".format( crc, crc2 )
+        
+        crcProc = DivisionCRC()
+        crcProc.setReversed(reverse)
+        crcProc.setXorOutValue( xorOut )
+        crcProc.setRegisterInitValue( regInit )
+#         crcProc.setInitCRC( regInit )
+        
+        crc = crcProc.calculate3(data, inputPoly)
+          
+#         print "values: {} poly:{:X} init:{:X} xorOut:{:08b} rev:{} crc:{:08b} crcmod:{:08b} crcxor:{:08b}".format( data, inputPoly, regInit, xorOut, reverse, crc, crcLib, crc^crcLib )
+        self.assertEqual( crc, crcLib )
         
     def test_crcmod_c8d64_zero(self):
         data = NumberMask(0x00, 8*random.randint(1, 8))

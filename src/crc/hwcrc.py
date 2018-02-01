@@ -59,6 +59,7 @@ class HwCRC(CRCProc):
         return (register ^ self.xorOut) & polyMask.dataMask
 
     ## 'poly' without leading '1'
+    ## 'dataMask' and 'polyMask' have to be reversed
     def calculateLSB(self, dataMask, polyMask):         
         register = self.registerInit
   

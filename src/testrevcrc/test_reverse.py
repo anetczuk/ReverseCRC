@@ -430,28 +430,7 @@ class ReverseBaseTest(object):
 #         print "found:", foundCRC
         self.assertIn( CRCKey(0x18005, False, 0x0, 0x0, 0, 32), foundCRC )
         
-    #TODO: try to fix test
-    def xxxtest_findCommon_crc16(self):
-        dataList = []
-         
-        crcFun = crcmod.predefined.mkCrcFun("crc-16")       ## p:0x18005 r:True i:0x0000 x:0x0000
-         
-        data = 0x4B4D
-        crc  = crcFun( intToASCII(data) )
-        dataList.append( (0x42440000 | data, crc) )
-         
-        data = data ^ 0x0010
-        crc  = crcFun( intToASCII(data) )
-        dataList.append( (0x47440000 | data, crc) )
-         
-        foundCRC = self.crcFinder.findCommon(dataList, 32, 16)
-        foundCRC = list( foundCRC )
-         
-#         print "found:", foundCRC
-        self.assertIn( CRCKey(0x18005, True, 0x0, 0x0, 0, 16), foundCRC )
-        
-    #TODO: try to fix test
-    def xxxtest_findCommon_crc16_d32(self):
+    def test_findCommon_crc16_d32(self):
         dataList = []
          
         crcFun = crcmod.predefined.mkCrcFun("crc-16")       ## p:0x18005 r:True i:0x0000 x:0x0000
@@ -470,8 +449,26 @@ class ReverseBaseTest(object):
 #         print "found:", foundCRC
         self.assertIn( CRCKey(0x18005, True, 0x0, 0x0, 0, 32), foundCRC )
         
-    #TODO: try to fix test
-    def xxxtest_findCommon_crc16dnp(self):
+    def test_findCommon_crc16_d32_subdata(self):
+        dataList = []
+         
+        crcFun = crcmod.predefined.mkCrcFun("crc-16")       ## p:0x18005 r:True i:0x0000 x:0x0000
+         
+        data = 0x4B4D
+        crc  = crcFun( intToASCII(data) )
+        dataList.append( (0x42440000 | data, crc) )
+         
+        data = data ^ 0x0010
+        crc  = crcFun( intToASCII(data) )
+        dataList.append( (0x47440000 | data, crc) )
+         
+        foundCRC = self.crcFinder.findCommon(dataList, 32, 16, 16)
+        foundCRC = list( foundCRC )
+         
+#         print "found:", foundCRC
+        self.assertIn( CRCKey(0x18005, True, 0x0, 0x0, 0, 16), foundCRC )
+    
+    def test_findCommon_crc16dnp(self):
         dataList = []
          
         crcFun = crcmod.predefined.mkCrcFun("crc-16-dnp")        ## poly: 0x13D65, rev, init: 0xFFFF, xor: 0xFFFF 

@@ -27,6 +27,7 @@ from crc.crcproc import CRCKey, PolyKey
 from crc.hwcrc import HwCRC
 from crc.divisioncrc import DivisionCRC
 from crc.modcrc import ModCRC
+import copy
 
 
 
@@ -354,20 +355,24 @@ class Reverse(object):
             print "Checking {:X} {:X} xor {:X} {:X}, {} {}".format(data1, crc1, data2, crc2, dataSize, crcSize)
         xorData = data1 ^ data2
         xorCRC = crc1 ^ crc2
-        dataCrc = MessageCRC(xorData, dataSize, xorCRC, crcSize)
+        dataMask = NumberMask(xorData, dataSize)
+        crcMask = NumberMask(xorCRC, crcSize)
+        
         polyList = []
-        polyList += self.findBruteForcePoly(dataCrc, False, searchRange)
-        polyList += self.findBruteForcePoly(dataCrc, True, searchRange)
+        polyList += self.findBruteForcePoly(dataMask, crcMask, False, searchRange)
+        polyList += self.findBruteForcePoly(dataMask, crcMask, True, searchRange)
+        
+        polyList += self.findBruteForcePolyReverse(dataMask, crcMask, searchRange)
+        
         return polyList
 
-    def findBruteForcePoly(self, dataCrc, reverseMode, searchRange = 0):
+    def findBruteForcePoly(self, dataMask, crcMask, reverseMode, searchRange = 0):
         crcProc = self.createCRCProcessor()
         crcProc.setReversed(reverseMode)
-        crc = dataCrc.crcNum
-        dataMask = dataCrc.dataMask()
-        poly = (0x1 << dataCrc.crcSize)
-        polyMax = (poly << 1) 
-        polyMask = dataCrc.crcMask()
+        crc = crcMask.dataNum
+        poly = (0x1 << crcMask.dataSize)
+        polyMax = (poly << 1)
+        polyMask = copy.deepcopy(crcMask)
         retList = []
         while poly < polyMax:
 #             if self.progress and (poly % 16384) == 16383:
@@ -381,9 +386,43 @@ class Reverse(object):
 #                 if self.progress:
 #                     sys.stdout.write("\r")
 #                     print "Found poly: 0b{0:b} 0x{0:X}".format(poly)
-                retList.append( PolyKey(poly, reverseMode, 0, dataCrc.dataSize) )
+                retList.append( PolyKey(poly, reverseMode, 0, dataMask.dataSize) )
+                
             poly += 1
-        
+                        
+        if self.progress:
+            sys.stdout.write("\r")
+            sys.stdout.flush()
+        return retList
+    
+    #TODO: try to achieve compatibility without reversing 
+    ## check reversed input and poly (crcmod compatibility)
+    def findBruteForcePolyReverse(self, dataMask, crcMask, searchRange = 0):
+        dataMask.reverseBytes()
+        crcProc = self.createCRCProcessor()
+        crcProc.setReversed(True)
+        crc = crcMask.dataNum
+        poly = (0x1 << crcMask.dataSize)
+        polyMax = (poly << 1)
+        polyMask = copy.deepcopy(crcMask)
+        retList = []
+        while poly < polyMax:
+#             if self.progress and (poly % 16384) == 16383:
+            if self.progress and (poly % 8192) == 8191:
+                sys.stdout.write("\r{:b}".format(poly))
+                sys.stdout.flush()
+
+            polyMask.setNumber(poly)
+            polyMask.reverse()
+            polyCRC = crcProc.calculate3(dataMask, polyMask)
+            if polyCRC == crc:
+#                 if self.progress:
+#                     sys.stdout.write("\r")
+#                     print "Found poly: 0b{0:b} 0x{0:X}".format(poly)
+                retList.append( PolyKey(poly, True, 0, dataMask.dataSize) )
+                
+            poly += 1
+
         if self.progress:
             sys.stdout.write("\r")
             sys.stdout.flush()

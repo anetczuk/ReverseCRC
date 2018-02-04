@@ -28,8 +28,7 @@ import crcmod
 from crc.numbermask import intToASCII
 import random
 from crc.hwcrc import HwCRC
-from crc.divisioncrc import DivisionCRC
-from revcrc.reverse import RevDivisionCRC, RevModCRC, RevHwCRC
+from revcrc.reverse import RevDivisionCRC, RevHwCRC
 from crc.crcproc import PolyKey, CRCKey
 from revcrc.input import InputData
 
@@ -175,7 +174,7 @@ class ReverseBaseTest(object):
         polyList = self.crcFinder.findPolysXOR(0x1234, 0xF1^xorOut, 0x1235, 0xF6^xorOut, 16, 8)
         self.assertTrue( PolyKey(0x107, False, 0, 16) in polyList )
     
-    def test_findPolysXOR_8_init_xorOut(self):
+    def test_findPolysXOR_c8_init_xorOut(self):
         dataSize = 42                           ## data size does not matter
         inputPoly = 0x1D5
         inputVal =  0xA53937CF
@@ -206,6 +205,27 @@ class ReverseBaseTest(object):
          
 #         print "polys:", "[{}]".format( ", ".join("0x{:X}".format(x) for x in polyList) )
         self.assertTrue( PolyKey(inputPoly, False, 0, 32) in polyList )
+        
+    def test_findPolysXOR_crcmod_8Arev_d32(self):
+        data  = 0xF90AD5FD
+        data2 =  data | 0xF
+        dataSize = 32
+        inputPoly = 0x10A
+        regInit = 0x00
+        xorOut = 0x00
+        crcSize = 8
+ 
+        crc_func = crcmod.mkCrcFun(inputPoly, rev=True, initCrc=regInit, xorOut=xorOut)
+        crc  = crc_func( intToASCII(data, dataSize) )
+        crc2 = crc_func( intToASCII(data2, dataSize) )
+#         print "crc: {:X} {:X}".format( crc, crc2 )
+#         print "data: {:X}/{:X} {:X}/{:X}".format( data, revData1, data2, revData2 )
+        
+        polyList = self.crcFinder.findPolysXOR(data, crc, data2, crc2, dataSize, crcSize)
+        
+#         revPoly = reverseBits(inputPoly, crcSize)
+#         print "polys: {:X}".format(inputPoly), "[{}]".format( ", ".join("(0x{:X} {})".format(pair[0], pair[1]) for pair in polyList) )
+        self.assertIn( PolyKey(inputPoly, True, 0, dataSize), polyList )
         
     def test_findPolysXOR_crcmod_8_random(self):
         data =  0xF90AD50D769553D3110A4535D37
@@ -411,7 +431,7 @@ class ReverseBaseTest(object):
          
         self.assertIn( CRCKey(0x107, False, 0x0, 0x0, 0, 16 ), foundCRC )
 
-    def test_findCommon_crc16buypass(self):
+    def test_findCommon_crc16buypass_d32(self):
         dataList = []
          
         crcFun = crcmod.predefined.mkCrcFun("crc-16-buypass")       ## p:0x18005 r:False i:0x0000 x:0x0000
@@ -606,8 +626,8 @@ class ReverseBaseTest(object):
 class RevHwCRCTest(unittest.TestCase, ReverseBaseTest):
     def setUp(self):
         # Called before testfunction is executed
-        self.crcProc = HwCRC()
         self.crcFinder = RevHwCRC()
+        self.crcProc = self.crcFinder.createCRCProcessor()
   
     def tearDown(self):
         # Called after testfunction was executed
@@ -617,104 +637,12 @@ class RevHwCRCTest(unittest.TestCase, ReverseBaseTest):
 class RevDivisionCRCTest(unittest.TestCase, ReverseBaseTest):
     def setUp(self):
         # Called before testfunction is executed
-        self.crcProc = DivisionCRC()
         self.crcFinder = RevDivisionCRC()
+        self.crcProc = self.crcFinder.createCRCProcessor()
   
     def tearDown(self):
         # Called after testfunction was executed
         pass
-
-
-#TODO: uncomment
-# class RevModCRCTest(unittest.TestCase, ReverseBaseTest):
-#     def setUp(self):
-#         # Called before testfunction is executed
-#         self.crcProc = ModCRC()
-#         self.crcFinder = RevModCRC()
-#    
-#     def tearDown(self):
-#         # Called after testfunction was executed
-#         pass
-
-
-#TODO: move tests to ReverseBaseTest
-class RevModCRC2Test(unittest.TestCase):
-
-    def setUp(self):
-        # Called before testfunction is executed
-        pass
-  
-    def tearDown(self):
-        # Called after testfunction was executed
-        pass
-
-    def test_findPolysXOR_crcmod_8Arev(self):
-        data =  0xF90AD5FF
-        data2 = 0xF90AD5FD
-        dataSize = 32
-        inputPoly = 0x10A
-        regInit = 0x00
-        xorOut = 0x00
-        crcSize = 8
- 
-        crc_func = crcmod.mkCrcFun(inputPoly, rev=True, initCrc=regInit, xorOut=xorOut)
-        crc  = crc_func( intToASCII(data) )
-        crc2 = crc_func( intToASCII(data2) )
-#         print "crc: {:X} {:X}".format( crc, crc2 )
-#         print "data: {:X}/{:X} {:X}/{:X}".format( data, revData1, data2, revData2 )
-        
-        finder = RevModCRC()
-        polyList = finder.findPolysXOR(data, crc, data2, crc2, dataSize, crcSize)
-        
-#         revPoly = reverseBits(inputPoly, crcSize)
-#         print "polys: {:X}".format(inputPoly), "[{}]".format( ", ".join("(0x{:X} {})".format(pair[0], pair[1]) for pair in polyList) )
-        self.assertIn( PolyKey(inputPoly, True, 0, dataSize), polyList )
-        
-    def test_findCommon_crcmod16buypass(self):
-        dataList = []
-        dataSize = 16
-        crcSize = 16
-        
-        crcFun = crcmod.predefined.mkCrcFun("crc-16-buypass")        ## init: 0, xor: 0, poly: 0x18005
-        
-        data = 0xABCD
-        crc  = crcFun( intToASCII(data) )
-        dataList.append( (data, crc) )
-        
-        data = data ^ 0x0010
-        crc  = crcFun( intToASCII(data) )
-        dataList.append( (data, crc) )
-        
-        finder = RevModCRC()
-        foundCRC = finder.findCommon(dataList, dataSize, crcSize, 0)
-        
-#         print "found:", foundCRC
-        self.assertIn( CRCKey(0x18005, False, 0x0, 0x0, 0, dataSize ), foundCRC )
-    
-    def test_findCommon_crcmod16(self):
-        dataList = []
-        dataSize = 16
-        crcSize = 16
-          
-        crcFun = crcmod.predefined.mkCrcFun("crc-16")        ## init: 0, xor: 0, rev, poly: 0x18005
-          
-        data1 = 0xABCD
-        crc1  = crcFun( intToASCII(data1) )
-#         revData1 = reverseBytes(data1)
-#         dataList.append( (revData1, crc1) )
-        dataList.append( (data1, crc1) )
-          
-        data2 = data1 ^ 0x0010
-        crc2  = crcFun( intToASCII(data2) )
-#         revData2 = reverseBytes(data2)
-#         dataList.append( (revData2, crc2) )
-        dataList.append( (data2, crc2) )
-          
-        finder = RevModCRC()
-        foundCRC = finder.findCommon(dataList, dataSize, crcSize, 0)
-          
-#         print "found:", foundCRC
-        self.assertIn( CRCKey(0x18005, True, 0x0, 0x0, 0, dataSize ), foundCRC )
 
 
 

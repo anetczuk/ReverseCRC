@@ -28,6 +28,7 @@ import argparse
 import cProfile
 import subprocess
 import coverage
+import os
 
 
 ## ============================= main section ===================================
@@ -45,23 +46,27 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     
+    coverageData = None
+    ## start code coverage
+    if args.coverage == True:
+        print "Executing code coverage"
+        currScript = os.path.realpath(__file__)
+        coverageData = coverage.Coverage(omit=currScript)
+        ##coverageData.load()
+        coverageData.start()
+        
+        
     if len(args.runtest) > 0:
         suite = unittest.TestLoader().loadTestsFromName( args.runtest )
     else:
-        suite = unittest.TestLoader().discover('.')  
+        suite = unittest.TestLoader().discover('.')
+        
 
-    testsRepeats=int(args.repeat)
+    testsRepeats = int(args.repeat)
 
-    coverageData = None
     profiler = None
 
     try:
-        ## start code coverage
-        if args.coverage == True:
-            print "Executing code coverage"
-            coverageData = coverage.Coverage()
-            coverageData.start()
-
         ## start code profiler
         profiler_outfile = args.pfile
         if args.profile == True or profiler_outfile != None:
@@ -111,4 +116,5 @@ if __name__ == '__main__':
             coverageData.stop()
             coverageData.save()
             coverageData.html_report()
+
         

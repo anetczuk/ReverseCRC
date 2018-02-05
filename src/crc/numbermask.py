@@ -135,34 +135,6 @@ def generateSubstringsReverse(dataString, maxPos = -1):
                 retSet.add( SubNumber(substr, subLen, length-subLen-x) )
     return retSet
 
-
-
-# class RawNumber(object):
-#     def __init__(self, data, dataSize):
-#         self.dataSize = dataSize
-#         self.setNumber(data)
-#         
-#     def setNumber(self, newValue):
-#         self.dataNum = (newValue & ((0b1 << self.dataSize)-1) )
-#         
-#     def __repr__(self):
-#         digits = int(math.ceil( float(self.dataSize)/4 ))
-#         return ("<RawNumber 0x{:0" + str(digits) + "X} {}>").format(self.dataNum, self.dataSize)
-# 
-#     def __eq__(self, other):
-#         if self.dataNum != other.dataNum:
-#             return False
-#         if self.dataSize != other.dataSize:
-#             return False
-#         return True
-#     
-#     def __ne__(self, other):
-#         return ((self == other) == False)
-#     
-#     def __hash__(self):
-#         return hash( (self.dataSize, self.dataNum) )
-
-
     
 class NumberMask:
     def __init__(self, data, dataSize):
@@ -172,6 +144,7 @@ class NumberMask:
     
     def setNumber(self, newValue):
         self.dataNum = (newValue & (self.dataMask))
+        self.revDataBytes = None
     
     def calculateCache(self):
         self.masterBit = 0b1 << self.dataSize
@@ -183,11 +156,13 @@ class NumberMask:
     def pushMSB(self, bit):
         if bit > 0:
             self.dataNum |= self.masterBit
+            self.revDataBytes = None
         self.dataSize += 1
         self.calculateCache()
         
     def pushLSB(self, bit):
         self.dataNum <<= 1
+        self.revDataBytes = None
         if bit > 0:
             self.dataNum |= 1
         self.dataSize += 1
@@ -195,11 +170,13 @@ class NumberMask:
         
     def pushLSZeros(self, num):
         self.dataNum <<= num
+        self.revDataBytes = None
         self.dataSize += num
         self.calculateCache()
         
     def popLSZeros(self, num):
         self.dataNum >>= num
+        self.revDataBytes = None
         self.dataSize -= num
         self.calculateCache()
         
@@ -230,10 +207,13 @@ class NumberMask:
     
     def reverse(self):
         self.dataNum = reverseBits(self.dataNum, self.dataSize)
+        self.revDataBytes = None
         
     def reverseBytes(self):
-        bytesNum = int(math.ceil( float(self.dataSize)/8 ))
-        self.dataNum = reverseBytes(self.dataNum, bytesNum)
+        self._calcRevBytes()
+        tmpData = self.dataNum
+        self.dataNum = self.revDataBytes
+        self.revDataBytes = tmpData
 
     def reversed(self):
         revData = copy.deepcopy(self)
@@ -241,9 +221,8 @@ class NumberMask:
         return revData
     
     def reversedBytes(self):
-        revData = copy.deepcopy(self)
-        revData.reverseBytes()
-        return revData
+        self._calcRevBytes()
+        return NumberMask(self.revDataBytes, self.dataSize)
     
     def getMSB(self, length):
         retVal = 0
@@ -299,4 +278,10 @@ class NumberMask:
     
     def __hash__(self):
         return hash( (self.dataSize, self.dataNum) )
+    
+    def _calcRevBytes(self):
+        if self.revDataBytes != None:
+            return
+        bytesNum = int(math.ceil( float(self.dataSize)/8 ))
+        self.revDataBytes = reverseBytes(self.dataNum, bytesNum)
     

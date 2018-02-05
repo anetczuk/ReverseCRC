@@ -60,6 +60,7 @@ class Reverse(object):
             self.progress = False
         else:
             self.progress = printProgress
+        self.crcProc = self.createCRCProcessor()
     
     def setReturnOnFirst(self):
         self.returnFirst = True
@@ -245,12 +246,11 @@ class Reverse(object):
         
         ##print "Checking data:", dataMask, crc, crcMaskKey
     
-        crcProc = self.createCRCProcessor()
-        crcProc.setValues(crcKey)
+        self.crcProc.setValues(crcKey)
         
         polyMask = NumberMask(crcKey.poly, crcMask.dataSize)
         
-        polyCRC = crcProc.calculate3(dataMask, polyMask)
+        polyCRC = self.crcProc.calculate3(dataMask, polyMask)
         if polyCRC == crcMask.dataNum:
             retList.add( crcKey )
             ## we assume that if key was found then testing on reversed input will fail
@@ -261,11 +261,11 @@ class Reverse(object):
         
         #TODO: try to achieve compatibility without reversing 
         ## check reversed input (crcmod compatibility)
-        crcProc.setInitCRC( crcKey.init, crcMask.dataSize )        
+        self.crcProc.setInitCRC( crcKey.init, crcMask.dataSize )        
         revDataMask = dataMask.reversedBytes()
         polyMask.reverse()
             
-        polyCRC = crcProc.calculate3(revDataMask, polyMask)
+        polyCRC = self.crcProc.calculate3(revDataMask, polyMask)
         if polyCRC == crcMask.dataNum:
             retList.add( crcKey )
         
@@ -301,8 +301,7 @@ class Reverse(object):
         return retList
 
     def findBruteForceParams(self, dataCrc1, dataCrc2, polyKey):
-        crcProc = self.createCRCProcessor()
-        crcProc.setReversed( polyKey.rev )
+        self.crcProc.setReversed( polyKey.rev )
          
         crcSize = dataCrc1.crcSize
         dataMask1 = dataCrc1.dataMask()
@@ -322,18 +321,18 @@ class Reverse(object):
                 sys.stdout.write("\r{:b}".format(initVal))
                 sys.stdout.flush()
                 
-            crcProc.setRegisterInitValue( initVal )
+            self.crcProc.setRegisterInitValue( initVal )
             
             xorVal = -1
             while xorVal < paramMax:
                 xorVal += 1
 
-                crcProc.setXorOutValue( xorVal )
+                self.crcProc.setXorOutValue( xorVal )
                 
-                polyCRC = crcProc.calculate3(dataMask1, polyMask)
+                polyCRC = self.crcProc.calculate3(dataMask1, polyMask)
                 if polyCRC != crc1:
                     continue
-                polyCRC = crcProc.calculate3(dataMask2, polyMask)
+                polyCRC = self.crcProc.calculate3(dataMask2, polyMask)
                 if polyCRC != crc2:
                     continue
                 
@@ -367,8 +366,7 @@ class Reverse(object):
         return polyList
 
     def findBruteForcePoly(self, dataMask, crcMask, reverseMode, searchRange = 0):
-        crcProc = self.createCRCProcessor()
-        crcProc.setReversed(reverseMode)
+        self.crcProc.setReversed(reverseMode)
         crc = crcMask.dataNum
         poly = (0x1 << crcMask.dataSize)
         polyMax = (poly << 1)
@@ -381,7 +379,7 @@ class Reverse(object):
                 sys.stdout.flush()
 
             polyMask.setNumber(poly)
-            polyCRC = crcProc.calculate3(dataMask, polyMask)
+            polyCRC = self.crcProc.calculate3(dataMask, polyMask)
             if polyCRC == crc:
 #                 if self.progress:
 #                     sys.stdout.write("\r")
@@ -399,8 +397,7 @@ class Reverse(object):
     ## check reversed input and poly (crcmod compatibility)
     def findBruteForcePolyReverse(self, dataMask, crcMask, searchRange = 0):
         dataMask.reverseBytes()
-        crcProc = self.createCRCProcessor()
-        crcProc.setReversed(True)
+        self.crcProc.setReversed(True)
         crc = crcMask.dataNum
         poly = (0x1 << crcMask.dataSize)
         polyMax = (poly << 1)
@@ -414,7 +411,7 @@ class Reverse(object):
 
             polyMask.setNumber(poly)
             polyMask.reverse()
-            polyCRC = crcProc.calculate3(dataMask, polyMask)
+            polyCRC = self.crcProc.calculate3(dataMask, polyMask)
             if polyCRC == crc:
 #                 if self.progress:
 #                     sys.stdout.write("\r")

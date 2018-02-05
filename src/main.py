@@ -116,6 +116,7 @@ finally:
         else:
             print "Storing profiler data to", profiler_outfile
             profiler.dump_stats( profiler_outfile )
+            print "pyprof2calltree -k -i", profiler_outfile
         
     timeDiff = (time.time()-starttime)*1000.0
     print "Calculation time: {:13.8f}ms".format(timeDiff)

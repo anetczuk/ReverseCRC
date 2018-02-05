@@ -143,7 +143,10 @@ class NumberMask:
         self.setNumber(data)
     
     def setNumber(self, newValue):
-        self.dataNum = (newValue & (self.dataMask))
+        #self.dataNum = (newValue & (self.dataMask))
+        self.dataNum = newValue
+        if self.dataNum > self.dataMask:
+            self.dataNum &= self.dataMask
         self.revDataBytes = None
     
     def calculateCache(self):
@@ -219,6 +222,9 @@ class NumberMask:
         revData = copy.deepcopy(self)
         revData.reverse()
         return revData
+    
+    def reversedData(self):
+        return reverseBits(self.dataNum, self.dataSize)
     
     def reversedBytes(self):
         self._calcRevBytes()

@@ -368,8 +368,8 @@ class Reverse(object):
     def findBruteForcePoly(self, dataMask, crcMask, reverseMode, searchRange = 0):
         self.crcProc.setReversed(reverseMode)
         crc = crcMask.dataNum
-        poly = (0x1 << crcMask.dataSize)
-        polyMax = (poly << 1)
+        poly = 0
+        polyMax = crcMask.masterBit
         polyMask = copy.deepcopy(crcMask)
         retList = []
         while poly < polyMax:
@@ -384,7 +384,7 @@ class Reverse(object):
 #                 if self.progress:
 #                     sys.stdout.write("\r")
 #                     print "Found poly: 0b{0:b} 0x{0:X}".format(poly)
-                retList.append( PolyKey(poly, reverseMode, 0, dataMask.dataSize) )
+                retList.append( PolyKey(poly| polyMax, reverseMode, 0, dataMask.dataSize) )
                 
             poly += 1
                         
@@ -399,8 +399,8 @@ class Reverse(object):
         dataMask.reverseBytes()
         self.crcProc.setReversed(True)
         crc = crcMask.dataNum
-        poly = (0x1 << crcMask.dataSize)
-        polyMax = (poly << 1)
+        poly = 0
+        polyMax = crcMask.masterBit
         polyMask = copy.deepcopy(crcMask)
         retList = []
         while poly < polyMax:
@@ -410,13 +410,13 @@ class Reverse(object):
                 sys.stdout.flush()
 
             polyMask.setNumber(poly)
-            polyMask.reverse()
             polyCRC = self.crcProc.calculate3(dataMask, polyMask)
             if polyCRC == crc:
 #                 if self.progress:
 #                     sys.stdout.write("\r")
 #                     print "Found poly: 0b{0:b} 0x{0:X}".format(poly)
-                retList.append( PolyKey(poly, True, 0, dataMask.dataSize) )
+                revPoly = polyMask.reversedData() | polyMax
+                retList.append( PolyKey(revPoly, True, 0, dataMask.dataSize) )
                 
             poly += 1
 

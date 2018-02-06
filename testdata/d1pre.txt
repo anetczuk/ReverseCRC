@@ -1,0 +1,6 @@
+## call command: ./generateData.py --samples=4 --datasize=20 --preamblesize=6 --poly=0x1ABCD
+## pres:6 ds:20 poly:0x1ABCD rev:False initcrc:0x0 xor:0x0
+FB6646D68C0595BD86177F24A1 E4A8
+3F0F4EDB2B1F6CEA7DC30C9545 127B
+C7B7B0B8CB1408657534294FA5 B6FB
+BD2416E6DAF743328C0A8C1A72 AB5C

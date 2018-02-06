@@ -1,0 +1,5 @@
+## pres:0 ds:4 poly:0x1ABCD rev:False initcrc:0x0 xor:0x0
+82DB EB8C
+DE91 45C5
+379D B787
+A6B8 EBAA

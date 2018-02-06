@@ -28,6 +28,7 @@ from crc.hwcrc import HwCRC
 from crc.divisioncrc import DivisionCRC
 from crc.modcrc import ModCRC
 import copy
+from collections import Counter
 
 
 
@@ -110,7 +111,8 @@ class Reverse(object):
         if (self.progress):
             print "List size: {} Data size: {} CRC size: {}".format(len(numbersList), inputData.dataSize, inputData.crcSize)
         
-        retList = set()
+        ##retList = set()
+        retList = Counter()
         comb = list( itertools.combinations( numbersList, 2 ) )
         cLen = len(comb)
         
@@ -350,10 +352,10 @@ class Reverse(object):
         return retList
     
     def findPolysXOR(self, data1, crc1, data2, crc2, dataSize, crcSize, searchRange = 0):
-        if self.progress:
-            print "Checking {:X} {:X} xor {:X} {:X}, {} {}".format(data1, crc1, data2, crc2, dataSize, crcSize)
         xorData = data1 ^ data2
         xorCRC = crc1 ^ crc2
+        if self.progress:
+            print "Checking {:X} {:X} xor {:X} {:X} = {:X} {:X}, {} {}".format(data1, crc1, data2, crc2, xorData, xorCRC, dataSize, crcSize)
         dataMask = NumberMask(xorData, dataSize)
         crcMask = NumberMask(xorCRC, crcSize)
         
@@ -375,7 +377,7 @@ class Reverse(object):
         while poly < polyMax:
 #             if self.progress and (poly % 16384) == 16383:
             if self.progress and (poly % 8192) == 8191:
-                sys.stdout.write("\r{:b}".format(poly))
+                sys.stdout.write("\r{:b}".format(poly | polyMax))
                 sys.stdout.flush()
 
             polyMask.setNumber(poly)
@@ -384,7 +386,7 @@ class Reverse(object):
 #                 if self.progress:
 #                     sys.stdout.write("\r")
 #                     print "Found poly: 0b{0:b} 0x{0:X}".format(poly)
-                retList.append( PolyKey(poly| polyMax, reverseMode, 0, dataMask.dataSize) )
+                retList.append( PolyKey(poly|polyMax, reverseMode, 0, dataMask.dataSize) )
                 
             poly += 1
                         
@@ -406,7 +408,7 @@ class Reverse(object):
         while poly < polyMax:
 #             if self.progress and (poly % 16384) == 16383:
             if self.progress and (poly % 8192) == 8191:
-                sys.stdout.write("\r{:b}".format(poly))
+                sys.stdout.write("\r{:b}".format(poly | polyMax))
                 sys.stdout.flush()
 
             polyMask.setNumber(poly)

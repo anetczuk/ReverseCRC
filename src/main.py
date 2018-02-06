@@ -80,9 +80,12 @@ try:
 #         finder = RevModCRC(True)
 #         finder = RevCRCCommon(True)
         retList = finder.bruteForceInput(data, 48)
-        print "Discovered keys[{:}]:".format( len(retList) )
-        for key in retList:
-            print key
+        if len(retList) < 1:
+            print "No keys discovered"
+        else:
+            print "Discovered keys[{:}]:".format( len(retList) )
+            for key in retList:
+                print key
     elif args.mode == "POLY":
         ## find polygons by xor-ing data pairs
         finder = RevHwCRC(True)
@@ -90,9 +93,12 @@ try:
 #         finder = RevModCRC(True)
 #         finder = RevCRCCommon(True)
         retList = finder.findPolysInput(data, 48)
-        print "Discovered polys[{:}]:".format( len(retList) )
-        for poly in retList:
-            print poly
+        if len(retList) < 1:
+            print "No polys discovered"
+        else:
+            print "Discovered polys[{:}]:".format( len(retList) )
+            for poly in retList.most_common():
+                print poly[0], poly[1]
     elif args.mode == "COMMON":
         ## finding full key by backward algorithm
         finder = RevHwCRC(True)
@@ -100,9 +106,12 @@ try:
 #         finder = RevModCRC(True)
 #         finder = RevCRCCommon(True)
         retList = finder.findCommonInput(data, 48)
-        print "Discovered keys[{:}]:".format( len(retList) )
-        for key in retList:
-            print key
+        if len(retList) < 1:
+            print "No keys discovered"
+        else:
+            print "Discovered keys[{:}]:".format( len(retList) )
+            for key in retList:
+                print key
     else:
         print "Invalid mode:", args.mode
         sys.exit(1)

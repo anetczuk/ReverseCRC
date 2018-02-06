@@ -74,21 +74,23 @@ try:
     xor = int(args.xor, 16)
     rev = args.reversed
     
+    print "## call command: {}".format( ' '.join(sys.argv[:]) )
     print "## pres:{} ds:{} poly:0x{:X} rev:{} initcrc:0x{:X} xor:0x{:X}".format( preSize, dataSize, poly, rev, initCrc, xor )
+    
     crc_func = crcmod.mkCrcFun(poly, rev=rev, initCrc=initCrc, xorOut=xor)
     
-    dataFullSize = preSize+dataSize
-    dataFormat = "{:0" + str(dataFullSize/4) + "X}"
+    preambleFormat = "{}"
+    dataFormat = "{:0" + str(dataSize/4) + "X}"
     polyFormat = "{:0" + str(polySize/4) + "X}"
-    messageFormat = dataFormat + " " + polyFormat
+    messageFormat = preambleFormat + dataFormat + " " + polyFormat
     
     for _ in xrange(0, samples):
         preamble = randomHexString(preSize)
         data = randomHexString(dataSize)
-        messageNum = int(preamble + data, 16)
-        messageMask = NumberMask( messageNum, dataFullSize*4 )
+        messageNum = int(data, 16)
+        messageMask = NumberMask( messageNum, dataSize*4 )
         polyCRC  = crc_func( messageMask.toASCII() )
-        print messageFormat.format(messageMask.dataNum, polyCRC)
+        print messageFormat.format(preamble, messageMask.dataNum, polyCRC)
     
 finally:
     pass

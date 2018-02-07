@@ -57,7 +57,7 @@ class CRCKey:
         self.rev = rev
         self.init = init
         self.xor = xor
-        self.dataPos = dataPos
+        self.dataPos = dataPos              ## counts starting from LSB
         self.dataLen = dataLen
 
     def __repr__(self):

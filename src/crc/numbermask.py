@@ -77,7 +77,7 @@ class SubNumber(object):
     def __init__(self, data, dataSize, pos):
         self.data = data
         self.size = dataSize
-        self.pos = pos                              ## informative, do not affect data
+        self.pos = pos                              ## informative, do not affect data, counts from LSB
     
     def toASCII(self):
         return intToASCII(self.data, self.size)

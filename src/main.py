@@ -48,6 +48,8 @@ parser.add_argument('--mode', action='store', required=True, choices=["BF", "POL
 parser.add_argument('--file', action='store', required=True, help='File with data' )
 parser.add_argument('--profile', action='store_const', const=True, default=False, help='Profile the code' )
 parser.add_argument('--pfile', action='store', default=None, help='Profile the code and output data to file' )
+parser.add_argument('--mindsize', action='store', default=1, help='Minimal data size' )
+
  
  
 args = parser.parse_args()
@@ -72,6 +74,7 @@ try:
     dataParser = DataParser()
     data = dataParser.parseFile(args.file)
 
+    minSearchData = int(args.mindsize)
     
     if   args.mode == "BF":
         ## finding full key by forward algorithm
@@ -79,7 +82,7 @@ try:
 #         finder = RevDivisionCRC(True)
 #         finder = RevModCRC(True)
 #         finder = RevCRCCommon(True)
-        retList = finder.bruteForceInput(data, 48)
+        retList = finder.bruteForceInput(data, minSearchData)
         if len(retList) < 1:
             print "\nNo keys discovered"
         else:
@@ -92,7 +95,7 @@ try:
 #         finder = RevDivisionCRC(True)
 #         finder = RevModCRC(True)
 #         finder = RevCRCCommon(True)
-        retList = finder.findPolysInput(data, 48)
+        retList = finder.findPolysInput(data, minSearchData)
         if len(retList) < 1:
             print "\nNo polys discovered"
         else:
@@ -105,7 +108,7 @@ try:
 #         finder = RevDivisionCRC(True)
 #         finder = RevModCRC(True)
 #         finder = RevCRCCommon(True)
-        retList = finder.findCommonInput(data, 48)
+        retList = finder.findCommonInput(data, minSearchData)
         if len(retList) < 1:
             print "\nNo keys discovered"
         else:

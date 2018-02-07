@@ -139,11 +139,13 @@ class Reverse(object):
             
         return retList
 
-    def findCommonInput(self, inputData, searchRange = 0):
+    def findCommonInput(self, inputData, searchRange = -1):
         if inputData.empty():
             return
         if inputData.ready() == False:
             return
+        if searchRange < 0:
+            searchRange = inputData.dataSize-1
             
         if (self.progress):
             print "List size: {} Data size: {} CRC size: {}".format(len(inputData.numbersList), inputData.dataSize, inputData.crcSize)

@@ -97,10 +97,10 @@ class SubNumber(object):
         if self.pos != other.pos:
             return False
         return True
-    
+     
     def __ne__(self, other):
         return ((self == other) == False)
-    
+      
     def __hash__(self):
         return hash( (self.data, self.size, self.pos) )
     
@@ -260,7 +260,8 @@ class NumberMask:
             xpos = min(self.dataSize-valLen, maxPos)
             for x in xrange(xpos+1):
                 val = (self.dataNum >> x) & lenMask
-                t = (val, valLen)
+#                 t = (val, valLen)
+                t = val
                 if (t in valSet) == False:
                     valSet.add( t )
                     retSet.add( SubNumber(val, valLen, x) )

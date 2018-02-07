@@ -82,7 +82,8 @@ class CRCKey:
         return ((self == other) == False)
     
     def __hash__(self):
-        return hash(str(self.poly) + str(self.init) + str(self.xor))
+#         return hash(str(self.poly) + str(self.init) + str(self.xor))
+        return hash( (self.poly, self.init, self.xor) )
     
 
 

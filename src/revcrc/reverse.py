@@ -152,18 +152,16 @@ class Reverse(object):
     
     ## searchRange=0 means exact length (no subvalues)
     def findCommon(self, dataList, dataSize, crcSize, searchRange = 0):
+        retList = Counter()
+        
         if len(dataList) < 1: 
-            return set()
+            return retList
         
-        dataPair = dataList[0]
-        dataMask = NumberMask(dataPair[0], dataSize)
-        retList = self.findCRCKeyBits( dataMask, dataPair[1], crcSize, searchRange)
-        
-        for i in xrange(1, len(dataList)):
+        for i in xrange(0, len(dataList)):
             dataPair = dataList[i]
             dataMask = NumberMask(dataPair[0], dataSize)
             keys = self.findCRCKeyBits( dataMask, dataPair[1], crcSize, searchRange)
-            retList.intersection( keys )
+            retList.update( keys )
             
         return retList
         
@@ -173,17 +171,20 @@ class Reverse(object):
             
         retList = set()
                 
-        subList = dataMask.generateSubnumbers(0, dataMask.dataSize - searchRange)
+        subList = dataMask.generateSubnumbers(searchRange, dataMask.dataSize - searchRange)
         for sub in subList:
+#             print "Checking subnumber {}".format(sub)
 #             if self.progress:
-#                 subnum = asciiToInt(substr)
-#                 print "Checking substring {:X}".format(subnum)
+#                 print "Checking substring {:X}".format(sub.dataNum)
             crcMask = NumberMask(crcNum, crcSize)
             subRet = self.findCRC(sub, crcMask)
+            if len(subRet) < 1:
+                continue
             for key in subRet:
                 key.dataPos = sub.pos
                 key.dataLen = sub.size
             retList |= subRet
+#             print "Found sub:", subRet, sub
             
         if self.progress and len(retList)>0:
             print "Found keys:", retList

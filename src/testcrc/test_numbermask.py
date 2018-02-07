@@ -217,16 +217,22 @@ class NumberMaskTest(unittest.TestCase):
         
     def test_generateSubnumbers_2pos(self):
         data = NumberMask(0x9, 4)
-        subList = data.generateSubnumbers(0)
+        subList = data.generateSubnumbers(maxPos = 0)
 #         print "ret list:", subList
         self.assertEqual(subList, set([ SubNumber(0x1, 1, 0), SubNumber(0x1, 2, 0), 
                                         SubNumber(0x1, 3, 0), SubNumber(0x9, 4, 0) ]) )
         
     def test_generateSubnumbers_2len(self):
         data = NumberMask(0x9, 4)
-        subList = data.generateSubnumbers(0, 4)
+        subList = data.generateSubnumbers(4, 0)
 #         print "ret list:", subList
         self.assertEqual(subList, set([ SubNumber(0x9, 4, 0) ]) )
+        
+    def test_generateSubnumbers_sufix(self):
+        data = NumberMask(0xABCD, 16)
+        subList = data.generateSubnumbers(12, 4)
+#         print "ret list:", subList
+        self.assertIn(SubNumber(0xABC, 12, 4), subList )
         
     def test_getMSB_zero(self):
         data = NumberMask(0xA, 0)

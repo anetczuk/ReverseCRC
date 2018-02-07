@@ -248,7 +248,7 @@ class NumberMask:
     def toASCII(self):
         return intToASCII(self.dataNum)
     
-    def generateSubnumbers(self, maxPos = -1, minLen = -1):
+    def generateSubnumbers(self, minLen = -1, maxPos = -1):
         valSet = set()
         retSet = set()
         if maxPos < 0:

@@ -171,7 +171,7 @@ class Reverse(object):
             
         retList = set()
                 
-        subList = dataMask.generateSubnumbers(searchRange, dataMask.dataSize - searchRange)
+        subList = dataMask.generateSubnumbers(dataMask.dataSize - searchRange, 0)
         for sub in subList:
 #             print "Checking subnumber {}".format(sub)
 #             if self.progress:

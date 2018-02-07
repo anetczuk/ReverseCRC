@@ -385,36 +385,6 @@ class ReverseBaseTest(object):
           
 #         print "found data:", foundCRC
         self.assertIn( CRCKey(inputPoly, reverse, regInit, 0, 0, dataSize ), foundCRC )
-        
-    def test_findCommon_c16d16_sufix12(self):
-        dataList = []
-        crcSize = 16
-        dataSize = 16
-        inputPoly = 0x18005             ## 0x18005 = 98309
-        regInit = 0x0
-        xorOut = 0x0
-        reverse = False
-        
-        sufixSize = 12
-        sufix = 0xFFF
-        
-        ## init: 0, xor: 0, rev, poly: 0x18005
-        self.crcProc.setReversed(reverse)
-        self.crcProc.setRegisterInitValue(regInit)
-        self.crcProc.setXorOutValue(xorOut)
-
-        data1 = 0xABCD
-        crc1  = self.crcProc.calculate2(data1, dataSize, inputPoly, crcSize)
-        dataList.append( ( (data1<<sufixSize)|sufix, crc1) )
-          
-        data2 = data1 ^ 0x0010
-        crc2  = self.crcProc.calculate2(data2, dataSize, inputPoly, crcSize)
-        dataList.append( ( (data2<<sufixSize)|sufix, crc2) )
-          
-        foundCRC = self.crcFinder.findCommon(dataList, dataSize+sufixSize, crcSize, 12)
-          
-#         print "found data:", foundCRC
-        self.assertIn( CRCKey(inputPoly, reverse, regInit, 0, 12, dataSize ), foundCRC )
 
     def test_findCommon_c16d16_rev(self):
         dataList = []

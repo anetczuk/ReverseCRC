@@ -107,7 +107,7 @@ if __name__ == '__main__':
 
             if profiler_outfile != None:
                 ##pyprof2calltree -i $PROF_FILE -k
-                print "Launching: pyprof2calltree -i {}_FILE -k".format(profiler_outfile)
+                print "Launching: pyprof2calltree -i {} -k".format(profiler_outfile)
                 subprocess.call(["pyprof2calltree", "-i", profiler_outfile, "-k"])
         
         ## prepare coverage results

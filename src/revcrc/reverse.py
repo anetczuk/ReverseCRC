@@ -131,9 +131,9 @@ class Reverse(object):
             
             keys = self.findPolysXOR(data1, crc1, data2, crc2, inputData.dataSize, inputData.crcSize, searchRange)
 
-            if (self.progress):
-                keysSet = set(keys)
-                print "Found polys:", keysSet
+#             if (self.progress):
+#                 keysSet = set(keys)
+#                 print "Found polys:", keysSet
 
             retList.update( keys )
             
@@ -171,6 +171,8 @@ class Reverse(object):
         if self.progress:
             print "Checking {:X} {:X}".format(dataMask.dataNum, crcNum)
             
+        crcMask = NumberMask(crcNum, crcSize)
+        
         retList = set()
                 
         subList = dataMask.generateSubnumbers(dataMask.dataSize - searchRange, 0)
@@ -178,7 +180,6 @@ class Reverse(object):
 #             print "Checking subnumber {}".format(sub)
 #             if self.progress:
 #                 print "Checking substring {:X}".format(sub.dataNum)
-            crcMask = NumberMask(crcNum, crcSize)
             subRet = self.findCRC(sub, crcMask)
             if len(subRet) < 1:
                 continue
@@ -359,18 +360,44 @@ class Reverse(object):
         xorCRC = crc1 ^ crc2
         if self.progress:
             print "Checking {:X} {:X} xor {:X} {:X} = {:X} {:X}, {} {}".format(data1, crc1, data2, crc2, xorData, xorCRC, dataSize, crcSize)
-        dataMask = NumberMask(xorData, dataSize)
+        xorMask = NumberMask(xorData, dataSize)
         crcMask = NumberMask(xorCRC, crcSize)
         
-        polyList = []
-        polyList += self.findBruteForcePoly(dataMask, crcMask, False, searchRange)
-        polyList += self.findBruteForcePoly(dataMask, crcMask, True, searchRange)
+        retList = []
         
-        polyList += self.findBruteForcePolyReverse(dataMask, crcMask, searchRange)
-        
-        return polyList
+        subList = xorMask.generateSubnumbers(xorMask.dataSize - searchRange, 0)
+        listLen = len(subList)
+        ind = 0
+        for sub in subList:
+            ind += 1
+#             print "Checking subnumber {}".format(sub)
+            if self.progress:
+                #print "Checking substring {:X}".format(sub.dataNum)
+                sys.stdout.write( "\r{}/{} checking substring {:X}".format(ind, listLen, sub.data) )
+                sys.stdout.flush()
+            
+            dataMask = sub.toNumberMask()
+            
+            polyList = []
+            polyList += self.findBruteForcePoly(dataMask, crcMask, False)
+            polyList += self.findBruteForcePoly(dataMask, crcMask, True)            
+            polyList += self.findBruteForcePolyReverse(dataMask, crcMask)
 
-    def findBruteForcePoly(self, dataMask, crcMask, reverseMode, searchRange = 0):
+            if len(polyList) < 1:
+                continue
+            for key in polyList:
+                key.dataPos = sub.pos
+                key.dataLen = sub.size
+            retList += polyList
+#             print "Found sub:", subRet, sub
+             
+        if self.progress:
+            sys.stdout.write("\r")
+            sys.stdout.flush()
+             
+        return retList
+
+    def findBruteForcePoly(self, dataMask, crcMask, reverseMode):
         self.crcProc.setReversed(reverseMode)
         crc = crcMask.dataNum
         poly = 0
@@ -379,9 +406,9 @@ class Reverse(object):
         retList = []
         while poly < polyMax:
 #             if self.progress and (poly % 16384) == 16383:
-            if self.progress and (poly % 8192) == 8191:
-                sys.stdout.write("\r{:b}".format(poly | polyMax))
-                sys.stdout.flush()
+#             if self.progress and (poly % 8192) == 8191:
+#                 sys.stdout.write("\r{:b}".format(poly | polyMax))
+#                 sys.stdout.flush()
 
             polyMask.setNumber(poly)
             polyCRC = self.crcProc.calculate3(dataMask, polyMask)
@@ -393,9 +420,9 @@ class Reverse(object):
                 
             poly += 1
                         
-        if self.progress:
-            sys.stdout.write("\r")
-            sys.stdout.flush()
+#         if self.progress:
+#             sys.stdout.write("\r")
+#             sys.stdout.flush()
         return retList
     
     #TODO: try to achieve compatibility without reversing 
@@ -410,9 +437,9 @@ class Reverse(object):
         retList = []
         while poly < polyMax:
 #             if self.progress and (poly % 16384) == 16383:
-            if self.progress and (poly % 8192) == 8191:
-                sys.stdout.write("\r{:b}".format(poly | polyMax))
-                sys.stdout.flush()
+#             if self.progress and (poly % 8192) == 8191:
+#                 sys.stdout.write("\r{:b}".format(poly | polyMax))
+#                 sys.stdout.flush()
 
             polyMask.setNumber(poly)
             polyCRC = self.crcProc.calculate3(dataMask, polyMask)
@@ -425,9 +452,9 @@ class Reverse(object):
                 
             poly += 1
 
-        if self.progress:
-            sys.stdout.write("\r")
-            sys.stdout.flush()
+#         if self.progress:
+#             sys.stdout.write("\r")
+#             sys.stdout.flush()
         return retList
 
     

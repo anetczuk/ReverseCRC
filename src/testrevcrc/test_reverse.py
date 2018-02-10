@@ -289,8 +289,8 @@ class ReverseBaseTest(object):
     def test_findPolysInput_poly(self):
         dataList = []
         dataSize = 16
-        crcSize = 8
-        inputPoly = 0x185
+        crcSize = 16
+        inputPoly = 0x18005
         regInit = 0x0
         xorOut = 0x0
         reverse = False
@@ -313,6 +313,30 @@ class ReverseBaseTest(object):
           
 #         print "found data:", foundCRC
         self.assertIn( PolyKey(inputPoly, reverse, 0, dataSize ), foundCRC )
+
+    def test_findPolysInput(self):
+        dataList = []
+        dataList.append( ("71FB2EE1", "BE0D") )
+        dataList.append( ("D5C0A73B", "D9B4") )
+        
+        inputData = InputData()
+        inputData.convert( dataList )
+        foundCRC = self.crcFinder.findPolysInput(inputData, 0)
+        
+#         print "found data:", foundCRC
+        self.assertIn( PolyKey(0x18005, False, 0, 32 ), foundCRC )
+        
+    def test_findPolysInput_preamble(self):
+        dataList = []
+        dataList.append( ("CC71FB2EE1", "BE0D") )
+        dataList.append( ("FFD5C0A73B", "D9B4") )
+        
+        inputData = InputData()
+        inputData.convert( dataList )
+        foundCRC = self.crcFinder.findPolysInput(inputData, 8)
+        
+#         print "found data:", foundCRC
+        self.assertIn( PolyKey(0x18005, False, 0, 32 ), foundCRC )
 
     def test_findCommon_c8d8_empty(self):
         dataList = []

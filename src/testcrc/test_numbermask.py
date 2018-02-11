@@ -211,7 +211,8 @@ class NumberMaskTest(unittest.TestCase):
         data = NumberMask(0x9, 4)
         subList = data.generateSubnumbers()
 #         print "ret list:", subList
-        self.assertEqual(subList, set([ SubNumber(0x0, 1, 1), SubNumber(0x1, 1, 0), 
+        self.assertEqual(subList, set([ SubNumber(0x0, 1, 1), SubNumber(0x0, 2, 1), 
+                                        SubNumber(0x1, 1, 0), SubNumber(0x1, 2, 0), SubNumber(0x1, 3, 0), 
                                         SubNumber(0x2, 2, 2), SubNumber(0x4, 3, 1), 
                                         SubNumber(0x9, 4, 0) ]) )
         
@@ -219,13 +220,20 @@ class NumberMaskTest(unittest.TestCase):
         data = NumberMask(0x9, 4)
         subList = data.generateSubnumbers(maxPos = 0)
 #         print "ret list:", subList
-        self.assertEqual(subList, set([ SubNumber(0x1, 1, 0), SubNumber(0x9, 4, 0) ]) )
+        self.assertEqual(subList, set([ SubNumber(0x1, 1, 0), SubNumber(0x1, 2, 0), SubNumber(0x1, 3, 0),
+                                        SubNumber(0x9, 4, 0) ]) )
         
     def test_generateSubnumbers_2len(self):
         data = NumberMask(0x9, 4)
         subList = data.generateSubnumbers(4, 0)
 #         print "ret list:", subList
         self.assertEqual(subList, set([ SubNumber(0x9, 4, 0) ]) )
+        
+    def test_generateSubnumbers_2lenB(self):
+        data = NumberMask(0x1, 4)
+        subList = data.generateSubnumbers(3, 0)
+#         print "ret list:", subList
+        self.assertEqual(subList, set([ SubNumber(0x1, 3, 0), SubNumber(0x1, 4, 0) ]) )
         
     def test_generateSubnumbers_sufix(self):
         data = NumberMask(0xABCD, 16)

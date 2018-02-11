@@ -260,8 +260,7 @@ class NumberMask:
             xpos = min(self.dataSize-valLen, maxPos)
             for x in xrange(xpos+1):
                 val = (self.dataNum >> x) & lenMask
-#                 t = (val, valLen)
-                t = val
+                t = (val, valLen)
                 if (t in valSet) == False:
                     valSet.add( t )
                     retSet.add( SubNumber(val, valLen, x) )

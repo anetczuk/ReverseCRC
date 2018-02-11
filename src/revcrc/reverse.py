@@ -373,7 +373,7 @@ class Reverse(object):
 #             print "Checking subnumber {}".format(sub)
             if self.progress:
                 #print "Checking substring {:X}".format(sub.dataNum)
-                sys.stdout.write( "\r{}/{} checking substring {:X}".format(ind, listLen, sub.data) )
+                sys.stdout.write( "\r{}/{} checking substring {}\n".format(ind, listLen, sub) )
                 sys.stdout.flush()
             
             dataMask = sub.toNumberMask()
@@ -391,12 +391,12 @@ class Reverse(object):
             retList += polyList
 #             print "Found sub:", subRet, sub
              
-        if self.progress:
-            sys.stdout.write("\r")
-            sys.stdout.flush()
+#         if self.progress:
+#             sys.stdout.write("\r")
+#             sys.stdout.flush()
              
         return retList
-
+    
     def findBruteForcePoly(self, dataMask, crcMask, reverseMode):
         self.crcProc.setReversed(reverseMode)
         crc = crcMask.dataNum
@@ -423,6 +423,7 @@ class Reverse(object):
 #         if self.progress:
 #             sys.stdout.write("\r")
 #             sys.stdout.flush()
+            
         return retList
     
     #TODO: try to achieve compatibility without reversing 

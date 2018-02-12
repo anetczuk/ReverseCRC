@@ -27,7 +27,13 @@ import unittest
 import argparse
 import cProfile
 import subprocess
-import coverage
+
+try:
+    import coverage
+except ImportError:
+    print "Missing coverage module. Try running 'pip install coverage'"
+    raise
+
 import os
 
 

@@ -24,8 +24,14 @@ cd $SCRIPT_DIR
 if [ $coverage -eq 0 ]; then
     python -m main "${args[@]}"
 else
+    tmprootdir=$(dirname $(mktemp -u))
+    revCrcTmpDir="$tmprootdir/revcrc"
+    htmlcovdir="$revCrcTmpDir/htmlcov"
+    mkdir -p $htmlcovdir
+    
     ## requires coverage.py
-    coverage run -m main "${args[@]}"
+    coverage run --branch -m main "${args[@]}"
     ## generate html pages in htmlcov directory based on coverage data
-    coverage html
+    coverage html -d $htmlcovdir
+    echo -e "\nCoverage HTML output: $htmlcovdir/index.html"
 fi

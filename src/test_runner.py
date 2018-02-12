@@ -35,6 +35,7 @@ except ImportError:
     raise
 
 import os
+import tempfile
 
 
 ## ============================= main section ===================================
@@ -57,7 +58,7 @@ if __name__ == '__main__':
     if args.coverage == True:
         print "Executing code coverage"
         currScript = os.path.realpath(__file__)
-        coverageData = coverage.Coverage(omit=currScript)
+        coverageData = coverage.Coverage(branch=True, omit=currScript)
         ##coverageData.load()
         coverageData.start()
         
@@ -119,8 +120,15 @@ if __name__ == '__main__':
         ## prepare coverage results
         if coverageData != None:
             ## convert results to html
+            tmprootdir=tempfile.gettempdir()
+            revCrcTmpDir=tmprootdir+"/revcrc"
+            if not os.path.exists(revCrcTmpDir):
+                os.makedirs(revCrcTmpDir)
+            htmlcovdir=revCrcTmpDir+"/htmlcov"
+            
             coverageData.stop()
             coverageData.save()
-            coverageData.html_report()
+            coverageData.html_report(directory=htmlcovdir)
+            print "\nCoverage HTML output:", (htmlcovdir+"/index.html")
 
         

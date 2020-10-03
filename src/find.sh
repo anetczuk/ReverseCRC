@@ -22,7 +22,7 @@ cd $SCRIPT_DIR
 
 
 if [ $coverage -eq 0 ]; then
-    python -m main "${args[@]}"
+    python2 -m main "${args[@]}"
 else
     tmprootdir=$(dirname $(mktemp -u))
     revCrcTmpDir="$tmprootdir/revcrc"

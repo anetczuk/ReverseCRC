@@ -13,7 +13,22 @@ Repository contains followint implementations of CRC:
 _DivisionCRC_ and _HwCRC_ have its backward versions which allows to find polynomials from input messages.
 
 
-### Code additional features
+### Running
+
+For run parameters execute `src/find.sh --help`
+
+Running computation: `src/find.sh --file in.txt --outfile results.txt --mode BF_PAIRS --algo MOD`
+
+Example of *in.txt* file:
+`#comment
+0020FCFF 11
+0120FCFF 8C
+0220FCFF 36
+`
+where first hex number in row is data and second number is calculated CRC.
+
+
+### Code features examples
 
 Following techniques were used in the project:
 * Unit testing 

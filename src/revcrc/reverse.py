@@ -31,6 +31,11 @@ import copy
 from collections import Counter
 
 
+def flush_number( num, bitSize ):
+    formatStr = "\r{:0%sb}" % bitSize
+    sys.stdout.write( formatStr.format(num) )
+    sys.stdout.flush()
+
 
 class MessageCRC:
     def __init__(self, data, dataSize, crc, crcSize):
@@ -70,7 +75,73 @@ class Reverse(object):
     ## ==========================================================
         
     
-    def bruteForceInput(self, inputData, searchRange = 0):
+    def bruteForceStandardInput(self, inputData, searchRange = 0):
+        if inputData.empty():
+            return
+        if inputData.ready() == False:
+            return
+        
+        numbersList = inputData.numbersList
+        if (self.progress):
+            print "List size: {} Data size: {} CRC size: {}".format(len(numbersList), inputData.dataSize, inputData.crcSize)
+        
+        retList = Counter()
+        
+        for num in numbersList:
+            keys = self.findBruteForceStandard( num, inputData.dataSize, inputData.crcSize, searchRange )
+
+            if (self.progress):
+                print "Found keys:", len( keys )
+
+            retList.update( keys )
+            
+        return retList
+
+    def findBruteForceStandard(self, dataCrcPair, dataSize, crcSize, searchRange = 0):
+        data1 = dataCrcPair[0]
+        crc1  = dataCrcPair[1]
+
+        if self.progress:
+            print "Checking {:X} {:X}, {} {}".format(data1, crc1, dataSize, crcSize)
+        
+        dataMask = NumberMask(data1, dataSize)
+        crcMask  = NumberMask(crc1, crcSize)
+        
+        polyList = []
+        
+        initVal = -1
+        paramMax = (0x1 << crcSize) - 1
+                  
+        while initVal < paramMax:
+            initVal += 1
+            
+            if self.progress:
+                flush_number( initVal, crcSize )
+                
+            self.crcProc.setRegisterInitValue( initVal )
+            
+            xorVal = -1
+            while xorVal < paramMax:
+                xorVal += 1
+                self.crcProc.setXorOutValue( xorVal )
+                
+#                 if self.progress:
+#                     sys.stdout.write("\r{:b}".format( xorVal ))
+#                     sys.stdout.flush()
+                
+                polyList += self.findBruteForcePoly(dataMask, crcMask, False)
+#                 polyList += self.findBruteForcePoly(dataMask, crcMask, True)            
+#                 polyList += self.findBruteForcePolyReverse(dataMask, crcMask)
+
+        for key in polyList:
+            key.dataPos = 0
+            key.dataLen = dataSize
+            
+        return polyList
+
+    ## ==========================================================
+    
+    def bruteForcePairsInput(self, inputData, searchRange = 0):
         if inputData.empty():
             return
         if inputData.ready() == False:
@@ -92,14 +163,91 @@ class Reverse(object):
             numberPair1 = combPair[0]
             numberPair2 = combPair[1]
             
-            keys = self.findBruteForce(numberPair1, numberPair2, inputData.dataSize, inputData.crcSize, searchRange)
+            keys = self.findBruteForcePairs(numberPair1, numberPair2, inputData.dataSize, inputData.crcSize, searchRange)
 
             if (self.progress):
-                print "Found keys:", keys
+                print "Found keys:", len( keys )
 
             retList += keys
             
         return retList
+
+    def findBruteForcePairs(self, dataCrcPair1, dataCrcPair2, dataSize, crcSize, searchRange = 0):
+        data1 = dataCrcPair1[0]
+        crc1 = dataCrcPair1[1]
+        data2 = dataCrcPair2[0]
+        crc2 = dataCrcPair2[1]
+        
+        keyList = self.findPolysXOR(data1, crc1, data2, crc2, dataSize, crcSize, searchRange)
+        
+        if (self.progress):
+            print "Found {} potential polynomials to check".format( len(keyList) )
+        
+        ## finding xor value
+
+        dataCrc1 = MessageCRC(data1, dataSize, crc1, crcSize)
+        dataCrc2 = MessageCRC(data2, dataSize, crc2, crcSize)
+
+        retList = []
+        for key in keyList:
+            paramsList = self.findBruteForceParams(dataCrc1, dataCrc2, key)
+            if len(paramsList) < 1:
+                continue
+            #if self.progress:
+            #    sys.stdout.write("\r")
+            #    print "Found keys: {}".format( paramsList )
+            retList += paramsList
+        return retList
+
+    def findBruteForceParams(self, dataCrc1, dataCrc2, polyKey):
+        self.crcProc.setReversed( polyKey.rev )
+         
+        crcSize = dataCrc1.crcSize
+        dataMask1 = dataCrc1.dataMask()
+        dataMask2 = dataCrc2.dataMask()
+        polyMask = NumberMask(polyKey.poly, crcSize)
+        crc1 = dataCrc1.crcNum
+        crc2 = dataCrc2.crcNum
+        
+        initVal = -1
+        paramMax = (0x1 << crcSize) - 1
+                  
+        retList = []
+        while initVal < paramMax:
+            initVal += 1
+            
+            if self.progress:
+                flush_number( initVal, crcSize )
+                
+            self.crcProc.setRegisterInitValue( initVal )
+            
+            xorVal = -1
+            while xorVal < paramMax:
+                xorVal += 1
+
+                self.crcProc.setXorOutValue( xorVal )
+                
+                polyCRC = self.crcProc.calculate3(dataMask1, polyMask)
+                if polyCRC != crc1:
+                    continue
+                polyCRC = self.crcProc.calculate3(dataMask2, polyMask)
+                if polyCRC != crc2:
+                    continue
+                
+                newKey = CRCKey(polyKey.poly, polyKey.rev, initVal, xorVal, polyKey.dataPos, polyKey.dataLen)
+                
+                #if self.progress:
+                #    sys.stdout.write("\r")
+                #    print "Found key: {}".format(newKey)
+                    
+                retList.append( newKey )
+         
+        if self.progress:
+            sys.stdout.write("\r")
+            sys.stdout.flush()
+        return retList
+
+    ## =============================================================
 
     def findPolysInput(self, inputData, searchRange = 0):
         if inputData.empty():
@@ -189,8 +337,8 @@ class Reverse(object):
             retList |= subRet
 #             print "Found sub:", subRet, sub
             
-        if self.progress and len(retList)>0:
-            print "Found keys:", retList
+        #if self.progress and len(retList)>0:
+        #    print "Found keys:", retList
             
         return retList
         
@@ -275,85 +423,7 @@ class Reverse(object):
         if polyCRC == crcMask.dataNum:
             retList.add( crcKey )
         
-
-
     ## ==========================================================
-
-
-    def findBruteForce(self, dataCrcPair1, dataCrcPair2, dataSize, crcSize, searchRange = 0):
-        data1 = dataCrcPair1[0]
-        crc1 = dataCrcPair1[1]
-        data2 = dataCrcPair2[0]
-        crc2 = dataCrcPair2[1]
-        
-        keyList = self.findPolysXOR(data1, crc1, data2, crc2, dataSize, crcSize, searchRange)
-        
-#         print "keys:", keyList
-        
-        ## finding xor value
-
-        dataCrc1 = MessageCRC(data1, dataSize, crc1, crcSize)
-        dataCrc2 = MessageCRC(data2, dataSize, crc2, crcSize)
-
-        retList = []
-        for key in keyList:
-            paramsList = self.findBruteForceParams(dataCrc1, dataCrc2, key)
-            if len(paramsList) < 1:
-                continue
-            if self.progress:
-                sys.stdout.write("\r")
-                print "Found keys: {}".format( paramsList )
-            retList += paramsList
-        return retList
-
-    def findBruteForceParams(self, dataCrc1, dataCrc2, polyKey):
-        self.crcProc.setReversed( polyKey.rev )
-         
-        crcSize = dataCrc1.crcSize
-        dataMask1 = dataCrc1.dataMask()
-        dataMask2 = dataCrc2.dataMask()
-        polyMask = NumberMask(polyKey.poly, crcSize)
-        crc1 = dataCrc1.crcNum
-        crc2 = dataCrc2.crcNum
-        
-        initVal = -1
-        paramMax = (0x1 << crcSize)
-                  
-        retList = []
-        while initVal < paramMax:
-            initVal += 1
-            
-            if self.progress:
-                sys.stdout.write("\r{:b}".format(initVal))
-                sys.stdout.flush()
-                
-            self.crcProc.setRegisterInitValue( initVal )
-            
-            xorVal = -1
-            while xorVal < paramMax:
-                xorVal += 1
-
-                self.crcProc.setXorOutValue( xorVal )
-                
-                polyCRC = self.crcProc.calculate3(dataMask1, polyMask)
-                if polyCRC != crc1:
-                    continue
-                polyCRC = self.crcProc.calculate3(dataMask2, polyMask)
-                if polyCRC != crc2:
-                    continue
-                
-                newKey = CRCKey(polyKey.poly, polyKey.rev, initVal, xorVal, polyKey.dataPos, polyKey.dataLen)
-                
-                if self.progress:
-                    sys.stdout.write("\r")
-                    print "Found key: {}".format(newKey)
-                    
-                retList.append( newKey )
-         
-        if self.progress:
-            sys.stdout.write("\r")
-            sys.stdout.flush()
-        return retList
     
     def findPolysXOR(self, data1, crc1, data2, crc2, dataSize, crcSize, searchRange = 0):
         xorData = data1 ^ data2
@@ -458,6 +528,45 @@ class Reverse(object):
 #             sys.stdout.flush()
         return retList
 
+    
+    ##============================================================
+    
+    
+    def verify(self, inputData, poly, initReg, xorVal):
+        if inputData.empty():
+            return True
+        if inputData.ready() == False:
+            return True
+        
+        numbersList = inputData.numbersList
+        dataSize = inputData.dataSize
+        crcSize  = inputData.crcSize
+        if (self.progress):
+            print "List size: {} Data size: {} CRC size: {}".format( len(numbersList), dataSize, crcSize )
+        
+        polyMask = NumberMask( poly, crcSize )
+        
+        for num in numbersList:
+            data = num[0]
+            crc  = num[1]
+            if self.progress:
+                print "Checking {:X} {:X}, {} {}".format( data, crc, dataSize, crcSize )
+
+            dataMask = NumberMask( data, dataSize )
+            crcMask  = NumberMask( crc, crcSize )
+            
+            self.crcProc.setRegisterInitValue( initReg )
+            self.crcProc.setXorOutValue( xorVal )
+                
+            crc = crcMask.dataNum
+            polyCRC = self.crcProc.calculate3( dataMask, polyMask )
+            if polyCRC != crc:
+                print "CRC mismatch: ", polyCRC, crc
+                return False
+            
+        return True
+                
+    
     
     ##============================================================
 

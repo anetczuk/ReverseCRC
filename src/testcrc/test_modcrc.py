@@ -37,6 +37,7 @@ __scriptdir__ = os.path.dirname(os.path.realpath(__file__))
         
         
 class ModCRCTest(unittest.TestCase):
+
     def setUp(self):
         # Called before testfunction is executed
         pass
@@ -44,7 +45,35 @@ class ModCRCTest(unittest.TestCase):
     def tearDown(self):
         # Called after testfunction was executed
         pass
+
+    def test_calculateCRC_8_a(self):
+        ## http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
+        dataSize = 4*8
+        inputPoly = 0x1D
+        crcSize = 8
+
+        crc = ModCRC().calculateCRC( 0x31323334, dataSize, inputPoly, crcSize, reverse=False )
+        self.assertEqual( crc, 0xF2 )
+
+        crc = ModCRC().calculateCRC( 0x31323334, dataSize, inputPoly, crcSize, reverse=True )
+        self.assertEqual( crc, 0x43 )
+
+    def test_calculateCRC_8_b(self):
+        dataSize = 56
+        inputPoly = 0x11D
+        crcSize = 8
+        regInit = 0x00
+        xorOut  = 0x8F
+
+        crc = ModCRC().calculateCRC( 0x0D00C0F0FFFFFF, dataSize, inputPoly, crcSize, init=regInit, xorout=xorOut )
+        self.assertEqual( crc, 0x90 )
         
+        crc = ModCRC().calculateCRC( 0x0000C0F0FFFFFF, dataSize, inputPoly, crcSize, init=regInit, xorout=xorOut )
+        self.assertEqual( crc, 0x76 )
+        
+        crc = ModCRC().calculateCRC( 0x0E00C0F0FFFFFF, dataSize, inputPoly, crcSize, init=regInit, xorout=xorOut )
+        self.assertEqual( crc, 0x77 )
+
     def test_crcmod_8_data(self):
         data = 0xF0FF
         dataSize = 16
@@ -185,7 +214,7 @@ class ModCRCTest(unittest.TestCase):
         xorOut = 0x0F
         reverse = True
           
-        crc_func = crcmod.mkCrcFun(inputPoly.masterData(), initCrc=regInit, rev=reverse, xorOut=xorOut)
+        crc_func = crcmod.mkCrcFun(inputPoly.masterData(), initCrc=regInit ^ xorOut, rev=reverse, xorOut=xorOut)
         crcLib = crc_func( data.toASCII() )
     
         crcProc = ModCRC()

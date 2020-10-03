@@ -57,6 +57,7 @@ CRCModCacheMap.instance = CRCModCacheMap()
 ## Compatible with crcmod library
 ##
 class ModCRC(CRCProc):
+
     def __init__(self):
         CRCProc.__init__(self)
         
@@ -69,7 +70,8 @@ class ModCRC(CRCProc):
         ## crcmod requires leading '1' bit
         poly = polyMask.dataNum | polyMask.masterBit
         currXor = self.xorOut & polyMask.dataMask
-        crc_func = crcmod.mkCrcFun(poly, rev=self.reversed, initCrc=self.registerInit, xorOut=currXor)
+        initReg = self.registerInit ^ currXor
+        crc_func = crcmod.mkCrcFun(poly, rev=self.reversed, initCrc=initReg, xorOut=currXor)
 #         crcKey = CRCKey(poly, self.reversed, self.registerInit, currXor)
 #         crc_func = CRCModCacheMap.instance.getFunction(crcKey)
         dataString = dataMask.toASCII()

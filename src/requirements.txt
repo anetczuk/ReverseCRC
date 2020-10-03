@@ -1,0 +1,6 @@
+# packets required by generator.py
+# use:
+#       pip3 install --user -r requirements.txt
+#
+coverage
+crcmod

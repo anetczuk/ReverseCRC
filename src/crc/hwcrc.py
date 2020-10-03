@@ -27,7 +27,7 @@ from crc.crcproc import CRCProc
 
 ##
 ##
-class HwCRC(CRCProc):
+class HwCRC( CRCProc ):
     def __init__(self):
         CRCProc.__init__(self)
   
@@ -38,7 +38,7 @@ class HwCRC(CRCProc):
             return self.calculateLSB(dataMask, polyMask)
         
     ## 'poly' without leading '1'
-    def calculateMSB(self, dataMask, polyMask):         
+    def calculateMSB(self, dataMask, polyMask):
         register = self.registerInit
  
         dataNum = dataMask.dataNum
@@ -60,7 +60,7 @@ class HwCRC(CRCProc):
 
     ## 'poly' without leading '1'
     ## 'dataMask' and 'polyMask' have to be reversed
-    def calculateLSB(self, dataMask, polyMask):         
+    def calculateLSB(self, dataMask, polyMask):
         register = self.registerInit
   
         dataNum = dataMask.dataNum
@@ -78,5 +78,3 @@ class HwCRC(CRCProc):
             dataBit <<= 1
 
         return (register ^ self.xorOut) & polyMask.dataMask
-
-

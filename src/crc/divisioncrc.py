@@ -100,5 +100,3 @@ class DivisionCRC(CRCProc):
                 register ^= polyNum
         
         return (register ^ self.xorOut) & polyMask.dataMask
-    
-    

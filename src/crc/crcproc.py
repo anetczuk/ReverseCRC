@@ -101,6 +101,7 @@ class CRCProc(object):
     def reset(self):
         self.registerInit = 0x0
         self.xorOut = 0x0
+        ## controls if input and result should be reflected during calculation
         self.reversed = False
 
     def setRegisterInitValue(self, value):
@@ -134,3 +135,9 @@ class CRCProc(object):
     def calculate3(self, dataMask, polyMask):
         raise NotImplementedError
     
+    def calculateCRC( self, data, dataSize, poly, crcSize, init=0, xorout=0, reverse=False ):
+        self.setReversed( reverse )
+        self.setRegisterInitValue( init )
+        self.setXorOutValue( xorout )
+        crc = self.calculate2(data, dataSize, poly, crcSize)
+        return crc

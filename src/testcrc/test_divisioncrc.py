@@ -48,6 +48,22 @@ class DivisionCRCTest(unittest.TestCase):
         # Called after testfunction was executed
         pass
       
+    def test_calculateCRC_8_b(self):
+        dataSize = 56
+        inputPoly = 0x11D
+        crcSize = 8
+        regInit = 0x00
+        xorOut  = 0x8F
+
+        crc = DivisionCRC().calculateCRC( 0x0D00C0F0FFFFFF, dataSize, inputPoly, crcSize, init=regInit, xorout=xorOut )
+        self.assertEqual( crc, 0x90 )
+        
+        crc = DivisionCRC().calculateCRC( 0x0000C0F0FFFFFF, dataSize, inputPoly, crcSize, init=regInit, xorout=xorOut )
+        self.assertEqual( crc, 0x76 )
+        
+        crc = DivisionCRC().calculateCRC( 0x0E00C0F0FFFFFF, dataSize, inputPoly, crcSize, init=regInit, xorout=xorOut )
+        self.assertEqual( crc, 0x77 )
+
     def test_calculate_1(self):
         crcProc = DivisionCRC()
         crc = crcProc.calculate2(0b1, 1, 0b1, 1)

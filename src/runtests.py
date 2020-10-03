@@ -24,6 +24,7 @@
 #
 
 import unittest
+import re
 import argparse
 import cProfile
 import subprocess
@@ -36,6 +37,52 @@ except ImportError:
 
 import os
 import tempfile
+import logging
+
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+
+_LOGGER = logging.getLogger(__name__)
+
+
+def match_tests( pattern ):
+    if pattern.find("*") < 0:
+        ## regular module
+        loader = unittest.TestLoader()
+        return loader.loadTestsFromName( pattern )
+
+    ## wildcarded
+    rePattern = pattern
+    # pylint: disable=W1401
+    rePattern = rePattern.replace(".", "\.")
+    rePattern = rePattern.replace("*", ".*")
+    ## rePattern = "^" + rePattern + "$"
+    _LOGGER.info( "searching test cases with pattern: %s", rePattern )
+    loader = unittest.TestLoader()
+    testsSuite = loader.discover( script_dir )
+    return match_test_suites(testsSuite, rePattern)
+
+
+def match_test_suites( testsList, rePattern ):
+    retSuite = unittest.TestSuite()
+    for testObject in testsList:
+        if isinstance(testObject, unittest.TestSuite):
+            subTests = match_test_suites( testObject, rePattern )
+            retSuite.addTest( subTests )
+            continue
+        if isinstance(testObject, unittest.TestCase):
+            classobj         = testObject.__class__
+            # pylint: disable=W0212,
+            testCaseFullName = ".".join([ classobj.__module__, classobj.__name__,
+                                          testObject._testMethodName ] )
+            matched = re.search(rePattern, testCaseFullName)
+            if matched is not None:
+                ## _LOGGER.info("test case matched: %s", testCaseFullName )
+                retSuite.addTest( testObject )
+            continue
+        _LOGGER.warning("unknown type: %s", type( testObject ))
+    return retSuite
 
 
 ## ============================= main section ===================================
@@ -43,7 +90,9 @@ import tempfile
 
 if __name__ == '__main__':    
     parser = argparse.ArgumentParser(description='Test runner')
-    parser.add_argument('-rt', '--runtest', action='store', required=False, default="", help='Module with tests, e.g. test.test_class' )
+    # pylint: disable=C0301
+    parser.add_argument('-rt', '--runtest', action='store', required=False, default="",
+                        help='Module with tests, e.g. module.submodule.test_file.test_class.test_method, wildcard * allowed' )
     parser.add_argument('-r', '--repeat', action='store', type=int, default=0, help='Repeat tests given number of times' )
     parser.add_argument('-ut', '--untilfailure', action="store_true", help='Run tests in loop until failure' )
     parser.add_argument('-cov', '--coverage', action="store_true", help='Measure code coverage' )
@@ -63,10 +112,12 @@ if __name__ == '__main__':
         coverageData.start()
         
         
-    if len(args.runtest) > 0:
-        suite = unittest.TestLoader().loadTestsFromName( args.runtest )
+    if args.runtest:
+        ## not empty
+        suite = match_tests( args.runtest )
     else:
-        suite = unittest.TestLoader().discover('.')
+        testsLoader = unittest.TestLoader()
+        suite = testsLoader.discover( script_dir )
         
 
     testsRepeats = int(args.repeat)

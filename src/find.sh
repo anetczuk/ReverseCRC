@@ -18,12 +18,11 @@ esac
 done
 
 
-cd $SCRIPT_DIR
-
-
 if [ $coverage -eq 0 ]; then
-    python2 -m main "${args[@]}"
+    $SCRIPT_DIR/main.py "${args[@]}"
 else
+    cd $SCRIPT_DIR
+    
     tmprootdir=$(dirname $(mktemp -u))
     revCrcTmpDir="$tmprootdir/revcrc"
     htmlcovdir="$revCrcTmpDir/htmlcov"

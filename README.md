@@ -1,4 +1,5 @@
 ## ReverseCRC
+
 Finding polynomial, init and xor values of CRC.
 
 
@@ -20,15 +21,30 @@ For run parameters execute `src/find.sh --help`
 Running computation: `src/find.sh --file in.txt --outfile results.txt --mode BF_PAIRS --algo MOD`
 
 Example of *in.txt* file:
-`#comment
+```#comment
 0020FCFF 11
 0120FCFF 8C
 0220FCFF 36
-`
+```
 where first hex number in row is data and second number is calculated CRC.
 
+#### Parameters
 
-### Code features examples
+- *alg*: input file
+- *infile*: input file
+- *mode*: operation mode:
+    - *BF*: finding full key by forward algorithm (brute force)
+    - *BF_PAIRS*: finding full key by forward algorithm using pair xoring (brute force)
+    - *POLY*: find polynomials by xor-ing data pairs
+    - *COMMON*: finding full key by backward algorithm
+- *mode*: decode algorithm:
+    - *HW* -- use *HwCRC*
+    - *DIV* -- use *DivisionCRC*
+    - *MOD* -- use *ModCRC*
+- *mindsize*: Data size in frame, rest of frame will be treated as potential CRC field
+  
+
+### Development
 
 Following techniques were used in the project:
 * Unit testing 
@@ -38,7 +54,7 @@ Following techniques were used in the project:
 
 #### Profiler
 
-To run main application it needs to run one of following comands:
+To run main application it needs to run one of following commands:
 * *find.sh {params} --profile*
 * *find.sh {params} --pfile={output file}*
 

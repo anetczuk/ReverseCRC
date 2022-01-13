@@ -64,7 +64,7 @@ class DataParser:
         self.data = []
         if not os.path.exists(path):
             ## file not exists
-            logging.info("file '{}' not exists".format(path))
+            logging.info( "file '{}' not exists in {}".format(path, os.getcwd()) )
             return InputData()
         if os.path.getsize(path) < 1:
             ## file is empty

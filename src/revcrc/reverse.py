@@ -62,6 +62,7 @@ class Reverse(object):
     
     def __init__(self, printProgress = None):
         self.returnFirst = False
+        self.initVal = None
         if printProgress == None:
             self.progress = False
         else:
@@ -70,10 +71,12 @@ class Reverse(object):
     
     def setReturnOnFirst(self):
         self.returnFirst = True
-        
-        
+    
+    ## set registry initial value
+    def setInitValue(self, value):
+        self.initVal = value
+
     ## ==========================================================
-        
     
     def bruteForceStandardInput(self, inputData, searchRange = 0):
         if inputData.empty():
@@ -109,34 +112,46 @@ class Reverse(object):
         
         polyList = []
         
-        initVal = -1
         paramMax = (0x1 << crcSize) - 1
-                  
-        while initVal < paramMax:
-            initVal += 1
-            
+
+        if self.initVal is not None:
+            ## use init value passed by argument
             if self.progress:
-                flush_number( initVal, crcSize )
-                
-            self.crcProc.setRegisterInitValue( initVal )
-            
-            xorVal = -1
-            while xorVal < paramMax:
-                xorVal += 1
-                self.crcProc.setXorOutValue( xorVal )
-                
-#                 if self.progress:
-#                     sys.stdout.write("\r{:b}".format( xorVal ))
-#                     sys.stdout.flush()
-                
-                polyList += self.findBruteForcePoly(dataMask, crcMask, False)
-#                 polyList += self.findBruteForcePoly(dataMask, crcMask, True)            
-#                 polyList += self.findBruteForcePolyReverse(dataMask, crcMask)
+                flush_number( self.initVal, crcSize )
+            polyList += self._checkXORA( dataMask, crcMask, self.initVal, paramMax )
+        else:
+            ## search for init value
+            initVal = -1
+            while initVal < paramMax:
+                initVal += 1
+                if self.progress:
+                    flush_number( initVal, crcSize )
+                polyList += self._checkXORA( dataMask, crcMask, initVal, paramMax )
 
         for key in polyList:
             key.dataPos = 0
             key.dataLen = dataSize
             
+        return polyList
+
+    def _checkXORA(self, dataMask, crcMask, initVal, paramMax ):
+        polyList = []
+            
+        self.crcProc.setRegisterInitValue( initVal )
+        
+        xorVal = -1
+        while xorVal < paramMax:
+            xorVal += 1
+            self.crcProc.setXorOutValue( xorVal )
+            
+#                 if self.progress:
+#                     sys.stdout.write("\r{:b}".format( xorVal ))
+#                     sys.stdout.flush()
+            
+            polyList += self.findBruteForcePoly(dataMask, crcMask, False)
+#                 polyList += self.findBruteForcePoly(dataMask, crcMask, True)            
+#                 polyList += self.findBruteForcePolyReverse(dataMask, crcMask)
+
         return polyList
 
     ## ==========================================================
@@ -203,49 +218,65 @@ class Reverse(object):
         self.crcProc.setReversed( polyKey.rev )
          
         crcSize = dataCrc1.crcSize
-        dataMask1 = dataCrc1.dataMask()
-        dataMask2 = dataCrc2.dataMask()
-        polyMask = NumberMask(polyKey.poly, crcSize)
-        crc1 = dataCrc1.crcNum
-        crc2 = dataCrc2.crcNum
-        
-        initVal = -1
+                 
         paramMax = (0x1 << crcSize) - 1
                   
-        retList = []
-        while initVal < paramMax:
-            initVal += 1
-            
+        polyList = []
+        
+        if self.initVal is not None:
+            ## use init value passed by argument
             if self.progress:
-                flush_number( initVal, crcSize )
-                
-            self.crcProc.setRegisterInitValue( initVal )
-            
-            xorVal = -1
-            while xorVal < paramMax:
-                xorVal += 1
-
-                self.crcProc.setXorOutValue( xorVal )
-                
-                polyCRC = self.crcProc.calculate3(dataMask1, polyMask)
-                if polyCRC != crc1:
-                    continue
-                polyCRC = self.crcProc.calculate3(dataMask2, polyMask)
-                if polyCRC != crc2:
-                    continue
-                
-                newKey = CRCKey(polyKey.poly, polyKey.rev, initVal, xorVal, polyKey.dataPos, polyKey.dataLen)
-                
-                #if self.progress:
-                #    sys.stdout.write("\r")
-                #    print "Found key: {}".format(newKey)
-                    
-                retList.append( newKey )
+                flush_number( self.initVal, crcSize )
+            polyList += self._checkXORB( dataCrc1, dataCrc2, polyKey, crcSize, self.initVal, paramMax )
+        else:
+            ## search for init value
+            initVal = -1
+            while initVal < paramMax:
+                initVal += 1
+                if self.progress:
+                    flush_number( initVal, crcSize )
+                keysList = self._checkXORB( dataCrc1, dataCrc2, polyKey, crcSize, initVal, paramMax )
+                polyList.extend( keysList ) 
          
         if self.progress:
             sys.stdout.write("\r")
             sys.stdout.flush()
-        return retList
+        return polyList
+
+    def _checkXORB(self, dataCrc1, dataCrc2, polyKey, crcSize, initVal, paramMax ):
+        polyList = []
+        
+        polyMask = NumberMask(polyKey.poly, crcSize)
+        
+        dataMask1 = dataCrc1.dataMask()
+        dataMask2 = dataCrc2.dataMask()
+        crc1 = dataCrc1.crcNum
+        crc2 = dataCrc2.crcNum
+            
+        self.crcProc.setRegisterInitValue( initVal )
+        
+        xorVal = -1
+        while xorVal < paramMax:
+            xorVal += 1
+
+            self.crcProc.setXorOutValue( xorVal )
+            
+            polyCRC = self.crcProc.calculate3(dataMask1, polyMask)
+            if polyCRC != crc1:
+                continue
+            polyCRC = self.crcProc.calculate3(dataMask2, polyMask)
+            if polyCRC != crc2:
+                continue
+            
+            newKey = CRCKey(polyKey.poly, polyKey.rev, initVal, xorVal, polyKey.dataPos, polyKey.dataLen)
+            
+            #if self.progress:
+            #    sys.stdout.write("\r")
+            #    print "Found key: {}".format(newKey)
+                
+            polyList.append( newKey )
+            
+        return polyList
 
     ## =============================================================
 
@@ -486,7 +517,12 @@ class Reverse(object):
 #                 if self.progress:
 #                     sys.stdout.write("\r")
 #                     print "Found poly: 0b{0:b} 0x{0:X}".format(poly)
-                retList.append( PolyKey(poly|polyMax, reverseMode, 0, dataMask.dataSize) )
+
+                polyValue = poly | polyMax
+                polyInitVal = self.crcProc.registerInit
+                polyXor = self.crcProc.xorOut
+                retList.append( CRCKey(polyValue, reverseMode, polyInitVal, polyXor, 0, dataMask.dataSize) )
+#                 retList.append( PolyKey(polyValue, reverseMode, 0, dataMask.dataSize) )
                 
             poly += 1
                         
@@ -519,8 +555,11 @@ class Reverse(object):
 #                     sys.stdout.write("\r")
 #                     print "Found poly: 0b{0:b} 0x{0:X}".format(poly)
                 revPoly = polyMask.reversedData() | polyMax
-                retList.append( PolyKey(revPoly, True, 0, dataMask.dataSize) )
-                
+                polyInit = self.crcProc.registerInit
+                polyXor = self.crcProc.xorOut
+                retList.append( CRCKey(revPoly, True, polyInit, polyXor, 0, dataMask.dataSize) )
+#                 retList.append( PolyKey(revPoly, True, 0, dataMask.dataSize) )
+
             poly += 1
 
 #         if self.progress:
@@ -561,7 +600,7 @@ class Reverse(object):
             crc = crcMask.dataNum
             polyCRC = self.crcProc.calculate3( dataMask, polyMask )
             if polyCRC != crc:
-                print "CRC mismatch: ", polyCRC, crc
+                # print "CRC mismatch: ", polyCRC, crc
                 return False
             
         return True

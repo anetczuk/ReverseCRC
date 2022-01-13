@@ -113,10 +113,32 @@ def find_crc( args, finder, data ):
 def verify_crc( args, finder, data ):
 #     ret = finder.verify( data, 0x11D, 0x00, 0x8F )
 #     ret = finder.verify( data, 0x11D, 0x8F, 0x8F )
-    ret = finder.verify( data, 0x11D, 0x00, 0x70 )
-#     ret = finder.verify( data, 0x11D, 0x70, 0x70 )
-    if ret is True:
-        print "\nPoly matches all data"
+    print "input:", args.poly, args.initReg, args.xorVal
+    poly    = int( args.poly, 16 )
+    
+    initList = list()
+    if args.initReg is not None:
+        initReg = int( args.initReg, 16 )
+        initList.append( initReg )
+    else:
+        initList = range(0, 256)
+        
+    xorList = list()
+    if args.xorVal is not None:
+        xorVal = int( args.xorVal, 16 )
+        xorList.append( xorVal )
+    else:
+        xorList = range(0, 256)
+
+    for initNum in initList:
+        for xorNum in xorList:
+            ret = finder.verify( data, poly, initNum, xorNum )
+            if ret is True:
+#                 print "\nPoly matches all data:", hex(poly), hex(initNum), hex(xorNum)
+                print "\nPoly matches all data - poly: 0x{0:02x} initReg: 0x{1:02x} xorVal: 0x{2:02x}".format( poly, initNum, xorNum )
+                return
+    print "\nPoly matches all data"
+    return
 
 
 ## ============================= main section ===================================
@@ -134,6 +156,9 @@ parser.add_argument('--profile', action='store_const', const=True, default=False
 parser.add_argument('--pfile', action='store', default=None, help='Profile the code and output data to file' )
 parser.add_argument('--mindsize', action='store', default=0, help='Minimal data size' )
 parser.add_argument('--algo', action='store', required=True, choices=["HW", "DIV", "MOD"], help='Algorithm' )
+parser.add_argument('--poly', action='store', default="0", help='Polynomial (for VERIFY mode)' )
+parser.add_argument('--initReg', action='store', default=None, help='Registry init value' )
+parser.add_argument('--xorVal', action='store', default=None, help='CRC output xor (for VERIFY mode)' )
 parser.add_argument('--print_progress', '-pp', action='store_const', const=True, default=False, help='Print progress' )
 
  

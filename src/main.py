@@ -24,6 +24,7 @@
 #
 
 
+import os
 import sys
 import time
 import argparse 
@@ -37,6 +38,7 @@ from crc.divisioncrc import DivisionCRC
 from crc.modcrc import ModCRC
 from revcrc.reverse import PolysSolver, BruteForcePairsSolver, BruteForceSolver,\
     CommonSolver, VerifySolver
+from site import makepath
 
 
 def create_processor( algorithm ):
@@ -90,7 +92,7 @@ def main():
     parser.add_argument('--alg', action='store', required=True, choices=["HW", "DIV", "MOD"], help='Algorithm' )
     parser.add_argument('--mode', action='store', required=True, choices=["BF", "BF_PAIRS", "POLY", "COMMON", "VERIFY"], help='Mode' )
     parser.add_argument('--infile', action='store', required=True, help='File with data. Numbers strings are written in big endian notion and are directly converted by "int(str, 16)" invocation.' )
-    parser.add_argument('--outfile', action='store', default="out.txt", help='Results output file' )
+    parser.add_argument('--outfile', action='store', default=None, help='Results output file' )
     parser.add_argument('--mindsize', action='store', default=0, help='Minimal data size' )
     parser.add_argument('--poly', action='store', default=None, help='Polynomial (for VERIFY mode)' )
     parser.add_argument('--crc_size', action='store', default=None, help='CRC size (for VERIFY mode)' )
@@ -133,6 +135,15 @@ def main():
     
         printProgress = args.print_progress
         outfile       = args.outfile
+        if outfile is None:
+            filename = os.path.basename(args.infile)
+            filenameroot = os.path.splitext( filename )[0]
+            dirname = os.path.dirname(args.infile)
+            outdir = os.path.join( dirname, "out" )
+            if os.path.exists( outdir ) is False:
+                os.makedirs( outdir )
+            outname = "%s_%s_%s_%s_%s.txt" % ( filenameroot, args.alg, args.mode, args.initReg, args.xorVal )
+            outfile = os.path.join( outdir, outname )
         
         processor = create_processor( args.alg )
         if processor is None:

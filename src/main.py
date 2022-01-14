@@ -66,6 +66,14 @@ def create_solver( mode, processor, printProgress ):
     return None
 
 
+def convert_int( value ):
+    if value is None:
+        return None
+    if value == "None":
+        return None
+    return int( value )
+
+
 def convert_hex( value ):
     if value is None:
         return None
@@ -84,7 +92,8 @@ def main():
     parser.add_argument('--infile', action='store', required=True, help='File with data. Numbers strings are written in big endian notion and are directly converted by "int(str, 16)" invocation.' )
     parser.add_argument('--outfile', action='store', default="out.txt", help='Results output file' )
     parser.add_argument('--mindsize', action='store', default=0, help='Minimal data size' )
-    parser.add_argument('--poly', action='store', default="0", help='Polynomial (for VERIFY mode)' )
+    parser.add_argument('--poly', action='store', default=None, help='Polynomial (for VERIFY mode)' )
+    parser.add_argument('--crc_size', action='store', default=None, help='CRC size (for VERIFY mode)' )
     parser.add_argument('--initReg', action='store', default=None, help='Registry init value' )
     parser.add_argument('--xorVal', action='store', default=None, help='CRC output xor (for VERIFY mode)' )
     parser.add_argument('--print_progress', '-pp', action='store_const', const=True, default=False, help='Print progress' )
@@ -139,11 +148,13 @@ def main():
         poly    = convert_hex( args.poly )
         initReg = convert_hex( args.initReg )
         xorVal  = convert_hex( args.xorVal )
+        crcSize = convert_int( args.crc_size )
         minSearchData = int(args.mindsize)
         
         solver.setPoly( poly )
         solver.setInitValue( initReg )
         solver.setXorValue( xorVal )
+        solver.setCRCSize( crcSize )
         solver.setMinSearchData( minSearchData )
         
         solver.execute( data, outfile )       

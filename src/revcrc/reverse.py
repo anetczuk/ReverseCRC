@@ -101,6 +101,12 @@ def flush_string( value ):
     sys.stdout.write( "\r{}".format(value) )
     sys.stdout.flush()
 
+        
+def flush_percent( value, places ):
+    formatStr = "\r{:.%sf}%%" % places
+    sys.stdout.write( formatStr.format(value) )
+    sys.stdout.flush()
+
 
 class MessageCRC:
     def __init__(self, data, dataSize, crc, crcSize):
@@ -129,6 +135,7 @@ class Reverse(object):
         self.poly    = None
         self.initVal = None
         self.xorVal  = None
+        self.crcSize = None
         self.minSearchData = None
         
         self.returnFirst = False
@@ -150,6 +157,9 @@ class Reverse(object):
     
     def setXorValue(self, value):
         self.xorVal = value
+
+    def setCRCSize(self, value):
+        self.crcSize = value
     
     def setMinSearchData(self, value):
         self.minSearchData = value
@@ -777,10 +787,28 @@ class VerifySolver(Reverse):
         return data.size()
 
     def execute( self, data, outputFile ):
-        print "input:", self.poly, self.initVal, self.xorVal
+        print "input:", self.poly, self.initVal, self.xorVal, self.crcSize
         
-        polyKey = PolyKey( self.poly )
-        crcSize = polyKey.size()
+        if self.poly is None and self.crcSize is None:
+            print "\nAt least one data need to be passed: poly or crcsize"
+            return
+
+        crcSize = None
+        if self.poly is not None:
+            polyKey = PolyKey( self.poly )
+            crcSize = polyKey.size()
+        else:
+            crcSize = self.crcSize
+            
+        if crcSize is None:
+            print "\nUnable to determine CRC size"
+            return             
+
+        polyList = list()
+        if self.poly is not None:
+            polyList.append( self.poly )
+        else:
+            polyList = range(0, 2 ** crcSize)
         
         initList = list()
         if self.initVal is not None:
@@ -794,45 +822,44 @@ class VerifySolver(Reverse):
         else:
             xorList = range(0, 2 ** crcSize)
 
-        spaceSize = len( xorList ) * len( initList )
-        print "search space size:", spaceSize
+        spaceSize = len( polyList ) * len( initList ) * len( xorList )
+        print "search space size:", spaceSize, len( polyList ), len( initList ), len( xorList )
         
         spaceCounter = 1
 
         matchesAll = False    
-        for initNum in initList:
-            currCounter = spaceCounter
-            for xorNum in xorList:
-                if self.progress:
-                    value = currCounter * 100.0 / spaceSize
-                    flush_float( value, 6 )
-                ret = self.verify( data, self.poly, initNum, xorNum )
-                if ret is True:
-                    flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( self.poly, initNum, xorNum ) )
-                    matchesAll = True
-                    continue
-                currCounter += 1
-            spaceCounter += len( xorList )
+        for polyNum in polyList:
+            polyMask = NumberMask( polyNum, crcSize )
+            
+            for initNum in initList:
+                currCounter = spaceCounter
+                for xorNum in xorList:
+                    if self.progress:
+                        value = currCounter * 100.0 / spaceSize
+                        flush_percent( value, 6 )
+                    ret = self.verify_input( data, polyMask, initNum, xorNum )
+                    if ret is True:
+                        flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyNum, initNum, xorNum ) )
+                        matchesAll = True
+                        continue
+                    currCounter += 1
+                spaceCounter += len( xorList )
         if matchesAll:
             print "\nFound poly matching all data"
         else:
             print "\nNo matching polys found"
 
-    def verify(self, inputData, poly, initReg, xorVal):
+    def verify_input(self, inputData, polyMask, initReg, xorVal):
         if inputData.empty():
             return True
         if inputData.ready() == False:
             return True
         
-        numbersList = inputData.numbersList
-        dataSize = inputData.dataSize
-        crcSize  = inputData.crcSize
-#         if (self.progress):
-#             print "List size: {} Data size: {} CRC size: {}".format( len(numbersList), dataSize, crcSize )
-        
-        polyMask = NumberMask( poly, crcSize )
-        
-        for num in numbersList:
+        inputList = inputData.numbersList
+        dataSize  = inputData.dataSize
+        crcSize   = inputData.crcSize
+                
+        for num in inputList:
             data = num[0]
             crc  = num[1]
 #             if self.progress:

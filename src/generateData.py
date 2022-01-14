@@ -1,19 +1,19 @@
 #!/usr/bin/env python2
 #
 # MIT License
-# 
+#
 # Copyright (c) 2017 Arkadiusz Netczuk <dev.arnet@gmail.com>
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,7 +25,7 @@
 
 
 import sys
-import argparse 
+import argparse
 import logging
 
 import crcmod
@@ -39,7 +39,7 @@ def randomHexString(length):
     for _ in xrange(length):
         retString += random.choice('0123456789ABCDEF')
     return retString
-    
+
 
 
 ## ============================= main section ===================================
@@ -56,10 +56,10 @@ parser.add_argument('--preamblesize', action='store', required=False, default=0,
 parser.add_argument('--poly', action='store', required=True, help='Polynomial with leading \'1\'(in hex)' )
 parser.add_argument('--xor', action='store', required=False, default="0", help='Xor value (in hex)' )
 parser.add_argument('--reversed', action='store', required=False, default=False, help='Reversed algorithm' )
- 
- 
+
+
 args = parser.parse_args()
- 
+
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -73,17 +73,17 @@ try:
     initCrc = 0x0
     xor = int(args.xor, 16)
     rev = args.reversed
-    
+
     print "## call command: {}".format( ' '.join(sys.argv[:]) )
     print "## pres:{} ds:{} poly:0x{:X} rev:{} initcrc:0x{:X} xor:0x{:X}".format( preSize, dataSize, poly, rev, initCrc, xor )
-    
+
     crc_func = crcmod.mkCrcFun(poly, rev=rev, initCrc=initCrc, xorOut=xor)
-    
+
     preambleFormat = "{}"
     dataFormat = "{:0" + str(dataSize/4) + "X}"
     polyFormat = "{:0" + str(polySize/4) + "X}"
     messageFormat = preambleFormat + dataFormat + " " + polyFormat
-    
+
     for _ in xrange(0, samples):
         preamble = randomHexString(preSize)
         data = randomHexString(dataSize)
@@ -91,8 +91,7 @@ try:
         messageMask = NumberMask( messageNum, dataSize*4 )
         polyCRC  = crc_func( messageMask.toASCII() )
         print messageFormat.format(preamble, messageMask.dataNum, polyCRC)
-    
+
 finally:
     pass
-    
-    
+

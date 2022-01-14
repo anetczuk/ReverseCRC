@@ -1,17 +1,17 @@
 # MIT License
-# 
+#
 # Copyright (c) 2017 Arkadiusz Netczuk <dev.arnet@gmail.com>
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -39,7 +39,7 @@ class DivisionCRCBackwardState:
             self.shiftMSB(one)
         else:
             self.shiftLSB(one)
-        
+
     ## 'one' says what bit add to register
     def shiftMSB(self, one):
         ## reversing MSB mode
@@ -48,7 +48,7 @@ class DivisionCRCBackwardState:
             self.register |= self.polyMask.masterBit             ## set one
         self.dataMask.pushMSB( self.register & 1 )
         self.register >>= 1
-        
+
     ## 'one' says what bit add to register
     def shiftLSB(self, one):
         ## reversing MSB mode
@@ -65,7 +65,7 @@ class DivisionCRCBackwardState:
         self.dataMask.dataNum |= (data << self.dataMask.dataSize)
         self.dataMask.dataSize += dataSize
         self.register ^= data
-        
+
     def initXorLSB(self, data, dataSize):
         self.dataMask.dataNum <<= dataSize
         self.dataMask.dataNum |= data
@@ -74,16 +74,16 @@ class DivisionCRCBackwardState:
 
     def popLSZeros(self, num):
         self.dataMask.popLSZeros(num)
-        
+
     def popMSZeros(self, num):
         self.dataMask.popMSZeros(num)
-        
+
     def __repr__(self):
         return "<DCRCBState dm:{} pm{} r:0x{:X}>".format( self.dataMask, self.polyMask, self.register )
 #         regSize4 = int(math.ceil( float(self.crcSize)/4 ))
 #         messageFormat = "<DCRCBState dm:{} pm{} r:0x{:0" + str(regSize4) + "X}>"
 #         return messageFormat.format(self.dataMask, self.polyMask, self.register)
-    
+
     def __eq__(self, other):
         if self.dataMask != other.dataMask:
             return False
@@ -92,10 +92,10 @@ class DivisionCRCBackwardState:
         if self.register != other.register:
             return False
         return True
-     
+
     def __ne__(self, other):
         return ((self == other) == False)
-     
+
     def __hash__(self):
         return hash(str(self.dataMask) + str(self.polyMask) + str(self.register))
 
@@ -116,24 +116,24 @@ class DivisionCRCBackward:
         crcSize = polyMask.dataSize
         collector = []
         collector.append( DivisionCRCBackwardState( polyMask, self.crc^xorOut) )
-        
-        ### shift crc zeros        
+
+        ### shift crc zeros
         collector = self._roundZeros(collector, crcSize)
-            
+
         initShift = min(crcSize, self.dataMask.dataSize)
-        
+
         ## divide
         divideShifts = self.dataMask.dataSize - crcSize
         collector = self._round(collector, divideShifts)
-        
+
         if len(collector) < 1:
             return []
-        
+
         ## init shift register
         self._initShift(collector, initShift)
-            
+
         return collector
-    
+
     def _roundZeros(self, collector, crcSize):
         retList = []
         if self.reversedMode == False:
@@ -150,7 +150,7 @@ class DivisionCRCBackward:
                 c.popMSZeros(crcSize)
 #         print "collector:", retList
         return retList
-        
+
     def _round(self, collector, num=1):
         for _ in range(0, num):
             receiver = []
@@ -158,7 +158,7 @@ class DivisionCRCBackward:
                 ##c1 = copy.deepcopy(c)
                 c1 = c
                 c2 = copy.deepcopy(c)
-                
+
                 c1.shiftBit(False, self.reversedMode)
                 if self.isProper(c1):
                     receiver.append(c1)
@@ -171,12 +171,12 @@ class DivisionCRCBackward:
             if len(receiver) < 1:
                 return []
         return collector
-            
+
     def _initShift(self, collector, shiftLength):
 #         initBits = self.dataMask.getMSB(shiftLength)
 #         for c in collector:
 #             c.initXor(initBits, shiftLength)
-            
+
         if self.reversedMode == False:
             initBits = self.dataMask.getMSB(shiftLength)
             for c in collector:
@@ -186,10 +186,10 @@ class DivisionCRCBackward:
             for c in collector:
                 c.initXorLSB(initBits, shiftLength)
 
-    
+
     def isProper(self, crcBack):
         if self.reversedMode == False:
             return self.dataMask.containsLSB( crcBack.dataMask )
         else:
             return self.dataMask.containsMSB( crcBack.dataMask )
-    
+

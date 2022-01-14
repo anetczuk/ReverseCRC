@@ -1,17 +1,17 @@
 # MIT License
-# 
+#
 # Copyright (c) 2017 Arkadiusz Netczuk <dev.arnet@gmail.com>
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,23 +28,23 @@ from crc.crcproc import CRCProc
 class DivisionCRC(CRCProc):
     def __init__(self):
         CRCProc.__init__(self)
-    
+
     def calculate3(self, dataMask, polyMask):
         if self.reversed == False:
             return self.calculateMSB(dataMask, polyMask)
         else:
             return self.calculateLSB(dataMask, polyMask)
-    
+
     ## old implementation is very helpful when defining backward algorithm
     ## 'poly' without leading '1'
     def calculateMSB(self, dataMask, polyMask):
         ## MSB first
-        
+
         ## with leading '1' to xor out bit on shifting
         polyMasterBit = polyMask.masterBit
         genPoly = polyMask.dataNum | polyMasterBit
         dataNum = dataMask.dataNum
-  
+
         ## init shift register
         initShift = min(polyMask.dataSize, dataMask.dataSize)
         register = dataMask.getMSB(initShift) ^ self.registerInit
@@ -64,19 +64,19 @@ class DivisionCRC(CRCProc):
             register <<= 1
             if (register & polyMasterBit) > 0:
                 register ^= genPoly
-        
+
         return (register ^ self.xorOut) & polyMask.dataMask
-    
+
     ## old implementation is very helpful when defining backward algorithm
     ## 'poly' without leading '1'
     ## 'dataMask' and 'polyMask' have to be reversed
     def calculateLSB(self, dataMask, polyMask):
         ## LSB first
-        
+
         dataNum = dataMask.dataNum
         polyNum = polyMask.dataNum
         polyMasterBit = polyMask.masterBit
- 
+
         ## init shift register
         initShift = min(polyMask.dataSize, dataMask.dataSize)
         register = dataMask.getLSB(initShift) ^ self.registerInit
@@ -91,12 +91,12 @@ class DivisionCRC(CRCProc):
             if lastBit > 0:
                 register ^= polyNum
             dataBit <<= 1
-             
+
         ### shift crc zeros
         for _ in xrange(0, polyMask.dataSize):
             lastBit = register & 1
             register >>= 1
             if lastBit > 0:
                 register ^= polyNum
-        
+
         return (register ^ self.xorOut) & polyMask.dataMask

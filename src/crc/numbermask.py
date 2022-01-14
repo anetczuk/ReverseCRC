@@ -1,17 +1,17 @@
 # MIT License
-# 
+#
 # Copyright (c) 2017 Arkadiusz Netczuk <dev.arnet@gmail.com>
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -78,17 +78,17 @@ class SubNumber(object):
         self.data = data
         self.size = dataSize
         self.pos = pos                              ## informative, do not affect data, counts from LSB
-    
+
     def toASCII(self):
         return intToASCII(self.data, self.size)
-    
+
     def toNumberMask(self):
         return NumberMask(self.data, self.size)
-    
+
     def __repr__(self):
         digits = int(math.ceil( float(self.size)/4 ))
         return ("<SubNumber 0x{0:0" + str(digits) + "X}/{0} {1} {2}>").format(self.data, self.size, self.pos)
-    
+
     def __eq__(self, other):
         if self.data != other.data:
             return False
@@ -97,13 +97,13 @@ class SubNumber(object):
         if self.pos != other.pos:
             return False
         return True
-     
+
     def __ne__(self, other):
         return ((self == other) == False)
-      
+
     def __hash__(self):
         return hash( (self.data, self.size, self.pos) )
-    
+
 
 def generateSubstrings(dataString, maxPos = -1):
     valSet = set()
@@ -135,36 +135,36 @@ def generateSubstringsReverse(dataString, maxPos = -1):
                 retSet.add( SubNumber(substr, subLen, length-subLen-x) )
     return retSet
 
-    
+
 class NumberMask:
     """Container for data and it's size given in bits."""
-    
+
     def __init__(self, data, dataSize):
         self.dataSize = dataSize
         self.calculateCache()
         self.setNumber(data)
-    
+
     def setNumber(self, newValue):
         #self.dataNum = (newValue & (self.dataMask))
         self.dataNum = newValue
         if self.dataNum > self.dataMask:
             self.dataNum &= self.dataMask
         self.revDataBytes = None
-    
+
     def calculateCache(self):
         self.masterBit = 0b1 << self.dataSize
-        self.dataMask = self.masterBit-1        
-    
+        self.dataMask = self.masterBit-1
+
     def masterData(self):
         return self.dataNum | self.masterBit
-    
+
     def pushMSB(self, bit):
         if bit > 0:
             self.dataNum |= self.masterBit
             self.revDataBytes = None
         self.dataSize += 1
         self.calculateCache()
-        
+
     def pushLSB(self, bit):
         self.dataNum <<= 1
         self.revDataBytes = None
@@ -172,36 +172,36 @@ class NumberMask:
             self.dataNum |= 1
         self.dataSize += 1
         self.calculateCache()
-        
+
     def pushLSZeros(self, num):
         self.dataNum <<= num
         self.revDataBytes = None
         self.dataSize += num
         self.calculateCache()
-        
+
     def popLSZeros(self, num):
         self.dataNum >>= num
         self.revDataBytes = None
         self.dataSize -= num
         self.calculateCache()
-        
+
     def pushMSZeros(self, num):
         self.dataSize += num
         self.calculateCache()
-         
+
     def popMSZeros(self, num):
         self.dataSize -= num
         self.calculateCache()
-    
+
     def containsMSB(self, dataMask):
         sizeDiff = self.dataSize - dataMask.dataSize
         if sizeDiff < 0:
             return False
-        cmpMask = (dataMask.dataMask << sizeDiff) 
+        cmpMask = (dataMask.dataMask << sizeDiff)
         data1 = self.dataNum & cmpMask
         data2 = (dataMask.dataNum << sizeDiff)
         return (data1 == data2)
-    
+
     def containsLSB(self, dataMask):
         if self.dataSize < dataMask.dataSize:
             return False
@@ -209,11 +209,11 @@ class NumberMask:
         data1 = self.dataNum & cmpMask
         data2 = dataMask.dataNum & cmpMask
         return (data1 == data2)
-    
+
     def reverse(self):
         self.dataNum = reverseBits(self.dataNum, self.dataSize)
         self.revDataBytes = None
-        
+
     def reverseBytes(self):
         self._calcRevBytes()
         tmpData = self.dataNum
@@ -224,14 +224,14 @@ class NumberMask:
         revData = copy.deepcopy(self)
         revData.reverse()
         return revData
-    
+
     def reversedData(self):
         return reverseBits(self.dataNum, self.dataSize)
-    
+
     def reversedBytes(self):
         self._calcRevBytes()
         return NumberMask(self.revDataBytes, self.dataSize)
-    
+
     def getMSB(self, length):
         retVal = 0
         retBit = 1 << (length-1)
@@ -241,15 +241,15 @@ class NumberMask:
                 retVal |= retBit
             retBit >>= 1
             dataBit >>= 1
-        return retVal    
-    
+        return retVal
+
     def getLSB(self, length):
-        bitsMask = (1 << length) -1 
+        bitsMask = (1 << length) -1
         return (self.dataNum & bitsMask)
 
     def toASCII(self):
         return intToASCII(self.dataNum)
-    
+
     def generateSubnumbers(self, minLen = -1, maxPos = -1):
         valSet = set()
         retSet = set()
@@ -257,7 +257,7 @@ class NumberMask:
             maxPos = self.dataSize-1
         if minLen < 1:
             minLen = 1
-        lenMask = (1 << minLen) - 1 
+        lenMask = (1 << minLen) - 1
         for valLen in xrange(minLen, self.dataSize+1):
             xpos = min(self.dataSize-valLen, maxPos)
             for x in xrange(xpos+1):
@@ -267,9 +267,9 @@ class NumberMask:
                     valSet.add( t )
                     retSet.add( SubNumber(val, valLen, x) )
             lenMask = (lenMask << 1) | 0x1
-                
+
         return retSet
-    
+
     def __repr__(self):
         digits = int(math.ceil( float(self.dataSize)/4 ))
         return ("<NumberMask 0x{0:0" + str(digits) + "X}/{0} {1}>").format(self.dataNum, self.dataSize)
@@ -280,16 +280,15 @@ class NumberMask:
         if self.dataSize != other.dataSize:
             return False
         return True
-    
+
     def __ne__(self, other):
         return ((self == other) == False)
-    
+
     def __hash__(self):
         return hash( (self.dataSize, self.dataNum) )
-    
+
     def _calcRevBytes(self):
         if self.revDataBytes != None:
             return
         bytesNum = int(math.ceil( float(self.dataSize)/8 ))
         self.revDataBytes = reverseBytes(self.dataNum, bytesNum)
-    

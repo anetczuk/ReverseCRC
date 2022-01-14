@@ -1,19 +1,19 @@
 #!/usr/bin/env python2
 #
 # MIT License
-# 
+#
 # Copyright (c) 2017 Arkadiusz Netczuk <dev.arnet@gmail.com>
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,11 +23,10 @@
 # SOFTWARE.
 #
 
-
 import os
 import sys
 import time
-import argparse 
+import argparse
 import logging
 import cProfile
 
@@ -38,7 +37,6 @@ from crc.divisioncrc import DivisionCRC
 from crc.modcrc import ModCRC
 from revcrc.reverse import PolysSolver, BruteForcePairsSolver, BruteForceSolver,\
     CommonSolver, VerifySolver
-from site import makepath
 
 
 def create_processor( algorithm ):
@@ -101,21 +99,21 @@ def main():
     parser.add_argument('--print_progress', '-pp', action='store_const', const=True, default=False, help='Print progress' )
     parser.add_argument('--profile', action='store_const', const=True, default=False, help='Profile the code' )
     parser.add_argument('--pfile', action='store', default=None, help='Profile the code and output data to file' )
-    
-     
+
+
     args = parser.parse_args()
-     
-    
+
+
     logging.basicConfig(level=logging.DEBUG)
-    
+
     print "Starting:", args.alg, args.mode
-    
-    
+
+
     starttime = time.time()
     profiler = None
-    
+
     try:
-    
+
         profiler_outfile = args.pfile
         if args.profile == True or profiler_outfile != None:
             if profiler_outfile is None:
@@ -123,16 +121,16 @@ def main():
             print "Starting profiler"
             profiler = cProfile.Profile()
             profiler.enable()
-        
+
         dataParser = DataParser()
         data = dataParser.parseFile(args.infile)
-        
+
         if len(data.numbersList) < 1:
             print "no data found"
             return 1
-            
+
         print "input data:", data.numbersList
-    
+
         printProgress = args.print_progress
         outfile       = args.outfile
         if outfile is None:
@@ -144,35 +142,35 @@ def main():
                 os.makedirs( outdir )
             outname = "%s_%s_%s_%s_%s.txt" % ( filenameroot, args.alg, args.mode, args.initReg, args.xorVal )
             outfile = os.path.join( outdir, outname )
-        
+
         processor = create_processor( args.alg )
         if processor is None:
             print "invalid algorithm:", args.alg
             return 1
-        
+
         ## type Reverse
         solver = create_solver( args.mode, processor, printProgress )
         if solver is None:
             print "invalid solver:", args.mode
             return 1
-        
+
         poly    = convert_hex( args.poly )
         initReg = convert_hex( args.initReg )
         xorVal  = convert_hex( args.xorVal )
         crcSize = convert_int( args.crc_size )
         minSearchData = int(args.mindsize)
-        
+
         solver.setPoly( poly )
         solver.setInitValue( initReg )
         solver.setXorValue( xorVal )
         solver.setCRCSize( crcSize )
         solver.setMinSearchData( minSearchData )
-        
-        solver.execute( data, outfile )       
-            
+
+        solver.execute( data, outfile )
+
         timeDiff = (time.time()-starttime)
         print "Calculation time: {:13.8f}s".format(timeDiff)
-    
+
     finally:
         print ""                    ## print new line
         if profiler != None:

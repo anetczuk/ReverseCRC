@@ -1,17 +1,17 @@
 # MIT License
-# 
+#
 # Copyright (c) 2017 Arkadiusz Netczuk <dev.arnet@gmail.com>
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,14 +27,14 @@ from crc.numbermask import NumberMask
 from crc.crcproc import CRCProc
 
 
-    
+
 GlobalLookupTables = {}
-    
+
 class LookupCRC(CRCProc):
     def __init__(self, lookupSize):
         CRCProc.__init__(self)
-        self.lookupSize = lookupSize 
-    
+        self.lookupSize = lookupSize
+
     def calculate3(self, dataMask, polyMask):
         lookup = self.prepareTable(polyMask)
 
@@ -46,10 +46,10 @@ class LookupCRC(CRCProc):
         crcMask = (1 << polyMask.dataSize) - 1
         lookupMask = (1 << self.lookupSize) - 1
         valMask = lookupMask << (dataSize - self.lookupSize)
-        
+
         indexShift = polyMask.dataSize - self.lookupSize
         indexMask = lookupMask << indexShift
-        
+
         inputData = dataMask.dataNum
         for i in range(0, rep):
             val = (inputData & valMask) >> self.lookupSize*(rep-i-1)
@@ -71,5 +71,4 @@ class LookupCRC(CRCProc):
             data = NumberMask(i, self.lookupSize)
             lookup[i] = crcProc.calculate3(data, polyMask)
         return lookup
-    
-    
+

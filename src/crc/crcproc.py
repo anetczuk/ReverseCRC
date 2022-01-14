@@ -1,17 +1,17 @@
 # MIT License
-# 
+#
 # Copyright (c) 2017 Arkadiusz Netczuk <dev.arnet@gmail.com>
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -36,7 +36,7 @@ class PolyKey:
 
     def __repr__(self):
         return "<PolyKey p:0x{:X} r:{:} dP:{:} dL:{:}>".format(self.poly, self.rev, self.dataPos, self.dataLen)
-    
+
     def __eq__(self, other):
         if self.poly != other.poly:
             return False
@@ -47,13 +47,13 @@ class PolyKey:
         if self.dataLen != other.dataLen:
             return False
         return True
-    
+
     def __ne__(self, other):
         return ((self == other) == False)
-    
+
     def __hash__(self):
         return hash(str(self.poly) + str(self.rev))
-    
+
     def getPolyKey(self):
         return self
 
@@ -80,7 +80,7 @@ class CRCKey:
         crc_size = str( self.size() / 4 )
         template = "<CRCKey p:0x{:X} r:{:} i:0x{:0" + crc_size + "X} x:0x{:0" + crc_size + "X} dP:{:} dL:{:}>"
         return template.format(self.poly, self.rev, self.init, self.xor, self.dataPos, self.dataLen)
-    
+
     def __eq__(self, other):
         if self.poly != other.poly:
             return False
@@ -95,14 +95,14 @@ class CRCKey:
         if self.dataLen != other.dataLen:
             return False
         return True
-    
+
     def __ne__(self, other):
         return ((self == other) == False)
-    
+
     def __hash__(self):
 #         return hash(str(self.poly) + str(self.init) + str(self.xor))
         return hash( (self.poly, self.init, self.xor) )
-    
+
     def size(self):
         if self.crcSize is None:
             if self.poly < 1:
@@ -110,10 +110,10 @@ class CRCKey:
             else:
                 self.crcSize = int( math.log( self.poly, 2 ) )
         return self.crcSize
-    
+
     def getPolyKey(self):
         return PolyKey( self.poly, self.rev, self.dataPos, self.dataLen )
-    
+
 
 
 class CRCProc(object):
@@ -126,7 +126,7 @@ class CRCProc(object):
         Constructor
         '''
         self.reset()
-        
+
     def reset(self):
         self.registerInit = 0x0
         self.xorOut = 0x0
@@ -135,35 +135,35 @@ class CRCProc(object):
 
     def setRegisterInitValue(self, value):
         self.registerInit = value
-        
+
     def setXorOutValue(self, value):
         self.xorOut = value
-        
+
     def setInitCRC(self, value, crcSize):
         self.registerInit = value ^ self.xorOut
         if self.reversed == True:
             self.registerInit = reverseBits(self.registerInit, crcSize)
-    
+
     def setReversed(self, value = True):
-        self.reversed = value  
+        self.reversed = value
 
     def setValues(self, crcKey):
         self.setReversed( crcKey.rev )
         self.setXorOutValue( crcKey.xor )
         self.setRegisterInitValue( crcKey.init )
-    
+
     ## 'poly' with leading '1'
     def calculate(self, data, poly):
         return self.calculate2(data, data.bit_length(), poly, poly.bit_length()-1)
-    
+
     def calculate2(self, data, dataSize, poly, crcSize):
         dataMask = NumberMask(data, dataSize)
         polyMask = NumberMask(poly, crcSize)
         return self.calculate3(dataMask, polyMask)
-        
+
     def calculate3(self, dataMask, polyMask):
         raise NotImplementedError
-    
+
     def calculateCRC( self, data, dataSize, poly, crcSize, init=0, xorout=0, reverse=False ):
         self.setReversed( reverse )
         self.setRegisterInitValue( init )

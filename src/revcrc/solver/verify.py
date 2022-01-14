@@ -31,9 +31,7 @@ class VerifySolver(Reverse):
     def __init__(self, crcProcessor, printProgress = None):
         Reverse.__init__(self, crcProcessor, printProgress)
 
-    def dataSize( self, data ):
-        return data.size()
-
+    ## data -- InputData
     def execute( self, data, outputFile ):
         print "input:", self.poly, self.initVal, self.xorVal, self.crcSize
 

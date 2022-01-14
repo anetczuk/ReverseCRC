@@ -36,16 +36,13 @@ class BruteForcePairsSolver(Reverse):
     def __init__(self, crcProcessor, printProgress = None):
         Reverse.__init__(self, crcProcessor, printProgress)
 
-    def dataSize( self, data ):
-        return data.size() * ( data.size() - 1 ) / 2
-
     def execute( self, data, outputFile ):
         retList = self.bruteForcePairsInput( data, self.minSearchData )
         if len(retList) < 1:
             print "\nNo keys discovered"
             return
 
-        dataSize = self.dataSize( data )
+        dataSize = data.size() * ( data.size() - 1 ) / 2
 
         print_results( retList, dataSize )
 

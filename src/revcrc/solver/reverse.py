@@ -164,10 +164,8 @@ class Reverse(object):
     def setMinSearchData(self, value):
         self.minSearchData = value
 
-    def dataSize( self, data ):
-        raise NotImplementedError( "%s not implemented abstract method" % type(self) )
-
     ## abstract method
+    ## data -- InputData
     def execute( self, data, outputFile ):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
 

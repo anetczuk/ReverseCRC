@@ -36,7 +36,7 @@ where first hex number in row is data and second number is calculated CRC.
     - *BF*: finding full key by forward algorithm (brute force)
     - *BF_PAIRS*: finding full key by forward algorithm using pair xoring (brute force)
     - *POLY*: find polynomials by xor-ing data pairs
-    - *COMMON*: finding full key by backward algorithm
+    - *COMMON*: check common keys used in industry
 - *mode*: decode algorithm:
     - *HW* -- use *HwCRC*
     - *DIV* -- use *DivisionCRC*

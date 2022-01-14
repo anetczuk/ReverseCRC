@@ -23,7 +23,7 @@
 
 
 import unittest
-from crc.crcproc import PolyKey
+from crc.crcproc import PolyKey, CRCKey
 
 
 
@@ -48,6 +48,31 @@ class PolyKeyTest(unittest.TestCase):
         key2 = PolyKey(-1, True)
         
         self.assertNotEqual( key1, key2 )
+
+
+class CRCKeyTest(unittest.TestCase):
+    def setUp(self):
+        # Called before testfunction is executed
+        pass
+ 
+    def tearDown(self):
+        # Called after testfunction was executed
+        pass
+      
+    def test_size_0x00(self):
+        key1 = CRCKey( 0x00 )
+        crcsize = key1.size()
+        self.assertEqual( crcsize, 0 )
+      
+    def test_size_0x01(self):
+        key1 = CRCKey( 0x01 )
+        crcsize = key1.size()
+        self.assertEqual( crcsize, 0 )
+      
+    def test_size_0x123(self):
+        key1 = CRCKey( 0x123 )
+        crcsize = key1.size()
+        self.assertEqual( crcsize, 8 )
 
 
 if __name__ == "__main__":

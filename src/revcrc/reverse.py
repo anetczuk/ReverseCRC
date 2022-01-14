@@ -20,15 +20,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-from crc.numbermask import NumberMask
 import sys
 import itertools
+import copy
+from collections import Counter
+
+from crc.numbermask import NumberMask
 from crc.crcproc import CRCKey, PolyKey
 from crc.hwcrc import HwCRC
 from crc.divisioncrc import DivisionCRC
 from crc.modcrc import ModCRC
-import copy
-from collections import Counter
 
 
 def flush_number( num, bitSize ):
@@ -94,7 +95,7 @@ class Reverse(object):
             keys = self.findBruteForceStandard( num, inputData.dataSize, inputData.crcSize, searchRange )
 
             if (self.progress):
-                print "Found keys:", len( keys )
+                print "\nFound keys:", len( keys )
 
             retList.update( keys )
             
@@ -156,11 +157,12 @@ class Reverse(object):
 
     ## ==========================================================
     
+    # return List[ CRCKey ]
     def bruteForcePairsInput(self, inputData, searchRange = 0):
         if inputData.empty():
-            return
+            return []
         if inputData.ready() == False:
-            return
+            return []
         
         numbersList = inputData.numbersList
         if (self.progress):
@@ -187,6 +189,7 @@ class Reverse(object):
             
         return retList
 
+    # return List[ CRCKey ]
     def findBruteForcePairs(self, dataCrcPair1, dataCrcPair2, dataSize, crcSize, searchRange = 0):
         data1 = dataCrcPair1[0]
         crc1 = dataCrcPair1[1]
@@ -214,6 +217,7 @@ class Reverse(object):
             retList += paramsList
         return retList
 
+    # return List[ CRCKey ]
     def findBruteForceParams(self, dataCrc1, dataCrc2, polyKey):
         self.crcProc.setReversed( polyKey.rev )
          
@@ -243,6 +247,7 @@ class Reverse(object):
             sys.stdout.flush()
         return polyList
 
+    # return List[ CRCKey ]
     def _checkXORB(self, dataCrc1, dataCrc2, polyKey, crcSize, initVal, paramMax ):
         polyList = []
         
@@ -280,11 +285,12 @@ class Reverse(object):
 
     ## =============================================================
 
+    # return Counter[ PolyKey ]
     def findPolysInput(self, inputData, searchRange = 0):
         if inputData.empty():
-            return
+            return []
         if inputData.ready() == False:
-            return
+            return []
         
         numbersList = inputData.numbersList
         if (self.progress):
@@ -456,6 +462,7 @@ class Reverse(object):
         
     ## ==========================================================
     
+    # return List[ PolyKey ]
     def findPolysXOR(self, data1, crc1, data2, crc2, dataSize, crcSize, searchRange = 0):
         xorData = data1 ^ data2
         xorCRC = crc1 ^ crc2
@@ -498,6 +505,7 @@ class Reverse(object):
              
         return retList
     
+    # return List[ PolyKey ]
     def findBruteForcePoly(self, dataMask, crcMask, reverseMode):
         self.crcProc.setReversed(reverseMode)
         crc = crcMask.dataNum
@@ -519,10 +527,10 @@ class Reverse(object):
 #                     print "Found poly: 0b{0:b} 0x{0:X}".format(poly)
 
                 polyValue = poly | polyMax
-                polyInitVal = self.crcProc.registerInit
-                polyXor = self.crcProc.xorOut
-                retList.append( CRCKey(polyValue, reverseMode, polyInitVal, polyXor, 0, dataMask.dataSize) )
-#                 retList.append( PolyKey(polyValue, reverseMode, 0, dataMask.dataSize) )
+#                 polyInit = self.crcProc.registerInit
+#                 polyXor = self.crcProc.xorOut
+#                 retList.append( CRCKey(revPoly, True, polyInit, polyXor, 0, dataMask.dataSize) )
+                retList.append( PolyKey(polyValue, reverseMode, 0, dataMask.dataSize) )
                 
             poly += 1
                         
@@ -555,10 +563,10 @@ class Reverse(object):
 #                     sys.stdout.write("\r")
 #                     print "Found poly: 0b{0:b} 0x{0:X}".format(poly)
                 revPoly = polyMask.reversedData() | polyMax
-                polyInit = self.crcProc.registerInit
-                polyXor = self.crcProc.xorOut
-                retList.append( CRCKey(revPoly, True, polyInit, polyXor, 0, dataMask.dataSize) )
-#                 retList.append( PolyKey(revPoly, True, 0, dataMask.dataSize) )
+#                 polyInit = self.crcProc.registerInit
+#                 polyXor = self.crcProc.xorOut
+#                 retList.append( CRCKey(revPoly, True, polyInit, polyXor, 0, dataMask.dataSize) )
+                retList.append( PolyKey(revPoly, True, 0, dataMask.dataSize) )
 
             poly += 1
 

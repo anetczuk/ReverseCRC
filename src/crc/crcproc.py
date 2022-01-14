@@ -20,6 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
+
+import math
+
 from crc.numbermask import reverseBits, NumberMask
 
 
@@ -50,18 +53,24 @@ class PolyKey:
     def __hash__(self):
         return hash(str(self.poly) + str(self.rev))
     
+    def getPolyKey(self):
+        return self
+    
     
 class CRCKey:
     def __init__(self, poly=-1, rev=False, init=-1, xor=-1, dataPos=-1, dataLen=-1):
-        self.poly = poly
+        self.poly = poly                    ## with leading 1
         self.rev = rev
         self.init = init
         self.xor = xor
         self.dataPos = dataPos              ## counts starting from LSB
         self.dataLen = dataLen
+        self.crcSize = None
 
     def __repr__(self):
-        return "<CRCKey p:0x{:X} r:{:} i:0x{:X} x:0x{:X} dP:{:} dL:{:}>".format(self.poly, self.rev, self.init, self.xor, self.dataPos, self.dataLen)
+        crc_size = str( self.size() / 4 )
+        template = "<CRCKey p:0x{:X} r:{:} i:0x{:0" + crc_size + "X} x:0x{:0" + crc_size + "X} dP:{:} dL:{:}>"
+        return template.format(self.poly, self.rev, self.init, self.xor, self.dataPos, self.dataLen)
     
     def __eq__(self, other):
         if self.poly != other.poly:
@@ -84,6 +93,17 @@ class CRCKey:
     def __hash__(self):
 #         return hash(str(self.poly) + str(self.init) + str(self.xor))
         return hash( (self.poly, self.init, self.xor) )
+    
+    def size(self):
+        if self.crcSize is None:
+            if self.poly < 1:
+                self.crcSize = 0
+            else:
+                self.crcSize = int( math.log( self.poly, 2 ) )
+        return self.crcSize
+    
+    def getPolyKey(self):
+        return PolyKey( self.poly, self.rev, self.dataPos, self.dataLen )
     
 
 

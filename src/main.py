@@ -36,99 +36,133 @@ from revcrc.reverse import RevHwCRC, RevDivisionCRC, RevModCRC
 from collections import Counter
 
 
+## ======================================================================
+
+
+def get_popular( mostCommon, limit ):
+    retList = []
+    for poly in mostCommon:
+        if poly[1] < limit:
+            break
+        retList.append( poly )
+    return retList
+
+
+def print_keys_to( stream, commonList ):
+    stream.write( "Discovered keys[{:}]:\n".format( len(commonList) ) )
+    for poly in commonList:
+        stream.write( str(poly) + "\n" )
+        
+    keysList = []
+    for poly, _ in commonList:
+        key = poly.getPolyKey()
+        keysList.append( key )
+    polyKeys = Counter()
+    polyKeys.update( keysList )
+    
+    polysList = polyKeys.most_common()
+    stream.write( "\nDiscovered polys[{:}]:\n".format( len(polysList) ) )
+    for poly in polysList:
+        stream.write( str(poly) + "\n" )
+
+
+# input: Counter[ CRCKey ]
+def print_results_to( stream, retList, inputSize ):   
+    mostCommon = retList.most_common()
+    print_keys_to( stream, mostCommon )
+
+    popular = get_popular( mostCommon, inputSize )
+    if len(popular) < 1:
+        return
+    
+    stream.write( "\n\nFOUND MATCHING KEYS[{:}]:\n\n".format( len(popular) ) )
+    print_keys_to( stream, popular )
+
+
+def print_results( retList, inputSize ):
+    sys.stdout.write( "\n" )
+    print_results_to( sys.stdout, retList, inputSize )   
+
+
+def write_results( retList, inputSize, outpath ):
+    with open(outfile, "w") as text_file:
+        print_results_to( text_file, retList, inputSize )
+
+
+## ======================================================================
+
+
 def find_crc( mode, minSearchData, finder, data ):
     if mode == "BF":
         ## finding full key by forward algorithm
         retList = finder.bruteForceStandardInput(data, minSearchData)
         if len(retList) < 1:
             print "\nNo keys discovered"
-        else:
-            print "\nDiscovered keys[{:}]:".format( len(retList) )
-            for poly in retList.most_common():
-                print poly[0], poly[1]
-                
-            print "Found results: ", len(retList)
-                
-            with open(outfile, "w") as text_file:
-                text_file.write( "Discovered keys[{:}]:\n".format( len(retList) ) )
-                for poly in retList.most_common():
-                    text_file.write( "{:} {:}\n".format( poly[0], poly[1] ) )
+            return
+
+        print_results( retList, data.size() )
+            
+        print "\nFound results: ", len(retList)            
+        write_results( retList, data.size(), outfile )
             
     elif mode == "BF_PAIRS":
         ## finding full key by forward algorithm using pair xoring
         keysList = finder.bruteForcePairsInput(data, minSearchData)
         if len(keysList) < 1:
             print "\nNo keys discovered"
-        else:
-            retList = Counter()
-            retList.update( keysList )
-            print "\nDiscovered keys[{:}]:".format( len(retList) )
-            for poly in retList.most_common():
-                print poly[0], poly[1]
-#             print "\nDiscovered keys[{:}]:".format( len(retList) )
-#             for key in retList:
-#                 print key
+            return
+        
+        retList = Counter()
+        retList.update( keysList )
 
-            print "Found results: ", len(retList)
-            
-            with open(outfile, "w") as text_file:
-                text_file.write( "Discovered keys[{:}]:\n".format( len(retList) ) )
-                for poly in retList.most_common():
-                    text_file.write( "{:} {:}\n".format( poly[0], poly[1] ) )
+        print_results( retList, data.size() )
+
+        print "\nFound results: ", len(retList)
+        write_results( retList, data.size(), outfile )
                     
     elif mode == "POLY":
         ## find polynomials by xor-ing data pairs
         retList = finder.findPolysInput(data, minSearchData)
         if len(retList) < 1:
             print "\nNo polys discovered"
-        else:
-            print "\nDiscovered polys[{:}]:".format( len(retList) )
-            for poly in retList.most_common():
-                print poly[0], poly[1]
+            return 
+        
+        pairsNum = data.size() * ( data.size() - 1 ) / 2
+        print_results( retList, pairsNum )
                 
-            print "Found results: ", len(retList)
-                
-            with open(outfile, "w") as text_file:
-                text_file.write( "Discovered keys[{:}]:\n".format( len(retList) ) )
-                for poly in retList.most_common():
-                    text_file.write( "{:} {:}\n".format( poly[0], poly[1] ) )
+        print "\nFound results: ", len(retList)
+        write_results( retList, pairsNum, outfile )
 
     elif mode == "COMMON":
-        ## finding full key by backward algorithm
+        ## check common keys used in industry
         retList = finder.findCommonInput(data, minSearchData)
         if len(retList) < 1:
             print "\nNo keys discovered"
-        else:
-            print "\nDiscovered keys[{:}]:".format( len(retList) )
-            for poly in retList.most_common():
-                print poly[0], poly[1]
-                
-            with open(outfile, "w") as text_file:
-                text_file.write( "Discovered keys[{:}]:\n".format( len(retList) ) )
-                for poly in retList.most_common():
-                    text_file.write( "{:} {:}\n".format( poly[0], poly[1] ) )
+            return
+
+        print_results( retList, data.size() )
+            
+        print "\nFound results: ", len(retList)
+        write_results( retList, data.size(), outfile )
 
     else:
         print "Invalid mode:", mode
         sys.exit(1)
 
 
-def verify_crc( args, finder, data ):
+def verify_crc( poly, initReg, xorVal, finder, data ):
 #     ret = finder.verify( data, 0x11D, 0x00, 0x8F )
 #     ret = finder.verify( data, 0x11D, 0x8F, 0x8F )
-    print "input:", args.poly, args.initReg, args.xorVal
-    poly    = int( args.poly, 16 )
+    print "input:", poly, initReg, xorVal
     
     initList = list()
-    if args.initReg is not None:
-        initReg = int( args.initReg, 16 )
+    if initReg is not None:
         initList.append( initReg )
     else:
         initList = range(0, 256)
         
     xorList = list()
-    if args.xorVal is not None:
-        xorVal = int( args.xorVal, 16 )
+    if xorVal is not None:
         xorList.append( xorVal )
     else:
         xorList = range(0, 256)
@@ -142,6 +176,14 @@ def verify_crc( args, finder, data ):
                 return
     print "\nPoly matches all data"
     return
+
+
+def convert_hex( value ):
+    if value is None:
+        return None
+    if value == "None":
+        return None
+    return int( value, 16 )
 
 
 ## ============================= main section ===================================
@@ -177,6 +219,10 @@ starttime = time.time()
 profiler = None
 
 try:
+    
+    poly    = convert_hex( args.poly )
+    initReg = convert_hex( args.initReg )
+    xorVal  = convert_hex( args.xorVal )
 
     profiler_outfile = args.pfile
     if args.profile == True or profiler_outfile != None:
@@ -206,15 +252,14 @@ try:
 #     elif args.alg == "COMMON":
 #         finder = RevCRCCommon( printProgress )
 
-    if args.initReg is not None:
-        initRegVal = int( args.initReg, 16 )
-        finder.setInitValue( initRegVal )
+    if initReg is not None:
+        finder.setInitValue( initReg )
     
     if args.mode != "VERIFY":
         minSearchData = int(args.mindsize)
         find_crc( args.mode, minSearchData, finder, data )
     else:
-        verify_crc( args, finder, data )
+        verify_crc( poly, initReg, finder, data )
     
         
     timeDiff = (time.time()-starttime)

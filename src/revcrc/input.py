@@ -37,6 +37,9 @@ class InputData:
     def empty(self):
         return len(self.numbersList) < 1
     
+    def size(self):
+        return len(self.numbersList)
+    
     def ready(self):
         return ((self.dataSize>0) and (self.crcSize>0))
         

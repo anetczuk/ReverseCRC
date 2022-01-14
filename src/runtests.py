@@ -23,21 +23,17 @@
 # SOFTWARE.
 #
 
+import sys
+import os
+
+import logging
 import unittest
 import re
 import argparse
 import cProfile
 import subprocess
 
-try:
-    import coverage
-except ImportError:
-    print "Missing coverage module. Try running 'pip install coverage'"
-    raise
-
-import os
 import tempfile
-import logging
 
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -55,7 +51,8 @@ def match_tests( pattern ):
     ## wildcarded
     rePattern = pattern
     # pylint: disable=W1401
-    rePattern = rePattern.replace(".", "\.")
+    rePattern = rePattern.replace("/", ".")
+    rePattern = rePattern.replace(".", r"\.")
     rePattern = rePattern.replace("*", ".*")
     ## rePattern = "^" + rePattern + "$"
     _LOGGER.info( "searching test cases with pattern: %s", rePattern )
@@ -90,11 +87,13 @@ def match_test_suites( testsList, rePattern ):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Test runner')
+    parser.add_argument('-la', '--logall', action='store_true', help='Log all messages' )
     # pylint: disable=C0301
-    parser.add_argument('-rt', '--runtest', action='store', required=False, default="",
+    parser.add_argument('-rt', '--run_test', action='store', required=False, default="",
                         help='Module with tests, e.g. module.submodule.test_file.test_class.test_method, wildcard * allowed' )
     parser.add_argument('-r', '--repeat', action='store', type=int, default=0, help='Repeat tests given number of times' )
     parser.add_argument('-ut', '--untilfailure', action="store_true", help='Run tests in loop until failure' )
+    parser.add_argument('-v', '--verbose', action="store_true", help='Verbose output' )
     parser.add_argument('-cov', '--coverage', action="store_true", help='Measure code coverage' )
     parser.add_argument('--profile', action="store_true", help='Profile the code' )
     parser.add_argument('--pfile', action='store', default=None, help='Profile the code and output data to file' )
@@ -104,21 +103,27 @@ if __name__ == '__main__':
 
     coverageData = None
     ## start code coverage
-    if args.coverage == True:
-        print "Executing code coverage"
+    if args.coverage is True:
+        try:
+            import coverage
+        except ImportError:
+            print( "Missing coverage module. Try running 'pip install coverage'" )
+            print( "Python info:", sys.version )
+            raise
+
+        print( "Executing code coverage" )
         currScript = os.path.realpath(__file__)
         coverageData = coverage.Coverage(branch=True, omit=currScript)
         ##coverageData.load()
         coverageData.start()
 
 
-    if args.runtest:
+    if args.run_test:
         ## not empty
-        suite = match_tests( args.runtest )
+        suite = match_tests( args.run_test )
     else:
         testsLoader = unittest.TestLoader()
         suite = testsLoader.discover( script_dir )
-
 
     testsRepeats = int(args.repeat)
 
@@ -127,55 +132,55 @@ if __name__ == '__main__':
     try:
         ## start code profiler
         profiler_outfile = args.pfile
-        if args.profile == True or profiler_outfile != None:
+        if args.profile is True or profiler_outfile is not None:
             print "Starting profiler"
             profiler = cProfile.Profile()
             profiler.enable()
 
         ## run proper tests
-        if args.untilfailure == True:
+        if args.untilfailure is True:
             counter = 1
             while True:
                 print "Tests iteration:", counter
                 counter += 1
                 testResult = unittest.TextTestRunner().run(suite)
-                if testResult.wasSuccessful() == False:
-                    break;
+                if testResult.wasSuccessful() is False:
+                    break
                 print "\n"
         elif testsRepeats > 0:
-            for counter in xrange(1, testsRepeats+1):
+            for counter in xrange(1, testsRepeats + 1):
                 print "Tests iteration:", counter
                 testResult = unittest.TextTestRunner().run(suite)
-                if testResult.wasSuccessful() == False:
-                    break;
+                if testResult.wasSuccessful() is False:
+                    break
                 print "\n"
         else:
             unittest.TextTestRunner().run(suite)
 
     finally:
         ## stop profiler
-        if profiler != None:
+        if profiler is not None:
             profiler.disable()
-            if profiler_outfile == None:
+            if profiler_outfile is None:
                 print "Generating profiler data"
                 profiler.print_stats(1)
             else:
                 print "Storing profiler data to", profiler_outfile
                 profiler.dump_stats( profiler_outfile )
 
-            if profiler_outfile != None:
+            if profiler_outfile is not None:
                 ##pyprof2calltree -i $PROF_FILE -k
                 print "Launching: pyprof2calltree -i {} -k".format(profiler_outfile)
                 subprocess.call(["pyprof2calltree", "-i", profiler_outfile, "-k"])
 
         ## prepare coverage results
-        if coverageData != None:
+        if coverageData is not None:
             ## convert results to html
-            tmprootdir=tempfile.gettempdir()
-            revCrcTmpDir=tmprootdir+"/revcrc"
+            tmprootdir = tempfile.gettempdir()
+            revCrcTmpDir = tmprootdir + "/revcrc"
             if not os.path.exists(revCrcTmpDir):
                 os.makedirs(revCrcTmpDir)
-            htmlcovdir=revCrcTmpDir+"/htmlcov"
+            htmlcovdir = revCrcTmpDir + "/htmlcov"
 
             coverageData.stop()
             coverageData.save()

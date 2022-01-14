@@ -32,6 +32,7 @@ class PolyKey:
         self.rev = rev
         self.dataPos = dataPos
         self.dataLen = dataLen
+        self.crcSize = None
 
     def __repr__(self):
         return "<PolyKey p:0x{:X} r:{:} dP:{:} dL:{:}>".format(self.poly, self.rev, self.dataPos, self.dataLen)
@@ -55,8 +56,16 @@ class PolyKey:
     
     def getPolyKey(self):
         return self
-    
-    
+
+    def size(self):
+        if self.crcSize is None:
+            if self.poly < 1:
+                self.crcSize = 0
+            else:
+                self.crcSize = int( math.log( self.poly, 2 ) )
+        return self.crcSize
+
+
 class CRCKey:
     def __init__(self, poly=-1, rev=False, init=-1, xor=-1, dataPos=-1, dataLen=-1):
         self.poly = poly                    ## with leading 1

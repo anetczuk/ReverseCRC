@@ -31,151 +31,39 @@ import logging
 import cProfile
 
 from revcrc.input import DataParser
-from revcrc.reverse import RevHwCRC, RevDivisionCRC, RevModCRC
 
-from collections import Counter
-
-
-## ======================================================================
-
-
-def get_popular( mostCommon, limit ):
-    retList = []
-    for poly in mostCommon:
-        if poly[1] < limit:
-            break
-        retList.append( poly )
-    return retList
+from crc.hwcrc import HwCRC
+from crc.divisioncrc import DivisionCRC
+from crc.modcrc import ModCRC
+from revcrc.reverse import PolysSolver, BruteForcePairsSolver, BruteForceSolver,\
+    CommonSolver, VerifySolver
 
 
-def print_keys_to( stream, commonList ):
-    stream.write( "Discovered keys[{:}]:\n".format( len(commonList) ) )
-    for poly in commonList:
-        stream.write( str(poly) + "\n" )
-        
-    keysList = []
-    for poly, _ in commonList:
-        key = poly.getPolyKey()
-        keysList.append( key )
-    polyKeys = Counter()
-    polyKeys.update( keysList )
-    
-    polysList = polyKeys.most_common()
-    stream.write( "\nDiscovered polys[{:}]:\n".format( len(polysList) ) )
-    for poly in polysList:
-        stream.write( str(poly) + "\n" )
+def create_processor( algorithm ):
+    if algorithm == "HW":
+        return HwCRC()
+    elif algorithm == "DIV":
+        return DivisionCRC()
+    elif algorithm == "MOD":
+        return ModCRC()
+#     elif args.alg == "COMMON":
+#         finder = RevCRCCommon( printProgress )
+    return None
 
 
-# input: Counter[ CRCKey ]
-def print_results_to( stream, retList, inputSize ):   
-    mostCommon = retList.most_common()
-    print_keys_to( stream, mostCommon )
-
-    popular = get_popular( mostCommon, inputSize )
-    if len(popular) < 1:
-        return
-    
-    stream.write( "\n\nFOUND MATCHING KEYS[{:}]:\n\n".format( len(popular) ) )
-    print_keys_to( stream, popular )
-
-
-def print_results( retList, inputSize ):
-    sys.stdout.write( "\n" )
-    print_results_to( sys.stdout, retList, inputSize )   
-
-
-def write_results( retList, inputSize, outpath ):
-    with open(outfile, "w") as text_file:
-        print_results_to( text_file, retList, inputSize )
-
-
-## ======================================================================
-
-
-def find_crc( mode, minSearchData, finder, data ):
+## return Reverse
+def create_solver( mode, processor, printProgress ):
     if mode == "BF":
-        ## finding full key by forward algorithm
-        retList = finder.bruteForceStandardInput(data, minSearchData)
-        if len(retList) < 1:
-            print "\nNo keys discovered"
-            return
-
-        print_results( retList, data.size() )
-            
-        print "\nFound results: ", len(retList)            
-        write_results( retList, data.size(), outfile )
-            
+        return BruteForceSolver( processor, printProgress )
     elif mode == "BF_PAIRS":
-        ## finding full key by forward algorithm using pair xoring
-        keysList = finder.bruteForcePairsInput(data, minSearchData)
-        if len(keysList) < 1:
-            print "\nNo keys discovered"
-            return
-        
-        retList = Counter()
-        retList.update( keysList )
-
-        print_results( retList, data.size() )
-
-        print "\nFound results: ", len(retList)
-        write_results( retList, data.size(), outfile )
-                    
+        return BruteForcePairsSolver( processor, printProgress )
     elif mode == "POLY":
-        ## find polynomials by xor-ing data pairs
-        retList = finder.findPolysInput(data, minSearchData)
-        if len(retList) < 1:
-            print "\nNo polys discovered"
-            return 
-        
-        pairsNum = data.size() * ( data.size() - 1 ) / 2
-        print_results( retList, pairsNum )
-                
-        print "\nFound results: ", len(retList)
-        write_results( retList, pairsNum, outfile )
-
+        return PolysSolver( processor, printProgress )
     elif mode == "COMMON":
-        ## check common keys used in industry
-        retList = finder.findCommonInput(data, minSearchData)
-        if len(retList) < 1:
-            print "\nNo keys discovered"
-            return
-
-        print_results( retList, data.size() )
-            
-        print "\nFound results: ", len(retList)
-        write_results( retList, data.size(), outfile )
-
-    else:
-        print "Invalid mode:", mode
-        sys.exit(1)
-
-
-def verify_crc( poly, initReg, xorVal, finder, data ):
-#     ret = finder.verify( data, 0x11D, 0x00, 0x8F )
-#     ret = finder.verify( data, 0x11D, 0x8F, 0x8F )
-    print "input:", poly, initReg, xorVal
-    
-    initList = list()
-    if initReg is not None:
-        initList.append( initReg )
-    else:
-        initList = range(0, 256)
-        
-    xorList = list()
-    if xorVal is not None:
-        xorList.append( xorVal )
-    else:
-        xorList = range(0, 256)
-
-    for initNum in initList:
-        for xorNum in xorList:
-            ret = finder.verify( data, poly, initNum, xorNum )
-            if ret is True:
-#                 print "\nPoly matches all data:", hex(poly), hex(initNum), hex(xorNum)
-                print "\nPoly matches all data - poly: 0x{0:02x} initReg: 0x{1:02x} xorVal: 0x{2:02x}".format( poly, initNum, xorNum )
-                return
-    print "\nPoly matches all data"
-    return
+        return CommonSolver( processor, printProgress )
+    elif mode == "VERIFY":
+        return VerifySolver( processor, printProgress )
+    return None
 
 
 def convert_hex( value ):
@@ -189,90 +77,95 @@ def convert_hex( value ):
 ## ============================= main section ===================================
 
 
-if __name__ != '__main__':
-    sys.exit(0)
-
-
-parser = argparse.ArgumentParser(description='Finding CRC algorithm from data')
-parser.add_argument('--alg', action='store', required=True, choices=["HW", "DIV", "MOD"], help='Algorithm' )
-parser.add_argument('--mode', action='store', required=True, choices=["BF", "BF_PAIRS", "POLY", "COMMON", "VERIFY"], help='Mode' )
-parser.add_argument('--infile', action='store', required=True, help='File with data. Numbers strings are written in big endian notion and are directly converted by "int(str, 16)" invocation.' )
-parser.add_argument('--outfile', action='store', default="out.txt", help='Results output file' )
-parser.add_argument('--mindsize', action='store', default=0, help='Minimal data size' )
-parser.add_argument('--poly', action='store', default="0", help='Polynomial (for VERIFY mode)' )
-parser.add_argument('--initReg', action='store', default=None, help='Registry init value' )
-parser.add_argument('--xorVal', action='store', default=None, help='CRC output xor (for VERIFY mode)' )
-parser.add_argument('--print_progress', '-pp', action='store_const', const=True, default=False, help='Print progress' )
-parser.add_argument('--profile', action='store_const', const=True, default=False, help='Profile the code' )
-parser.add_argument('--pfile', action='store', default="out.prof", help='Profile the code and output data to file' )
-
- 
-args = parser.parse_args()
- 
-
-logging.basicConfig(level=logging.DEBUG)
-
-print "Starting"
-
-
-starttime = time.time()
-profiler = None
-
-try:
+def main():
+    parser = argparse.ArgumentParser(description='Finding CRC algorithm from data')
+    parser.add_argument('--alg', action='store', required=True, choices=["HW", "DIV", "MOD"], help='Algorithm' )
+    parser.add_argument('--mode', action='store', required=True, choices=["BF", "BF_PAIRS", "POLY", "COMMON", "VERIFY"], help='Mode' )
+    parser.add_argument('--infile', action='store', required=True, help='File with data. Numbers strings are written in big endian notion and are directly converted by "int(str, 16)" invocation.' )
+    parser.add_argument('--outfile', action='store', default="out.txt", help='Results output file' )
+    parser.add_argument('--mindsize', action='store', default=0, help='Minimal data size' )
+    parser.add_argument('--poly', action='store', default="0", help='Polynomial (for VERIFY mode)' )
+    parser.add_argument('--initReg', action='store', default=None, help='Registry init value' )
+    parser.add_argument('--xorVal', action='store', default=None, help='CRC output xor (for VERIFY mode)' )
+    parser.add_argument('--print_progress', '-pp', action='store_const', const=True, default=False, help='Print progress' )
+    parser.add_argument('--profile', action='store_const', const=True, default=False, help='Profile the code' )
+    parser.add_argument('--pfile', action='store', default=None, help='Profile the code and output data to file' )
     
-    poly    = convert_hex( args.poly )
-    initReg = convert_hex( args.initReg )
-    xorVal  = convert_hex( args.xorVal )
-
-    profiler_outfile = args.pfile
-    if args.profile == True or profiler_outfile != None:
-        print "Starting profiler"
-        profiler = cProfile.Profile()
-        profiler.enable()
+     
+    args = parser.parse_args()
+     
     
-    dataParser = DataParser()
-    data = dataParser.parseFile(args.infile)
+    logging.basicConfig(level=logging.DEBUG)
     
-    if len(data.numbersList) < 1:
-        print "no data found"
-        exit(1)
+    print "Starting:", args.alg, args.mode
+    
+    
+    starttime = time.time()
+    profiler = None
+    
+    try:
+    
+        profiler_outfile = args.pfile
+        if args.profile == True or profiler_outfile != None:
+            if profiler_outfile is None:
+                profiler_outfile = "out.prof"
+            print "Starting profiler"
+            profiler = cProfile.Profile()
+            profiler.enable()
         
-    print "input data:", data.numbersList
-
-    printProgress = args.print_progress
-    outfile       = args.outfile
+        dataParser = DataParser()
+        data = dataParser.parseFile(args.infile)
+        
+        if len(data.numbersList) < 1:
+            print "no data found"
+            return 1
+            
+        print "input data:", data.numbersList
     
-    finder = None
-    if args.alg == "HW":
-        finder = RevHwCRC( printProgress )
-    elif args.alg == "DIV":
-        finder = RevDivisionCRC( printProgress )
-    elif args.alg == "MOD":
-        finder = RevModCRC( printProgress )
-#     elif args.alg == "COMMON":
-#         finder = RevCRCCommon( printProgress )
-
-    if initReg is not None:
-        finder.setInitValue( initReg )
-    
-    if args.mode != "VERIFY":
+        printProgress = args.print_progress
+        outfile       = args.outfile
+        
+        processor = create_processor( args.alg )
+        if processor is None:
+            print "invalid algorithm:", args.alg
+            return 1
+        
+        ## type Reverse
+        solver = create_solver( args.mode, processor, printProgress )
+        if solver is None:
+            print "invalid solver:", args.mode
+            return 1
+        
+        poly    = convert_hex( args.poly )
+        initReg = convert_hex( args.initReg )
+        xorVal  = convert_hex( args.xorVal )
         minSearchData = int(args.mindsize)
-        find_crc( args.mode, minSearchData, finder, data )
-    else:
-        verify_crc( poly, initReg, finder, data )
-    
         
-    timeDiff = (time.time()-starttime)
-    print "Calculation time: {:13.8f}s".format(timeDiff)
+        solver.setPoly( poly )
+        solver.setInitValue( initReg )
+        solver.setXorValue( xorVal )
+        solver.setMinSearchData( minSearchData )
+        
+        solver.execute( data, outfile )       
+            
+        timeDiff = (time.time()-starttime)
+        print "Calculation time: {:13.8f}s".format(timeDiff)
+    
+    finally:
+        print ""                    ## print new line
+        if profiler != None:
+            profiler.disable()
+            if profiler_outfile == None:
+                print "Generating profiler data"
+                profiler.print_stats(1)
+            else:
+                print "Storing profiler data to", profiler_outfile
+                profiler.dump_stats( profiler_outfile )
+                print "pyprof2calltree -k -i", profiler_outfile
 
-finally:
-    print ""                    ## print new line
-    if profiler != None:
-        profiler.disable()
-        if profiler_outfile == None:
-            print "Generating profiler data"
-            profiler.print_stats(1)
-        else:
-            print "Storing profiler data to", profiler_outfile
-            profiler.dump_stats( profiler_outfile )
-            print "pyprof2calltree -k -i", profiler_outfile
+    return 0
+
+
+if __name__ == '__main__':
+    ret = main()
+    sys.exit( ret )

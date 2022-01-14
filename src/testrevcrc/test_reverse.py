@@ -25,12 +25,15 @@
 import unittest
 import os
 import crcmod
-from crc.numbermask import intToASCII
 import random
+
+from crc.numbermask import intToASCII
 from crc.hwcrc import HwCRC
-from revcrc.reverse import RevDivisionCRC, RevHwCRC
+from crc.divisioncrc import DivisionCRC
 from crc.crcproc import PolyKey, CRCKey
 from revcrc.input import InputData
+from revcrc.reverse import CommonSolver, BruteForceSolver, PolysSolver,\
+    BruteForcePairsSolver
 
 
 
@@ -115,7 +118,7 @@ class XorTest(unittest.TestCase):
 
 
 
-class ReverseBaseTest(object):
+class PolysSolverBaseTest(object):
     
     def test_findPolysXOR_c8d24_rev(self):
         data  = 0xFD50D7
@@ -337,6 +340,12 @@ class ReverseBaseTest(object):
         
 #         print "found data:", foundCRC
         self.assertIn( PolyKey(0x18005, False, 0, 32 ), foundCRC )
+
+
+### ===============================================================
+
+
+class CommonSolverBaseTest(object):
 
     def test_findCommon_c8d8_empty(self):
         dataList = []
@@ -560,6 +569,12 @@ class ReverseBaseTest(object):
 #         print "found:", foundCRC
         self.assertIn( CRCKey(0x13D65, True, 0xFFFF, 0xFFFF, 0, 16), foundCRC )
         
+        
+## =================================================================
+        
+        
+class BruteForcePairsSolverBaseTest(object):
+        
     def test_bruteForceInput_poly(self):
         dataList = []
         dataSize = 16
@@ -676,27 +691,60 @@ class ReverseBaseTest(object):
 ## ===========================================================================
 
 
-class RevHwCRCTest(unittest.TestCase, ReverseBaseTest):
+class HwCRC_CommonSolver_Test(unittest.TestCase, CommonSolverBaseTest):
     def setUp(self):
         # Called before testfunction is executed
-        self.crcFinder = RevHwCRC()
-        self.crcProc = self.crcFinder.createCRCProcessor()
-  
-    def tearDown(self):
-        # Called after testfunction was executed
-        pass
-    
-    
-class RevDivisionCRCTest(unittest.TestCase, ReverseBaseTest):
-    def setUp(self):
-        # Called before testfunction is executed
-        self.crcFinder = RevDivisionCRC()
-        self.crcProc = self.crcFinder.createCRCProcessor()
-  
+        self.crcProc = HwCRC()
+        self.crcFinder = CommonSolver( HwCRC() )
     def tearDown(self):
         # Called after testfunction was executed
         pass
 
+class HwCRC_PolysSolver_Test(unittest.TestCase, PolysSolverBaseTest):
+    def setUp(self):
+        # Called before testfunction is executed
+        self.crcProc = HwCRC()
+        self.crcFinder = PolysSolver( HwCRC() )
+    def tearDown(self):
+        # Called after testfunction was executed
+        pass
+
+class HwCRC_BruteForcePairsSolver_Test(unittest.TestCase, BruteForcePairsSolverBaseTest):
+    def setUp(self):
+        # Called before testfunction is executed
+        self.crcProc = HwCRC()
+        self.crcFinder = BruteForcePairsSolver( HwCRC() )
+    def tearDown(self):
+        # Called after testfunction was executed
+        pass
+
+
+class DivisionCRC_CommonSolver_Test(unittest.TestCase, CommonSolverBaseTest):
+    def setUp(self):
+        # Called before testfunction is executed
+        self.crcProc = DivisionCRC()
+        self.crcFinder = CommonSolver( DivisionCRC() )
+    def tearDown(self):
+        # Called after testfunction was executed
+        pass
+
+class DivisionCRC_PolysSolver_Test(unittest.TestCase, PolysSolverBaseTest):
+    def setUp(self):
+        # Called before testfunction is executed
+        self.crcProc = DivisionCRC()
+        self.crcFinder = PolysSolver( DivisionCRC() )
+    def tearDown(self):
+        # Called after testfunction was executed
+        pass
+
+class DivisionCRC_BruteForcePairsSolver_Test(unittest.TestCase, BruteForcePairsSolverBaseTest):
+    def setUp(self):
+        # Called before testfunction is executed
+        self.crcProc = DivisionCRC()
+        self.crcFinder = BruteForcePairsSolver( DivisionCRC() )
+    def tearDown(self):
+        # Called after testfunction was executed
+        pass
 
 
 if __name__ == "__main__":

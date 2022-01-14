@@ -108,6 +108,9 @@ def flush_percent( value, places ):
     sys.stdout.flush()
 
 
+## ======================================================================
+
+
 class MessageCRC:
     def __init__(self, data, dataSize, crc, crcSize):
         self.dataNum = data
@@ -124,6 +127,36 @@ class MessageCRC:
     def __repr__(self):
         return "<MessageCRC {:X} {} {:X} {}>".format(self.dataNum, self.dataSize, self.crcNum, self.crcSize)
 
+
+## ======================================================================
+
+
+class InputMaskList():
+
+    def __init__(self, inputData):
+        self.inputData = inputData
+        self.items = list()
+        
+        inputList = inputData.numbersList
+        dataSize  = inputData.dataSize
+        crcSize   = inputData.crcSize
+                
+        for num in inputList:
+            data = num[0]
+            crc  = num[1]
+            dataMask = NumberMask( data, dataSize )
+            crcMask  = NumberMask( crc, crcSize )
+            
+            self.items.append( (dataMask, crcMask) )
+
+    def empty(self):
+        return len( self.items ) < 1 
+
+    def getInputMasks(self):
+        return self.items
+
+
+## ======================================================================
 
 
 class Reverse(object):

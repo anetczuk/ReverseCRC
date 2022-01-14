@@ -23,15 +23,17 @@
 
 
 import copy
-from crc.numbermask import NumberMask
+from crc.numbermask import NumberMask, ReverseNumberMask
 
 
 
 class DivisionCRCBackwardState:
 
+    ## polyMask -- NumberMask
+    ## dataMask -- NumberMask
     def __init__(self, polyMask, reg = 0x0, dataMask = NumberMask(0, 0)):
-        self.dataMask = copy.deepcopy(dataMask)
-        self.polyMask = copy.deepcopy(polyMask)
+        self.polyMask = ReverseNumberMask.from_NumberMask( polyMask )
+        self.dataMask = ReverseNumberMask.from_NumberMask( dataMask )
         self.register = reg
 
     def shiftBit(self, one, revMode = False):
@@ -104,8 +106,9 @@ class DivisionCRCBackwardState:
 ## Finds registry init value
 ##
 class DivisionCRCBackward:
+
     def __init__(self, dataMask, crc):
-        self.dataMask = copy.deepcopy(dataMask)
+        self.dataMask = ReverseNumberMask.from_NumberMask( dataMask )
         self.crc = crc
         self.reversedMode = False
 

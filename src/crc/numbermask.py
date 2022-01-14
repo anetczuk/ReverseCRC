@@ -144,6 +144,23 @@ class NumberMask:
         self.calculateCache()
         self.setNumber(data)
 
+    def __repr__(self):
+        digits = int(math.ceil( float(self.dataSize)/4 ))
+        return ("<NumberMask 0x{0:0" + str(digits) + "X}/{0} {1}>").format(self.dataNum, self.dataSize)
+
+    def __eq__(self, other):
+        if self.dataNum != other.dataNum:
+            return False
+        if self.dataSize != other.dataSize:
+            return False
+        return True
+
+    def __ne__(self, other):
+        return ((self == other) == False)
+
+    def __hash__(self):
+        return hash( (self.dataSize, self.dataNum) )
+
     def setNumber(self, newValue):
         #self.dataNum = (newValue & (self.dataMask))
         self.dataNum = newValue
@@ -157,6 +174,83 @@ class NumberMask:
 
     def masterData(self):
         return self.dataNum | self.masterBit
+
+    def reverse(self):
+        self.dataNum = reverseBits(self.dataNum, self.dataSize)
+        self.revDataBytes = None
+
+    def reverseBytes(self):
+        self._calcRevBytes()
+        tmpData = self.dataNum
+        self.dataNum = self.revDataBytes
+        self.revDataBytes = tmpData
+
+    def reversed(self):
+        revData = copy.deepcopy(self)
+        revData.reverse()
+        return revData
+
+    def reversedData(self):
+        return reverseBits(self.dataNum, self.dataSize)
+
+    def reversedBytes(self):
+        self._calcRevBytes()
+        return NumberMask(self.revDataBytes, self.dataSize)
+
+    def getMSB(self, length):
+        retVal = 0
+        retBit = 1 << (length-1)
+        dataBit = (self.masterBit >> 1)
+        for _ in xrange(0, length):
+            if (self.dataNum & dataBit) > 0:
+                retVal |= retBit
+            retBit >>= 1
+            dataBit >>= 1
+        return retVal
+
+    def getLSB(self, length):
+        bitsMask = (1 << length) -1
+        return (self.dataNum & bitsMask)
+    
+    def generateSubnumbers(self, minLen = -1, maxPos = -1):
+        valSet = set()
+        retSet = set()
+        if maxPos < 0:
+            maxPos = self.dataSize-1
+        if minLen < 1:
+            minLen = 1
+        lenMask = (1 << minLen) - 1
+        for valLen in xrange(minLen, self.dataSize+1):
+            xpos = min(self.dataSize-valLen, maxPos)
+            for x in xrange(xpos+1):
+                val = (self.dataNum >> x) & lenMask
+                t = (val, valLen)
+                if (t in valSet) == False:
+                    valSet.add( t )
+                    retSet.add( SubNumber(val, valLen, x) )
+            lenMask = (lenMask << 1) | 0x1
+
+        return retSet
+
+    def toASCII(self):
+        return intToASCII(self.dataNum)
+    
+    def _calcRevBytes(self):
+        if self.revDataBytes != None:
+            return
+        bytesNum = int(math.ceil( float(self.dataSize)/8 ))
+        self.revDataBytes = reverseBytes(self.dataNum, bytesNum)
+
+
+class ReverseNumberMask( NumberMask ):
+    
+    def __init__(self, data = 0, dataSize = 0):
+        NumberMask.__init__( self, data, dataSize )
+
+    @classmethod
+    def from_NumberMask(cls, data):
+        data = ReverseNumberMask( data.dataNum, data.dataSize )
+        return data
 
     def pushMSB(self, bit):
         if bit > 0:
@@ -209,86 +303,3 @@ class NumberMask:
         data1 = self.dataNum & cmpMask
         data2 = dataMask.dataNum & cmpMask
         return (data1 == data2)
-
-    def reverse(self):
-        self.dataNum = reverseBits(self.dataNum, self.dataSize)
-        self.revDataBytes = None
-
-    def reverseBytes(self):
-        self._calcRevBytes()
-        tmpData = self.dataNum
-        self.dataNum = self.revDataBytes
-        self.revDataBytes = tmpData
-
-    def reversed(self):
-        revData = copy.deepcopy(self)
-        revData.reverse()
-        return revData
-
-    def reversedData(self):
-        return reverseBits(self.dataNum, self.dataSize)
-
-    def reversedBytes(self):
-        self._calcRevBytes()
-        return NumberMask(self.revDataBytes, self.dataSize)
-
-    def getMSB(self, length):
-        retVal = 0
-        retBit = 1 << (length-1)
-        dataBit = (self.masterBit >> 1)
-        for _ in xrange(0, length):
-            if (self.dataNum & dataBit) > 0:
-                retVal |= retBit
-            retBit >>= 1
-            dataBit >>= 1
-        return retVal
-
-    def getLSB(self, length):
-        bitsMask = (1 << length) -1
-        return (self.dataNum & bitsMask)
-
-    def toASCII(self):
-        return intToASCII(self.dataNum)
-
-    def generateSubnumbers(self, minLen = -1, maxPos = -1):
-        valSet = set()
-        retSet = set()
-        if maxPos < 0:
-            maxPos = self.dataSize-1
-        if minLen < 1:
-            minLen = 1
-        lenMask = (1 << minLen) - 1
-        for valLen in xrange(minLen, self.dataSize+1):
-            xpos = min(self.dataSize-valLen, maxPos)
-            for x in xrange(xpos+1):
-                val = (self.dataNum >> x) & lenMask
-                t = (val, valLen)
-                if (t in valSet) == False:
-                    valSet.add( t )
-                    retSet.add( SubNumber(val, valLen, x) )
-            lenMask = (lenMask << 1) | 0x1
-
-        return retSet
-
-    def __repr__(self):
-        digits = int(math.ceil( float(self.dataSize)/4 ))
-        return ("<NumberMask 0x{0:0" + str(digits) + "X}/{0} {1}>").format(self.dataNum, self.dataSize)
-
-    def __eq__(self, other):
-        if self.dataNum != other.dataNum:
-            return False
-        if self.dataSize != other.dataSize:
-            return False
-        return True
-
-    def __ne__(self, other):
-        return ((self == other) == False)
-
-    def __hash__(self):
-        return hash( (self.dataSize, self.dataNum) )
-
-    def _calcRevBytes(self):
-        if self.revDataBytes != None:
-            return
-        bytesNum = int(math.ceil( float(self.dataSize)/8 ))
-        self.revDataBytes = reverseBytes(self.dataNum, bytesNum)

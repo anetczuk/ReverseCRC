@@ -23,7 +23,8 @@
 
 from crc.numbermask import NumberMask
 from crc.crcproc import PolyKey
-from revcrc.solver.reverse import Reverse, flush_percent, flush_string
+from revcrc.solver.reverse import Reverse, flush_percent, flush_string,\
+    InputMaskList
 
 
 class VerifySolver(Reverse):
@@ -50,77 +51,80 @@ class VerifySolver(Reverse):
             print "\nUnable to determine CRC size"
             return
 
-        polyList = list()
+        rangeSize = 2 ** crcSize
+        
+        polyListStart = 0
+        polyListStop  = rangeSize
         if self.poly is not None:
-            polyList.append( self.poly )
-        else:
-            polyList = range(0, 2 ** crcSize)
-
-        initList = list()
+            polyListStart = self.poly
+            polyListStop  = polyListStart + 1
+        polyListSize  = polyListStop - polyListStart
+        
+        initListStart = 0
+        initListStop  = rangeSize
         if self.initVal is not None:
-            initList.append( self.initVal )
-        else:
-            initList = range(0, 2 ** crcSize)
+            initListStart = self.initVal
+            initListStop  = initListStart + 1
+        initListSize  = initListStop - initListStart
+        
+        xorListStart = 0
+        xorListStop  = rangeSize
+        if self.poly is not None:
+            xorListStart = self.xorVal
+            xorListStop  = xorListStart + 1
+        xorListSize  = xorListStop - xorListStart
 
-        xorList = list()
-        if self.xorVal is not None:
-            xorList.append( self.xorVal )
-        else:
-            xorList = range(0, 2 ** crcSize)
+        spaceSize = polyListSize * initListSize * xorListSize
+        print "search space size:", spaceSize, polyListSize, initListSize, xorListSize
 
-        spaceSize = len( polyList ) * len( initList ) * len( xorList )
-        print "search space size:", spaceSize, len( polyList ), len( initList ), len( xorList )
-
+        inputMasks = InputMaskList( data )
+        if inputMasks.empty():
+            print "invalid case -- no data"
+            return False
+        inputList = inputMasks.getInputMasks()
+        
         spaceCounter = 1
 
         matchesAll = False
-        for polyNum in polyList:
-            polyMask = NumberMask( polyNum, crcSize )
+        polyMask   = NumberMask( 0, crcSize )
+        
+        for polyNum in xrange(polyListStart, polyListStop):
+            polyMask.setNumber( polyNum )
 
-            for initNum in initList:
+            for initNum in xrange(initListStart, initListStop):
                 currCounter = spaceCounter
-                for xorNum in xorList:
+                
+                self.crcProc.setRegisterInitValue( initNum )
+                
+                for xorNum in xrange(xorListStart, xorListStop):
                     if self.progress:
                         value = currCounter * 100.0 / spaceSize
                         flush_percent( value, 6 )
-                    ret = self.verify_input( data, polyMask, initNum, xorNum )
+                        
+                    self.crcProc.setXorOutValue( xorNum )
+                    
+                    ret = self._verify_input( inputList, polyMask )
                     if ret is True:
                         flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyNum, initNum, xorNum ) )
                         matchesAll = True
                         continue
                     currCounter += 1
-                spaceCounter += len( xorList )
+                spaceCounter += xorListSize
+
         if matchesAll:
             print "\nFound poly matching all data"
         else:
             print "\nNo matching polys found"
 
-    def verify_input(self, inputData, polyMask, initReg, xorVal):
-        if inputData.empty():
-            return True
-        if inputData.ready() == False:
-            return True
-
-        inputList = inputData.numbersList
-        dataSize  = inputData.dataSize
-        crcSize   = inputData.crcSize
-
+    ## 
+    def _verify_input(self, inputList, polyMask):
         for num in inputList:
-            data = num[0]
-            crc  = num[1]
-#             if self.progress:
-#                 print "Checking {:X} {:X}, {} {}".format( data, crc, dataSize, crcSize )
-
-            dataMask = NumberMask( data, dataSize )
-            crcMask  = NumberMask( crc, crcSize )
-
-            self.crcProc.setRegisterInitValue( initReg )
-            self.crcProc.setXorOutValue( xorVal )
+            dataMask = num[0]
+            crcMask  = num[1]
 
             crc = crcMask.dataNum
             polyCRC = self.crcProc.calculate3( dataMask, polyMask )
             if polyCRC != crc:
-#                 print "CRC mismatch: ", polyCRC, crc
                 return False
 
         return True

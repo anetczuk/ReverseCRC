@@ -24,7 +24,8 @@
 
 import unittest
 from crc.numbermask import intToASCII, reverseBits, NumberMask,\
-    generateSubstrings, SubNumber, generateSubstringsReverse, asciiToInt
+    generateSubstrings, SubNumber, generateSubstringsReverse, asciiToInt,\
+    ReverseNumberMask
 
 
 
@@ -119,10 +120,8 @@ class NumberMaskTest(unittest.TestCase):
     def setUp(self):
         pass
 
-
     def tearDown(self):
         pass
-
 
     def test_eq_instance(self):
         data = NumberMask(0, 0)
@@ -146,54 +145,31 @@ class NumberMaskTest(unittest.TestCase):
     def test_in_instance(self):
         data = NumberMask(0, 0)
         self.assertIn(data, [data])
+        
+    def test_getMSB_zero(self):
+        data = NumberMask(0xA, 0)
+        msb = data.getMSB(2)
+        self.assertEqual(msb, 0)
 
-    def test_containsMSB_1(self):
-        data1 = NumberMask(0xF0, 8)
-        data2 = NumberMask(0xF0, 8)
-        contains = data1.containsMSB( data2 )
-        self.assertTrue(contains)
+    def test_getMSB_first(self):
+        data = NumberMask(0xF, 1)
+        msb = data.getMSB(1)
+        self.assertEqual(msb, 1)
 
-    def test_containsMSB_2(self):
-        data1 = NumberMask(0xF0, 8)
-        data2 = NumberMask(0xF, 4)
-        contains = data1.containsMSB( data2 )
-        self.assertTrue(contains)
+    def test_getMSB_one(self):
+        data = NumberMask(0x8, 4)
+        msb = data.getMSB(1)
+        self.assertEqual(msb, 1)
 
-    def test_containsMSB_3(self):
-        data1 = NumberMask(0xF0, 8)
-        data2 = NumberMask(0xE, 4)
-        contains = data1.containsMSB( data2 )
-        self.assertFalse(contains)
+    def test_getMSB(self):
+        data = NumberMask(0xA, 4)
+        msb = data.getMSB(2)
+        self.assertEqual(msb, 2)
 
-    def test_containsMSB_4(self):
-        data1 = NumberMask(0x70, 8)
-        data2 = NumberMask(0xE, 4)
-        contains = data1.containsMSB( data2 )
-        self.assertFalse(contains)
-
-    def test_containsLSB_1(self):
-        data1 = NumberMask(0x0F, 8)
-        data2 = NumberMask(0x0F, 8)
-        contains = data1.containsLSB( data2 )
-        self.assertTrue(contains)
-
-    def test_containsLSB_2(self):
-        data1 = NumberMask(0x0F, 8)
-        data2 = NumberMask(0x0F, 4)
-        contains = data1.containsLSB( data2 )
-        self.assertTrue(contains)
-
-    def test_containsLSB_3(self):
-        data1 = NumberMask(0x0F, 8)
-        data2 = NumberMask(0x0E, 4)
-        contains = data1.containsLSB( data2 )
-        self.assertFalse(contains)
-
-    def test_containsLSB_4(self):
-        data1 = NumberMask(0x07, 8)
-        data2 = NumberMask(0x0E, 4)
-        contains = data1.containsLSB( data2 )
-        self.assertFalse(contains)
+    def test_getMSB_greater(self):
+        data = NumberMask(0xA, 4)
+        msb = data.getMSB(6)
+        self.assertEqual(msb, 0x28)
 
     def test_generateSubnumbers_zero(self):
         data = NumberMask(0xF, 0)
@@ -241,31 +217,62 @@ class NumberMaskTest(unittest.TestCase):
 #         print "ret list:", subList
         self.assertIn(SubNumber(0xABC, 12, 4), subList )
 
-    def test_getMSB_zero(self):
-        data = NumberMask(0xA, 0)
-        msb = data.getMSB(2)
-        self.assertEqual(msb, 0)
 
-    def test_getMSB_first(self):
-        data = NumberMask(0xF, 1)
-        msb = data.getMSB(1)
-        self.assertEqual(msb, 1)
+class ReverseNumberMaskTest(unittest.TestCase):
 
-    def test_getMSB_one(self):
-        data = NumberMask(0x8, 4)
-        msb = data.getMSB(1)
-        self.assertEqual(msb, 1)
+    def setUp(self):
+        pass
 
-    def test_getMSB(self):
-        data = NumberMask(0xA, 4)
-        msb = data.getMSB(2)
-        self.assertEqual(msb, 2)
+    def tearDown(self):
+        pass
 
-    def test_getMSB_greater(self):
-        data = NumberMask(0xA, 4)
-        msb = data.getMSB(6)
-        self.assertEqual(msb, 0x28)
+    def test_containsMSB_1(self):
+        data1 = ReverseNumberMask(0xF0, 8)
+        data2 = ReverseNumberMask(0xF0, 8)
+        contains = data1.containsMSB( data2 )
+        self.assertTrue(contains)
 
+    def test_containsMSB_2(self):
+        data1 = ReverseNumberMask(0xF0, 8)
+        data2 = ReverseNumberMask(0xF, 4)
+        contains = data1.containsMSB( data2 )
+        self.assertTrue(contains)
+
+    def test_containsMSB_3(self):
+        data1 = ReverseNumberMask(0xF0, 8)
+        data2 = ReverseNumberMask(0xE, 4)
+        contains = data1.containsMSB( data2 )
+        self.assertFalse(contains)
+
+    def test_containsMSB_4(self):
+        data1 = ReverseNumberMask(0x70, 8)
+        data2 = ReverseNumberMask(0xE, 4)
+        contains = data1.containsMSB( data2 )
+        self.assertFalse(contains)
+
+    def test_containsLSB_1(self):
+        data1 = ReverseNumberMask(0x0F, 8)
+        data2 = ReverseNumberMask(0x0F, 8)
+        contains = data1.containsLSB( data2 )
+        self.assertTrue(contains)
+
+    def test_containsLSB_2(self):
+        data1 = ReverseNumberMask(0x0F, 8)
+        data2 = ReverseNumberMask(0x0F, 4)
+        contains = data1.containsLSB( data2 )
+        self.assertTrue(contains)
+
+    def test_containsLSB_3(self):
+        data1 = ReverseNumberMask(0x0F, 8)
+        data2 = ReverseNumberMask(0x0E, 4)
+        contains = data1.containsLSB( data2 )
+        self.assertFalse(contains)
+
+    def test_containsLSB_4(self):
+        data1 = ReverseNumberMask(0x07, 8)
+        data2 = ReverseNumberMask(0x0E, 4)
+        contains = data1.containsLSB( data2 )
+        self.assertFalse(contains)
 
 
 if __name__ == "__main__":

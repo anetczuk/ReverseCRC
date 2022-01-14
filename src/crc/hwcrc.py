@@ -42,10 +42,10 @@ class HwCRC( CRCProc ):
         register = self.registerInit
 
         dataNum = dataMask.dataNum
-        dataBit = (dataMask.masterBit >> 1)
+        dataBit = dataMask.masterBit >> 1
         polyMasterBit = polyMask.masterBit
 
-        crcMSB = (polyMask.masterBit >> 1)
+        crcMSB = polyMask.masterBit >> 1
         poly = polyMask.dataNum | polyMasterBit
 
         while(dataBit > 0):                             ## while is faster than 'for'

@@ -8,7 +8,7 @@ cd $SCRIPT_DIR
 
 PROF_FILE="/tmp/cprof.prof"
 
-python -m cProfile -o $PROF_FILE $@
+python2 -m cProfile -o $PROF_FILE $@
 
 
 pyprof2calltree -i $PROF_FILE -k

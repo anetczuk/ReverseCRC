@@ -83,7 +83,7 @@ class VerifySolver(Reverse):
             return False
         inputList = inputMasks.getInputMasks()
         
-        spaceCounter = 1
+        spaceCounter = 0
 
         matchesAll = False
         polyMask   = NumberMask( 0, crcSize )
@@ -91,25 +91,24 @@ class VerifySolver(Reverse):
         for polyNum in xrange(polyListStart, polyListStop):
             polyMask.setNumber( polyNum )
 
-            for initNum in xrange(initListStart, initListStop):
-                currCounter = spaceCounter
+            for self.crcProc.registerInit in xrange(initListStart, initListStop):
+#             for initNum in xrange(initListStart, initListStop):
+#                 self.crcProc.setRegisterInitValue( initNum )
                 
-                self.crcProc.setRegisterInitValue( initNum )
+                spaceCounter += xorListSize
+                if self.progress:
+                    value = spaceCounter * 100.0 / spaceSize
+                    flush_percent( value, 4 )
                 
-                for xorNum in xrange(xorListStart, xorListStop):
-                    if self.progress:
-                        value = currCounter * 100.0 / spaceSize
-                        flush_percent( value, 6 )
-                        
-                    self.crcProc.setXorOutValue( xorNum )
+                for self.crcProc.xorOut in xrange(xorListStart, xorListStop):
+#                 for xorNum in xrange(xorListStart, xorListStop):
+#                     self.crcProc.setXorOutValue( xorNum )
                     
                     ret = self._verify_input( inputList, polyMask )
                     if ret is True:
-                        flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyNum, initNum, xorNum ) )
+                        flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyNum, self.crcProc.registerInit, self.crcProc.xorOut ) )
                         matchesAll = True
                         continue
-                    currCounter += 1
-                spaceCounter += xorListSize
 
         if matchesAll:
             print "\nFound poly matching all data"
@@ -122,9 +121,8 @@ class VerifySolver(Reverse):
             dataMask = num[0]
             crcMask  = num[1]
 
-            crc = crcMask.dataNum
             polyCRC = self.crcProc.calculate3( dataMask, polyMask )
-            if polyCRC != crc:
+            if polyCRC != crcMask.dataNum:
                 return False
 
         return True

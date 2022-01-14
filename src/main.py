@@ -35,8 +35,11 @@ from revcrc.input import DataParser
 from crc.hwcrc import HwCRC
 from crc.divisioncrc import DivisionCRC
 from crc.modcrc import ModCRC
-from revcrc.reverse import PolysSolver, BruteForcePairsSolver, BruteForceSolver,\
-    CommonSolver, VerifySolver
+from revcrc.solver.bruteforce import BruteForceSolver
+from revcrc.solver.bruteforcepairs import BruteForcePairsSolver
+from revcrc.solver.polys import PolysSolver
+from revcrc.solver.common import CommonSolver
+from revcrc.solver.verify import VerifySolver
 
 
 def create_processor( algorithm ):

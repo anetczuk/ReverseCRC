@@ -92,6 +92,7 @@ class Reverse(object):
         retList = Counter()
         
         for num in numbersList:
+            ## num -- pair of data and crc
             keys = self.findBruteForceStandard( num, inputData.dataSize, inputData.crcSize, searchRange )
 
             if (self.progress):
@@ -140,9 +141,13 @@ class Reverse(object):
             
         self.crcProc.setRegisterInitValue( initVal )
         
+        crcSize = crcMask.dataSize
+        
         xorVal = -1
         while xorVal < paramMax:
             xorVal += 1
+            if self.initVal is not None and self.progress:
+                flush_number( xorVal, crcSize )
             self.crcProc.setXorOutValue( xorVal )
             
 #                 if self.progress:

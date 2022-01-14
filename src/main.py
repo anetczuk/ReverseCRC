@@ -204,7 +204,7 @@ parser.add_argument('--initReg', action='store', default=None, help='Registry in
 parser.add_argument('--xorVal', action='store', default=None, help='CRC output xor (for VERIFY mode)' )
 parser.add_argument('--print_progress', '-pp', action='store_const', const=True, default=False, help='Print progress' )
 parser.add_argument('--profile', action='store_const', const=True, default=False, help='Profile the code' )
-parser.add_argument('--pfile', action='store', default=None, help='Profile the code and output data to file' )
+parser.add_argument('--pfile', action='store', default="out.prof", help='Profile the code and output data to file' )
 
  
 args = parser.parse_args()

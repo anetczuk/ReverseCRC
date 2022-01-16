@@ -63,7 +63,7 @@ class ModCRC(CRCProc):
 
 #     def setInitCRC(self, value, crcSize):
 #         self.registerInit = value ^ self.xorOut
-#         if self.reversed == True:
+#         if self._reversed == True:
 #             self.registerInit = reverseBits(self.registerInit, crcSize)
 
     def calculate3(self, dataMask, polyMask):
@@ -71,14 +71,14 @@ class ModCRC(CRCProc):
         poly = polyMask.dataNum | polyMask.masterBit
         currXor = self.xorOut & polyMask.dataMask
         initReg = self.registerInit ^ currXor
-        crc_func = crcmod.mkCrcFun(poly, rev=self.reversed, initCrc=initReg, xorOut=currXor)
-#         crcKey = CRCKey(poly, self.reversed, self.registerInit, currXor)
+        crc_func = crcmod.mkCrcFun(poly, rev=self._reversed, initCrc=initReg, xorOut=currXor)
+#         crcKey = CRCKey(poly, self._reversed, self.registerInit, currXor)
 #         crc_func = CRCModCacheMap.instance.getFunction(crcKey)
         dataString = dataMask.toASCII()
         polyCRC  = crc_func( dataString )
         return polyCRC
 
-#         if self.reversed == False:
+#         if self._reversed == False:
 #             return self.calculateMSB(dataMask, polyMask)
 #         else:
 #             revData = dataMask.reversedBytes()

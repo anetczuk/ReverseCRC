@@ -86,3 +86,4 @@ As a result *htmlcov* directory will be created inside run directory.
 * http://www.sunshine2k.de/articles/coding/crc/understanding_crc.html - description of CRC algorithm,
 * http://www.infradead.org/~mchehab/kernel_docs/unsorted/crc32.html - opimised shift register algorithm,
 * http://www.cosc.canterbury.ac.nz/greg.ewing/essays/CRC-Reverse-Engineering.html - reverse engineering of CRC.
+* binding C/C++ in Python -- https://realpython.com/python-bindings-overview/

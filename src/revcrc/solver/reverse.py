@@ -103,7 +103,7 @@ def flush_string( value ):
 
 
 def flush_percent( value, places ):
-    formatStr = "\r{:.%sf}%%" % places
+    formatStr = "\r{:0%s.%sf}%%" % (places + 4, places )
     sys.stdout.write( formatStr.format(value) )
     sys.stdout.flush()
 
@@ -135,7 +135,7 @@ class InputMaskList():
 
     def __init__(self, inputData):
         self.inputData = inputData
-        self.items = list()
+        self.items = list()             ## List[ (NumberMask, NumberMask) ]
         
         inputList = inputData.numbersList
         dataSize  = inputData.dataSize

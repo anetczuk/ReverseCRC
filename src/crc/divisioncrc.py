@@ -30,7 +30,7 @@ class DivisionCRC(CRCProc):
         CRCProc.__init__(self)
 
     def calculate3(self, dataMask, polyMask):
-        if self.reversed == False:
+        if self._reversed == False:
             return self.calculateMSB(dataMask, polyMask)
         else:
             return self.calculateLSB(dataMask, polyMask)

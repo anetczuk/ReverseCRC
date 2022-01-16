@@ -130,8 +130,9 @@ class CRCProc(object):
     def reset(self):
         self.registerInit = 0x0
         self.xorOut = 0x0
+        self._reversed = False              ## do not set field directly, use setter
         ## controls if input and result should be reflected during calculation
-        self.reversed = False
+        self.setReversed( False )
 
     def setRegisterInitValue(self, value):
         self.registerInit = value
@@ -141,7 +142,7 @@ class CRCProc(object):
 
     def setInitCRC(self, value, crcSize):
         self.registerInit = value ^ self.xorOut
-        if self.reversed == True:
+        if self._reversed == True:
             self.registerInit = reverseBits(self.registerInit, crcSize)
 
     def setReversed(self, value = True):
@@ -162,7 +163,7 @@ class CRCProc(object):
         return self.calculate3(dataMask, polyMask)
 
     def calculate3(self, dataMask, polyMask):
-        raise NotImplementedError
+        raise NotImplementedError( "%s not implemented abstract method" % type(self) )
 
     def calculateCRC( self, data, dataSize, poly, crcSize, init=0, xorout=0, reverse=False ):
         self.setReversed( reverse )
@@ -170,3 +171,48 @@ class CRCProc(object):
         self.setXorOutValue( xorout )
         crc = self.calculate2(data, dataSize, poly, crcSize)
         return crc
+
+    ## inputData: List[ (NumberMask, NumberMask) ]
+    def createOperator(self, crcSize, inputData):
+        print( "creating StandardCRCOperator" )
+        return StandardCRCOperator( self, inputData )
+
+
+##
+class CRCOperator(object):
+    
+    def __init__(self):
+        pass
+
+    def calculate(self, polyMask):
+        raise NotImplementedError( "%s not implemented abstract method" % type(self) )
+
+    def verify(self, polyMask):
+        raise NotImplementedError( "%s not implemented abstract method" % type(self) )
+
+
+class StandardCRCOperator( CRCOperator ):
+    
+    def __init__(self, crcProcessor, inputData):
+        CRCOperator.__init__(self)
+        self.processor = crcProcessor
+        self.data = inputData                   ## List[ (NumberMask, NumberMask) ]
+
+    def calculate(self, polyMask):
+        retList = []
+        for num in self.data:
+            dataMask = num[0]
+            crc = self.processor.calculate3( dataMask, polyMask )
+            retList.append( crc )
+        return retList
+    
+    def verify(self, polyMask):
+        for item in self.data:
+            dataMask = item[0]
+            crcMask  = item[1]
+            crc = self.processor.calculate3( dataMask, polyMask )
+            if crc != crcMask.dataNum:
+                return False
+            
+        ## all CRC matches
+        return True

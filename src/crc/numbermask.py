@@ -26,7 +26,6 @@ import math
 import copy
 
 
-
 def intToASCII(number, dataSize = -1):
     if dataSize < 0:
         dataSize = number.bit_length()
@@ -39,6 +38,7 @@ def intToASCII(number, dataSize = -1):
         dataSize -= 8
     return ret
 
+
 def asciiToInt(dataString):
     ret = 0
     length = len(dataString)
@@ -48,29 +48,51 @@ def asciiToInt(dataString):
         ret |= val & 0xFF
     return ret
 
-def reverseBits(num, sizeBits = -1):
+
+## return ceil integer as result of division
+def divide_ceil( number, divider ):
+    return int( math.ceil( float( number ) / divider ) )
+
+
+## reverse whole number
+def reverse_number(num, sizeBits = -1):
     if sizeBits < 0:
         sizeBits = num.bit_length()
     ret = 0
-    val = num
+    number = num
     for _ in range(0, sizeBits):
         ret <<= 1
-        ret |= (val & 1)
-        val >>= 1
+        ret |= (number & 1)
+        number >>= 1
     return ret
 #     b = '{:0{width}b}'.format(num, width=sizeBits)
 #     return int(b[::-1], 2)
 
-def reverseBytes(num, sizeBytes = -1):
+
+## change (reverse) order of bytes in number
+def reorder_bytes(num, sizeBytes = -1):
     if sizeBytes < 0:
-        sizeBytes = int(math.ceil( float(num.bit_length())/8 ))
+        sizeBytes = divide_ceil( num.bit_length(), 8 )
     ret = 0
-    val = num
+    number = num
     for _ in range(0, sizeBytes):
         ret <<= 8
-        ret |= (val & 0xFF)
-        val >>= 8
+        ret |= (number & 0xFF)
+        number >>= 8
     return ret
+
+
+def reflect_bits(num, sizeBits):
+    sizeBytes = divide_ceil( sizeBits, 8 )
+    ret = 0
+    number = num
+    for i in range(0, sizeBytes):
+        ret += reverse_number(number & 0xFF, 8) << (i * 8)
+        number >>= 8
+    return ret
+
+
+## =================================================
 
 
 class SubNumber(object):
@@ -86,7 +108,7 @@ class SubNumber(object):
         return NumberMask(self.data, self.size)
 
     def __repr__(self):
-        digits = int(math.ceil( float(self.size)/4 ))
+        digits = divide_ceil( self.size, 4 )
         return ("<SubNumber 0x{0:0" + str(digits) + "X}/{0} {1} {2}>").format(self.data, self.size, self.pos)
 
     def __eq__(self, other):
@@ -141,12 +163,12 @@ class NumberMask:
 
     ## dataSize -- number of bits
     def __init__(self, data, dataSize):
-        self.dataSize = dataSize
+        self.dataSize = dataSize                ## number of bits
         self.calculateCache()
         self.setNumber(data)
 
     def __repr__(self):
-        digits = int(math.ceil( float(self.dataSize)/4 ))
+        digits = divide_ceil( self.size, 4 )
         return ("<NumberMask 0x{0:0" + str(digits) + "X}/{0} {1}>").format(self.dataNum, self.dataSize)
 
     def __eq__(self, other):
@@ -176,27 +198,34 @@ class NumberMask:
     def masterData(self):
         return self.dataNum | self.masterBit
 
+    ## reverse whole number
     def reverse(self):
-        self.dataNum = reverseBits(self.dataNum, self.dataSize)
+        self.dataNum = reverse_number(self.dataNum, self.dataSize)
         self.revDataBytes = None
 
-    def reverseBytes(self):
-        self._calcRevBytes()
-        tmpData = self.dataNum
-        self.dataNum = self.revDataBytes
-        self.revDataBytes = tmpData
-
+    ## reverse whole number
     def reversed(self):
         revData = copy.deepcopy(self)
         revData.reverse()
         return revData
 
+    ## reverse whole number
     def reversedData(self):
-        return reverseBits(self.dataNum, self.dataSize)
+        return reverse_number(self.dataNum, self.dataSize)
 
-    def reversedBytes(self):
-        self._calcRevBytes()
+    def reorderBytes(self):
+        self._calcReorderBytes()
+        tmpData = self.dataNum
+        self.dataNum = self.revDataBytes
+        self.revDataBytes = tmpData
+
+    def reorderedBytes(self):
+        self._calcReorderBytes()
         return NumberMask(self.revDataBytes, self.dataSize)
+
+    def reflectBits(self):
+        self.revDataBytes = None
+        self.dataNum = reflect_bits( self.dataNum, self.dataSize )
 
     def getMSB(self, length):
         retVal = 0
@@ -236,11 +265,14 @@ class NumberMask:
     def toASCII(self):
         return intToASCII(self.dataNum)
     
-    def _calcRevBytes(self):
+    ## 0b 11  1100 0011  1111 1111 -> 0b 0000 0011  1100 0011  1111 1111 -> 0b 1111 1111  1100 0011  0000 0011
+    def _calcReorderBytes(self):
         if self.revDataBytes != None:
             return
-        bytesNum = int(math.ceil( float(self.dataSize)/8 ))
-        self.revDataBytes = reverseBytes(self.dataNum, bytesNum)
+#         if self.dataSize % 8 != 0:
+#             raise ValueError( "bytes reordering is valid only for bits number be multiple of 8, current size is %s" % self.dataSize )
+        bytesNum = divide_ceil( self.dataSize, 8 )
+        self.revDataBytes = reorder_bytes( self.dataNum, bytesNum )
 
 
 class ReverseNumberMask( NumberMask ):

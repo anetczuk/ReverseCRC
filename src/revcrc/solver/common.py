@@ -175,7 +175,7 @@ class CommonSolver(Reverse):
         #TODO: try to achieve compatibility without reversing
         ## check reversed input (crcmod compatibility)
         self.crcProc.setInitCRC( crcKey.init, crcMask.dataSize )
-        revDataMask = dataMask.reversedBytes()
+        revDataMask = dataMask.reorderedBytes()
         polyMask.reverse()
 
         polyCRC = self.crcProc.calculate3(revDataMask, polyMask)

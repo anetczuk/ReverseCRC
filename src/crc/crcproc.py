@@ -23,7 +23,7 @@
 
 import math
 
-from crc.numbermask import reverseBits, NumberMask
+from crc.numbermask import reverse_number, NumberMask
 from crc.flush import flush_string
 
 
@@ -144,7 +144,7 @@ class CRCProc(object):
     def setInitCRC(self, value, crcSize):
         self.registerInit = value ^ self.xorOut
         if self._reversed == True:
-            self.registerInit = reverseBits(self.registerInit, crcSize)
+            self.registerInit = reverse_number(self.registerInit, crcSize)
 
     def setReversed(self, value = True):
         self._reversed = value

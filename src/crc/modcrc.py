@@ -64,7 +64,7 @@ class ModCRC(CRCProc):
 #     def setInitCRC(self, value, crcSize):
 #         self.registerInit = value ^ self.xorOut
 #         if self._reversed == True:
-#             self.registerInit = reverseBits(self.registerInit, crcSize)
+#             self.registerInit = reverse_number(self.registerInit, crcSize)
 
     def calculate3(self, dataMask, polyMask):
         ## crcmod requires leading '1' bit
@@ -81,7 +81,7 @@ class ModCRC(CRCProc):
 #         if self._reversed == False:
 #             return self.calculateMSB(dataMask, polyMask)
 #         else:
-#             revData = dataMask.reversedBytes()
+#             revData = dataMask.reorderedBytes()
 #             revPoly = polyMask.reversed()
 #             return self.calculateLSB(revData, revPoly)
 # #             return self.calculateLSB(dataMask, poly)

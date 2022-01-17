@@ -27,8 +27,8 @@ from crc.flush import flush_string
 
 from fastcrc.ctypes.fastcrc8 import hw_crc8_calculate, hw_crc8_calculate_range
 from fastcrc.ctypes.fastcrc16 import hw_crc16_calculate, hw_crc16_calculate_range
-from fastcrc.ctypes.utils import convert_to_msb_list, reverse_byte,\
-    convert_to_lsb_list
+from fastcrc.ctypes.utils import convert_to_msb_list, convert_to_lsb_list
+from crc.numbermask import reverse_number
 
 
 USE_FAST_CRC = True
@@ -95,25 +95,25 @@ class HwCRC( CRCProc ):
         
         if polyMask.dataSize == 8:
             bytesList = convert_to_lsb_list( dataMask.dataNum, dataMask.dataSize / 8 )
-            poly      = reverse_byte( polyMask.dataNum, polyMask.dataSize )
+            poly      = reverse_number( polyMask.dataNum, polyMask.dataSize )
             
-            initReg = reverse_byte( self.registerInit, polyMask.dataSize )
-            xor_val = reverse_byte( self.xorOut, polyMask.dataSize )
+            initReg = reverse_number( self.registerInit, polyMask.dataSize )
+            xor_val = reverse_number( self.xorOut, polyMask.dataSize )
 
             calc_crc = hw_crc8_calculate( bytesList, poly, initReg, xor_val )
             
-            return reverse_byte( calc_crc, polyMask.dataSize )
+            return reverse_number( calc_crc, polyMask.dataSize )
         
         if polyMask.dataSize == 16:
             bytesList = convert_to_lsb_list( dataMask.dataNum, dataMask.dataSize / 8 )
-            poly      = reverse_byte( polyMask.dataNum, polyMask.dataSize )
+            poly      = reverse_number( polyMask.dataNum, polyMask.dataSize )
             
-            initReg = reverse_byte( self.registerInit, polyMask.dataSize )
-            xor_val = reverse_byte( self.xorOut, polyMask.dataSize )
+            initReg = reverse_number( self.registerInit, polyMask.dataSize )
+            xor_val = reverse_number( self.xorOut, polyMask.dataSize )
 
             calc_crc = hw_crc16_calculate( bytesList, poly, initReg, xor_val )
             
-            return reverse_byte( calc_crc, polyMask.dataSize )
+            return reverse_number( calc_crc, polyMask.dataSize )
         
         ## fast crc only supports CRC8
         return self.calculateLSBClassic(dataMask, polyMask)
@@ -169,15 +169,15 @@ class HwCRC( CRCProc ):
         oldInit = self.registerInit
         oldXor  = self.xorOut
 
-        self.registerInit = reverse_byte( self.registerInit, polyMask.dataSize )
-        self.xorOut       = reverse_byte( self.xorOut, polyMask.dataSize )
+        self.registerInit = reverse_number( self.registerInit, polyMask.dataSize )
+        self.xorOut       = reverse_number( self.xorOut, polyMask.dataSize )
 
         calc_crc = self.calculateMSBClassic( revData, revPoly )
         
         self.registerInit = oldInit
         self.xorOut       = oldXor
         
-        return reverse_byte( calc_crc, polyMask.dataSize )
+        return reverse_number( calc_crc, polyMask.dataSize )
     
     ## inputData: List[ (NumberMask, NumberMask) ]
     def createOperator(self, crcSize, inputData):
@@ -205,19 +205,19 @@ class HwCRC( CRCProc ):
         for data in inputData:
             dataMask = data[0]
             if dataMask.dataSize % 8 != 0:
-                print "unable to morph -- unsupported data size"
+                print "unable to morph data -- unsupported data size"
                 #return CRCProc.createOperator(self, crcSize, inputData)
                 return []
             crcMask = data[1]
             if crcMask.dataSize != crcSize:
-                print "unable to morph -- unsupported crc"
+                print "unable to morph data -- unsupported crc"
                 #return CRCProc.createOperator(self, crcSize, inputData)
                 return []
             
 #             crcMask = data[1]
             bytesList = convert_to_msb_list( dataMask.dataNum, dataMask.dataSize / 8 )
             dataList.append( (bytesList, crcMask.dataNum) )
-            #rev_crc = reverse_byte( crcMask.dataNum, crcSize )
+            #rev_crc = reverse_number( crcMask.dataNum, crcSize )
             #dataList.append( (bytesList, rev_crc) )
         return dataList
 

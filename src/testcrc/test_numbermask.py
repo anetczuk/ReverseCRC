@@ -23,7 +23,7 @@
 
 
 import unittest
-from crc.numbermask import intToASCII, reverseBits, NumberMask,\
+from crc.numbermask import intToASCII, reverse_number, NumberMask,\
     generateSubstrings, SubNumber, generateSubstringsReverse, asciiToInt,\
     ReverseNumberMask
 
@@ -57,24 +57,24 @@ class GlobalTest(unittest.TestCase):
         revval = asciiToInt(asciival)
         self.assertEqual( revval, 0xAABB )
 
-    def test_reverseBits(self):
-        val = reverseBits( 0b11000001 )
+    def test_reverse_number(self):
+        val = reverse_number( 0b11000001 )
         self.assertEqual( val, 0b10000011 )
 
-        val = reverseBits( 0x1021 )
+        val = reverse_number( 0x1021 )
         self.assertEqual( val, 0x1081 )               ## 0x8408
 
-        val = reverseBits( 0x11021 )
+        val = reverse_number( 0x11021 )
         self.assertEqual( val, 0x10811 )
 
-        val = reverseBits( 0x8005 )
+        val = reverse_number( 0x8005 )
         self.assertEqual( val, 0xA001 )
 
-    def test_reverseBits_size(self):
-        val = reverseBits( 0x0FA, 12 )
+    def test_reverse_number_size(self):
+        val = reverse_number( 0x0FA, 12 )
         self.assertEqual( val, 0x5F0 )
 
-        val = reverseBits( 0x4441, 16 )
+        val = reverse_number( 0x4441, 16 )
         self.assertEqual( val, 0x8222 )
 
     def test_generateSubstrings_empty(self):
@@ -146,6 +146,30 @@ class NumberMaskTest(unittest.TestCase):
         data = NumberMask(0, 0)
         self.assertIn(data, [data])
         
+    def test_reorderedBytes_fullBytes(self):
+        data = NumberMask(0xABCDEF, 24)
+        reordered = data.reorderedBytes()
+        self.assertEqual( reordered.dataSize, data.dataSize )
+        self.assertEqual( reordered.dataNum, 0xEFCDAB )
+        
+    def test_reorderedBytes_partialBytes(self):
+        data = NumberMask(0xABCDE, 20)
+        reordered = data.reorderedBytes()
+        self.assertEqual( reordered.dataSize, data.dataSize )
+        self.assertEqual( reordered.dataNum, 0xEBC0A )
+        
+    def test_reflectBits_fullBytes(self):
+        data = NumberMask( 0b111011001001010100001111, 24 )
+        data.reflectBits()
+        self.assertEqual( data.dataSize, 24 )
+        self.assertEqual( data.dataNum, 0b001101111010100111110000 )
+        
+    def test_reflectBits_partialBytes(self):
+        data = NumberMask( 0b000011001001010100001111, 20 )
+        data.reflectBits()
+        self.assertEqual( data.dataSize, 20 )
+        self.assertEqual( data.dataNum, 0b001100001010100111110000 )
+
     def test_getMSB_zero(self):
         data = NumberMask(0xA, 0)
         msb = data.getMSB(2)

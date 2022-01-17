@@ -146,7 +146,7 @@ class ModCRCTest(unittest.TestCase):
         crcProc.setRegisterInitValue( regInit )
         crcProc.setXorOutValue( xorOut )
 
-        revData = data.reversedBytes()
+        revData = data.reorderedBytes()
         revPoly = inputPoly.reversed()
 
         crc = crcProc.calculate3( revData, revPoly)
@@ -240,7 +240,7 @@ class ModCRCTest(unittest.TestCase):
         crcProc.setRegisterInitValue( regInit )
         crcProc.setXorOutValue( xorOut )
 
-        revData = data.reversedBytes()
+        revData = data.reorderedBytes()
 
         crc = crcProc.calculate3( revData, inputPoly)
 

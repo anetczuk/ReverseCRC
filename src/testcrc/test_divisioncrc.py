@@ -28,7 +28,7 @@ from crc.hwcrc import HwCRC
 from crc.divisioncrc import DivisionCRC
 import random
 import crcmod
-from crc.numbermask import NumberMask, reverseBits
+from crc.numbermask import NumberMask, reverse_number
 
 # import logging
 
@@ -160,8 +160,8 @@ class DivisionCRCTest(unittest.TestCase):
 
         revData = data.reversed()
         revPoly = inputPoly.reversed()
-        revRegInit = reverseBits(regInit, crcSize)
-        revXorOut = reverseBits(xorOut, crcSize)
+        revRegInit = reverse_number(regInit, crcSize)
+        revXorOut  = reverse_number(xorOut, crcSize)
 
         revCrcProc = DivisionCRC()
         revCrcProc.setReversed()
@@ -169,7 +169,7 @@ class DivisionCRCTest(unittest.TestCase):
         revCrcProc.setXorOutValue( revXorOut )
         crc2 = revCrcProc.calculateLSB(revData, revPoly)
 
-        revCrc = reverseBits(crc2, crcSize)
+        revCrc = reverse_number(crc2, crcSize)
 
 #         print "values: data:{} poly:{:X} init:{:X} xorOut:{:08b} crc:{:08b} revcrc:{:08b}".format( data, inputPoly, regInit, xorOut, crc, revCrc )
         self.assertEqual( crc, revCrc )
@@ -240,7 +240,7 @@ class DivisionCRCTest(unittest.TestCase):
         crcProc.setXorOutValue( xorOut )
         crcProc.setRegisterInitValue( regInit )
 
-        data.reverseBytes()
+        data.reorderBytes()
         inputPoly.reverse()
 
         crc = crcProc.calculate3(data, inputPoly)
@@ -256,7 +256,7 @@ class DivisionCRCTest(unittest.TestCase):
         reverse = True
 
         revInputPoly = inputPoly.reversed()
-        revData = data.reversedBytes()
+        revData = data.reorderedBytes()
 
         crc_func = crcmod.mkCrcFun(revInputPoly.masterData(), rev=reverse, initCrc=regInit, xorOut=xorOut)
         crcLib  = crc_func( revData.toASCII() )
@@ -292,7 +292,7 @@ class DivisionCRCTest(unittest.TestCase):
         crcProc.setInitCRC( regInit, crcSize )
 
         if reverse:
-            data.reverseBytes()
+            data.reorderBytes()
 
         crc = crcProc.calculate3(data, inputPoly)
 
@@ -320,7 +320,7 @@ class DivisionCRCTest(unittest.TestCase):
 #         crcProc.setInitCRC( regInit )
 
         if reverse:
-            data.reverseBytes()
+            data.reorderBytes()
             inputPoly.reverse()
 
         crc = crcProc.calculate3(data, inputPoly)

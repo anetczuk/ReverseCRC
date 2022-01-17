@@ -146,7 +146,7 @@ class PolysSolverBaseTest(object):
 
         polyList = self.crcFinder.findPolysXOR(data, crc, data2, crc2, dataSize, crcSize)
 
-#         revPoly = reverseBits(inputPoly, crcSize)
+#         revPoly = reverse_number(inputPoly, crcSize)
 #         print "polys: {:X}".format(inputPoly), "[{}]".format( ", ".join("(0x{:X} {})".format(pair[0], pair[1]) for pair in polyList) )
         self.assertIn( PolyKey(inputPoly, True, 0, dataSize), polyList )
 

@@ -29,7 +29,7 @@ import os
 from crc.hwcrc import HwCRC
 import crcmod
 import random
-from crc.numbermask import NumberMask, reverseBits
+from crc.numbermask import NumberMask, reverse_number
 
 
 __scriptdir__ = os.path.dirname(os.path.realpath(__file__))
@@ -255,8 +255,8 @@ class HwCRCTest(unittest.TestCase):
 
         revData = data.reversed()
         revPoly = inputPoly.reversed()
-        revRegInit = reverseBits(regInit, crcSize)
-        revXorOut = reverseBits(xorOut, crcSize)
+        revRegInit = reverse_number(regInit, crcSize)
+        revXorOut  = reverse_number(xorOut, crcSize)
 
         revCrcProc = HwCRC()
         revCrcProc.setReversed()
@@ -264,7 +264,7 @@ class HwCRCTest(unittest.TestCase):
         revCrcProc.setXorOutValue( revXorOut )
         crc2 = revCrcProc.calculateLSB(revData, revPoly)
 
-        revCrc = reverseBits(crc2, crcSize)
+        revCrc = reverse_number(crc2, crcSize)
 
 #         print "values: data:{} poly:{:X} init:{:X} xorOut:{:08b} crc:{:08b} revcrc:{:08b}".format( data, inputPoly, regInit, xorOut, crc, revCrc )
         self.assertEqual( crc, revCrc )
@@ -385,9 +385,9 @@ class HwCRCTest(unittest.TestCase):
         crcProc.setXorOutValue( xorOut )
 
         if reverse:
-            data.reverseBytes()
+            data.reorderBytes()
             inputPoly.reverse()
-            crcInit = reverseBits(regInit^xorOut, crcSize)
+            crcInit = reverse_number(regInit^xorOut, crcSize)
             crcProc.setRegisterInitValue( crcInit )
         else:
             crcInit = regInit^xorOut
@@ -419,9 +419,9 @@ class HwCRCTest(unittest.TestCase):
         crcProc.setXorOutValue( xorOut )
 
         if reverse:
-            data.reverseBytes()
+            data.reorderBytes()
             inputPoly.reverse()
-            crcInit = reverseBits(regInit^xorOut, crcSize)
+            crcInit = reverse_number(regInit^xorOut, crcSize)
             crcProc.setRegisterInitValue( crcInit )
         else:
             crcInit = regInit^xorOut

@@ -266,7 +266,7 @@ class Reverse(object):
     #TODO: try to achieve compatibility without reversing
     ## check reversed input and poly (crcmod compatibility)
     def findBruteForcePolyReverse(self, dataMask, crcMask, searchRange = 0):
-        dataMask.reverseBytes()
+        dataMask.reorderBytes()
         self.crcProc.setReversed(True)
         crc = crcMask.dataNum
         poly = 0

@@ -52,28 +52,6 @@ c_fastcrc.CRC16ResultArray_free.argtypes = [ ctypes.POINTER( CRC16ResultArray ) 
 ## ========================================================================
 
 
-## least significant byte goes first in list
-def convert_to_lsb_list( number, numberBytesSize ):
-    retList = []
-    for _ in range(numberBytesSize):
-        byte = number & 0xFF
-        retList.append( byte )
-        number = number >> 8
-    return retList
-
-
-## most significant byte goes first in list
-def convert_to_msb_list( number, numberBytesSize ):
-    retList = []
-    for _ in range(numberBytesSize):
-        byte = number & 0xFF
-        retList.append( byte )
-        number = number >> 8
-    ## appending and list reverse is faster than inserting at front of list
-    retList.reverse()
-    return retList
-
-
 c_fastcrc.hw_crc16_calculate.restype = ctypes.c_uint16
 def hw_crc16_calculate( bytesList, poly, intReg, xorVal ):
     arr_len  = len(bytesList)

@@ -25,9 +25,10 @@
 import unittest
 
 from fastcrc.ctypes.fastcrc8 import hw_crc8_calculate, hw_crc8_calculate_range
+from fastcrc.ctypes.utils import convert_to_msb_list
 
 
-class HwCRC8Test(unittest.TestCase):
+class FastCRC8Test(unittest.TestCase):
     def setUp(self):
         # Called before testfunction is executed
         pass
@@ -40,6 +41,32 @@ class HwCRC8Test(unittest.TestCase):
         bytes_list = [ 0xFF, 0xFF, 0xFF, 0xFF ]
         crc = hw_crc8_calculate( bytes_list, 0xFF, 0x00, 0x00 )
         self.assertEqual( crc, 240 )
+
+    def test_hw_crc8_calculate_msb(self):
+        data     = 0x0D00C0F0FFFFFF
+        dataSize = 56
+        poly     = 0x1D
+        xorOut   = 0x00
+
+        ## 0x0D -- 0b 0000 1101
+        ## 0xB0 -- 0b 1011 0000
+        bytes_list = convert_to_msb_list( data, dataSize / 8 )
+        self.assertEqual( bytes_list[0], 0x0D )
+        
+        calc_crc = hw_crc8_calculate( bytes_list, poly, 0x00, xorOut )
+        
+        self.assertEqual( calc_crc, 0x1F )
+
+    def test_hw_crc8_calculate_msb_xor(self):
+        data     = 0x0D00C0F0FFFFFF
+        dataSize = 56
+        poly     = 0x1D
+        xorOut   = 0x8F
+        
+        bytes_list = convert_to_msb_list( data, dataSize / 8 )
+        calc_crc = hw_crc8_calculate( bytes_list, poly, 0x00, xorOut )
+        
+        self.assertEqual( calc_crc, 0x90 )
 
     def test_hw_crc8_calculate_range(self):
         bytes_list = [ 0xFF, 0xFF, 0xFF, 0xFF ]

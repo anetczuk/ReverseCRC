@@ -23,16 +23,19 @@
 
 from crc.crcproc import CRCProc, CRCOperator
 
-from fastcrc.ctypes.fastcrc8 import hw_crc8_calculate, convert_to_msb_list,\
-    hw_crc8_calculate_range
-
 from crc.flush import flush_string
-from fastcrc.ctypes.fastcrc16 import hw_crc16_calculate,\
-    hw_crc16_calculate_range
+
+from fastcrc.ctypes.fastcrc8 import hw_crc8_calculate, hw_crc8_calculate_range
+from fastcrc.ctypes.fastcrc16 import hw_crc16_calculate, hw_crc16_calculate_range
+from fastcrc.ctypes.utils import convert_to_msb_list
 
 
 USE_FAST_CRC = True
 # USE_FAST_CRC = False
+
+
+if USE_FAST_CRC is False:
+    print "WARNING: fast CRC is disabled!!!"
 
 
 ##
@@ -106,7 +109,7 @@ class HwCRC( CRCProc ):
     def calculateLSBClassic(self, dataMask, polyMask):
         register = self.registerInit
 
-        dataNum = dataMask.dataNum
+        dataNum  = dataMask.dataNum
         dataSize = dataMask.dataSize
         polyNum = polyMask.dataNum
         dataBit = 1
@@ -160,6 +163,8 @@ class HwCRC( CRCProc ):
 #             crcMask = data[1]
             bytesList = convert_to_msb_list( dataMask.dataNum, dataMask.dataSize / 8 )
             dataList.append( (bytesList, crcMask.dataNum) )
+            #rev_crc = reverse_byte( crcMask.dataNum, crcSize )
+            #dataList.append( (bytesList, rev_crc) )
         return dataList
 
 
@@ -193,6 +198,8 @@ class Forward8FastHwOperator( CRCOperator ):
         return True
     
     def verifyRange(self, polyMask, intRegStart, intRegEnd, xorStart, xorStop):
+#         print "verify input:", intRegStart, intRegEnd, xorStart, xorStop
+
         found_data = set()
         for item in self.data:
             bytes_list = item[0]

@@ -45,14 +45,28 @@ class InputData:
 
     def convert(self, stringList):
         self.numbersList = []
-        self.dataSize = 0
-        self.crcSize = 0
+        self.dataSize = -1
+        self.crcSize  = -1
         for i in xrange(0, len(stringList)):
             dataPair = stringList[i]
             dataString = dataPair[0]
             crcString  = dataPair[1]
-            self.dataSize = max( self.dataSize, len(dataString)*4 )
-            self.crcSize  = max( self.crcSize, len(crcString)*4 )
+
+            currDataSize = len(dataString) * 4
+            currCrcSize  = len(crcString) * 4
+            
+            if self.dataSize < 0:
+                self.dataSize = currDataSize
+            elif self.dataSize != currDataSize:
+                ## size of data varies across input file
+                raise ValueError( "inconsistent input data sizes" )
+            
+            if self.crcSize < 0:
+                self.crcSize = currCrcSize
+            elif self.crcSize != currCrcSize:
+                ## size of crc field varies across input file
+                raise ValueError( "inconsistent input crc sizes" )
+            
             data = int(dataString, 16)
             crc  = int(crcString, 16)
             self.numbersList.append((data, crc))

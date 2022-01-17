@@ -129,6 +129,17 @@ class InputMaskList():
 
     def getInputMasks(self):
         return self.items
+    
+    ## reverse order of bytes
+    def reverseOrder(self):
+        for dataMask, crcMask in self.items:
+            dataMask.reorderBytes()
+            crcMask.reorderBytes()
+    
+    def reflectBits(self):
+        for dataMask, crcMask in self.items:
+            dataMask.reflectBits()
+            crcMask.reflectBits()
 
 
 ## ======================================================================
@@ -152,6 +163,9 @@ class Reverse(object):
         else:
             self.progress = printProgress
         self.crcProc = crcProcessor
+        
+        self.reverseOrder = None        ## bool, should bytes be read in reverse?
+        self.reflectBits  = None        ## bool, should reflect bits in each input byte?
 
     def setReturnOnFirst(self):
         self.returnFirst = True
@@ -168,6 +182,10 @@ class Reverse(object):
 
     def setCRCSize(self, value):
         self.crcSize = value
+
+    def setReverseMode(self, bytesORder, bitsReflect):
+        self.reverseOrder = bytesORder
+        self.reflectBits  = bitsReflect
 
     def setMinSearchData(self, value):
         self.minSearchData = value

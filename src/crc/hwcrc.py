@@ -251,14 +251,14 @@ class Forward8FastHwOperator( CRCOperator ):
         ## all CRC matches
         return True
     
-    def verifyRange(self, polyMask, intRegStart, intRegEnd, xorStart, xorStop):
-#         print "verify input:", intRegStart, intRegEnd, xorStart, xorStop
+    def verifyRange(self, polyMask, intRegStart, intRegEnd, xorStart, xorEnd):
+#         print "verify input: 0x%X 0x%X 0x%X 0x%X 0x%X" % ( polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorEnd )
 
         found_data = set()
         for item in self.data:
             bytes_list = item[0]
             dataCRC    = item[1]
-            crc_match = hw_crc8_calculate_range( bytes_list, dataCRC, polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorStop )
+            crc_match = hw_crc8_calculate_range( bytes_list, dataCRC, polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorEnd )
             if not crc_match:
                 ## no result found -- return
                 return False
@@ -313,12 +313,12 @@ class Forward16FastHwOperator( CRCOperator ):
         ## all CRC matches
         return True
     
-    def verifyRange(self, polyMask, intRegStart, intRegEnd, xorStart, xorStop):
+    def verifyRange(self, polyMask, intRegStart, intRegEnd, xorStart, xorEnd):
         found_data = set()
         for item in self.data:
             bytes_list = item[0]
             dataCRC    = item[1]
-            crc_match = hw_crc16_calculate_range( bytes_list, dataCRC, polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorStop )
+            crc_match = hw_crc16_calculate_range( bytes_list, dataCRC, polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorEnd )
             if not crc_match:
                 ## no result found -- return
                 return False

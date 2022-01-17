@@ -35,7 +35,7 @@ class VerifySolver(Reverse):
 
     ## data -- InputData
     def execute( self, data, outputFile ):
-        print "input:", self.poly, self.initVal, self.xorVal, self.crcSize
+        print "input args, poly: %s init: %s, xor: %s crcsize: %s" % ( self.poly, self.initVal, self.xorVal, self.crcSize )
 
         ## CRC size is determined in following order:
         ## 1. from 'self.crcSize' field set directly
@@ -53,6 +53,10 @@ class VerifySolver(Reverse):
         if crcSize is None:
             print "\nUnable to determine CRC size: pass poly or crcsize as cmd argument"
             return
+        
+        if data.crcSize != crcSize:
+            ## deduced CRC size differs from input crc
+            raise ValueError( "inconsistent crc size [%s] with input data crc[%s]" % ( crcSize, data.crcSize ) )
 
         rangeSize = 2 ** crcSize
         
@@ -82,12 +86,24 @@ class VerifySolver(Reverse):
             print "invalid case -- no data"
             return False
         
+        reverseOrder = False if self.reverseOrder is None else self.reverseOrder
+        if reverseOrder:
+            inputMasks.reverseOrder()
+          
+        reflectBits = False if self.reflectBits is None else self.reflectBits
+        if reflectBits:
+            inputMasks.reflectBits()
+        
         ## List[ (NumberMask, NumberMask) ]
         inputList = inputMasks.getInputMasks()
 
         subSpaceSize = initListSize * xorListSize
         spaceSize = polyListSize * subSpaceSize
         print "search space size:", spaceSize, polyListSize, initListSize, xorListSize
+        
+        print "poly search range: %s %s" % ( polyListStart, polyListStop-1 )
+        print "init search range: %s %s" % ( initListStart, initListStop )
+        print " xor search range: %s %s" % ( xorListStart, xorListStop )
         
         spaceCounter = 0
 

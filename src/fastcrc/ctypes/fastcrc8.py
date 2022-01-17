@@ -63,6 +63,8 @@ def hw_crc8_calculate( bytesList, poly, intReg, xorVal ):
 c_fastcrc.hw_crc8_calculate_range.argtypes = [ ctypes.POINTER( ctypes.c_uint8 ), ctypes.c_size_t, ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint8 ]
 c_fastcrc.hw_crc8_calculate_range.restype = ctypes.POINTER( CRC8ResultArray )
 def hw_crc8_calculate_range( bytes_list, dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd ):
+#     print "verify input: 0x%X 0x%X 0x%X 0x%X 0x%X" % ( poly, intRegStart, intRegEnd, xorStart, xorEnd )
+    
     arr_len  = len(bytes_list)
     arr_type = ctypes.c_uint8 * arr_len
     arr      = arr_type( *bytes_list )

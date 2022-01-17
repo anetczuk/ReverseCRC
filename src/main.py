@@ -97,8 +97,10 @@ def main():
     parser.add_argument('--mindsize', action='store', default=0, help='Minimal data size' )
     parser.add_argument('--poly', action='store', default=None, help='Polynomial (for VERIFY mode)' )
     parser.add_argument('--crc_size', action='store', default=None, help='CRC size (for VERIFY mode)' )
-    parser.add_argument('--initReg', action='store', default=None, help='Registry init value' )
-    parser.add_argument('--xorVal', action='store', default=None, help='CRC output xor (for VERIFY mode)' )
+    parser.add_argument('--init_reg', action='store', default=None, help='Registry initial value' )
+    parser.add_argument('--xor_val', action='store', default=None, help='CRC output xor (for VERIFY mode)' )
+    parser.add_argument('--reverse_order', '-ro', action='store', default=None, help='Should input bytes be read in reverse? (for VERIFY mode)' )
+    parser.add_argument('--reflect_bits', '-rb', action='store', default=None, help='Should reflect bits in each input byte? (for VERIFY mode)' )
     parser.add_argument('--print_progress', '-pp', action='store_const', const=True, default=False, help='Print progress' )
     parser.add_argument('--profile', action='store_const', const=True, default=False, help='Profile the code' )
     parser.add_argument('--pfile', action='store', default=None, help='Profile the code and output data to file' )
@@ -144,7 +146,7 @@ def main():
             outdir = os.path.join( dirname, "out" )
             if os.path.exists( outdir ) is False:
                 os.makedirs( outdir )
-            outname = "%s_%s_%s_%s_%s.txt" % ( filenameroot, args.alg, args.mode, args.initReg, args.xorVal )
+            outname = "%s_%s_%s_%s_%s.txt" % ( filenameroot, args.alg, args.mode, args.init_reg, args.xor_val )
             outfile = os.path.join( outdir, outname )
 
         processor = create_processor( args.alg )
@@ -159,8 +161,8 @@ def main():
             return 1
 
         poly    = convert_hex( args.poly )
-        initReg = convert_hex( args.initReg )
-        xorVal  = convert_hex( args.xorVal )
+        initReg = convert_hex( args.init_reg )
+        xorVal  = convert_hex( args.xor_val )
         crcSize = convert_int( args.crc_size )
         minSearchData = int(args.mindsize)
 
@@ -168,6 +170,7 @@ def main():
         solver.setInitValue( initReg )
         solver.setXorValue( xorVal )
         solver.setCRCSize( crcSize )
+        solver.setReverseMode( args.reverse_order, args.reflect_bits )
         solver.setMinSearchData( minSearchData )
 
         solver.execute( data, outfile )

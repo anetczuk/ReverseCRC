@@ -146,7 +146,7 @@ class CRCProc(object):
             self.registerInit = reverseBits(self.registerInit, crcSize)
 
     def setReversed(self, value = True):
-        self.reversed = value
+        self._reversed = value
 
     def setValues(self, crcKey):
         self.setReversed( crcKey.rev )

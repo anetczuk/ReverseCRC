@@ -55,11 +55,11 @@ CRC8Result* CRC8ResultArray_get( CRC8ResultArray* array, const size_t index ) {
  * Performance can be improved by replacing inner loop with "lookup table" for all 256 combinations of "reg" for each polynomial.
  * It can be especially beneficial if the polynomial is fixed or handling large input data.
  */
-uint8 hw_crc8_calculate( const uint8* data_buffer, const size_t data_size, const uint8 polynomial, const uint8 init_reg, const uint8 xor_val ) {
-    uint8 reg = init_reg;
+uint8_t hw_crc8_calculate( const uint8_t* data_buffer, const size_t data_size, const uint8_t polynomial, const uint8_t init_reg, const uint8_t xor_val ) {
+    uint8_t reg = init_reg;
     for ( size_t i = 0; i < data_size; ++i ) {
-        reg ^= data_buffer[i];
-        for ( size_t j = 0; j < 8; ++j ) {
+        reg ^= data_buffer[i];                      /// xor
+        for ( uint8_t j = 0; j < 8; ++j ) {
             if ( (reg & 0x80) != 0 ) {
                 reg = (reg << 1) ^ polynomial;
             } else {
@@ -70,13 +70,13 @@ uint8 hw_crc8_calculate( const uint8* data_buffer, const size_t data_size, const
     return reg ^ xor_val;    /// & ((1 << 8) - 1)
 }
 
-CRC8ResultArray* hw_crc8_calculate_range( const uint8* data_buffer, const size_t data_size, const uint8 data_crc, 
-                                          const uint8 polynomial, const uint8 init_reg, 
-                                          const uint8 xor_start, const uint8 xor_end ) 
+CRC8ResultArray* hw_crc8_calculate_range( const uint8_t* data_buffer, const size_t data_size, const uint8_t data_crc, 
+                                          const uint8_t polynomial, const uint8_t init_reg, 
+                                          const uint8_t xor_start, const uint8_t xor_end ) 
 {
     CRC8ResultArray* crc_array = CRC8ResultArray_alloc( 0 );
-    for ( uint8 i = xor_start; i < xor_end; ++i ) {
-        const uint8 curr_crc = hw_crc8_calculate( data_buffer, data_size, polynomial, init_reg, i );
+    for ( uint8_t i = xor_start; i < xor_end; ++i ) {
+        const uint8_t curr_crc = hw_crc8_calculate( data_buffer, data_size, polynomial, init_reg, i );
         if ( curr_crc == data_crc ) {
             CRC8Result data;
             data.reg = 0;
@@ -87,7 +87,7 @@ CRC8ResultArray* hw_crc8_calculate_range( const uint8* data_buffer, const size_t
     }
     if ( xor_end == 0xFF) {
         /// last value
-        const uint8 curr_crc = hw_crc8_calculate( data_buffer, data_size, polynomial, init_reg, xor_end );
+        const uint8_t curr_crc = hw_crc8_calculate( data_buffer, data_size, polynomial, init_reg, xor_end );
         if ( curr_crc == data_crc ) {
             CRC8Result data;
             data.reg = 0;

@@ -19,9 +19,9 @@ c_fastcrc = ctypes.CDLL( fastcrc_path )
 class CRC8Result(ctypes.Structure):
     """ creates a struct """
 
-    _fields_ = [('reg', ctypes.c_ubyte),
-                ('xor', ctypes.c_ubyte),
-                ('crc', ctypes.c_ubyte)]
+    _fields_ = [('reg', ctypes.c_uint8),
+                ('xor', ctypes.c_uint8),
+                ('crc', ctypes.c_uint8)]
 
     def __str__(self):
         return "<CRC8Result 0x%x - init:0x%X, xor:0x%X, crc:0x%X>" % ( id(self), self.reg, self.xor, self.crc )
@@ -75,10 +75,10 @@ def convert_to_msb_list( number, numberBytesSize ):
     return retList
 
 
-c_fastcrc.hw_crc8_calculate.restype = ctypes.c_ubyte
+c_fastcrc.hw_crc8_calculate.restype = ctypes.c_uint8
 def hw_crc8_calculate( bytesList, poly, intReg, xorVal ):
     arr_len  = len(bytesList)
-    arr_type = ctypes.c_ubyte * arr_len
+    arr_type = ctypes.c_uint8 * arr_len
     arr      = arr_type( *bytesList )
     return c_fastcrc.hw_crc8_calculate( arr, arr_len, poly, intReg, xorVal )
 
@@ -87,7 +87,7 @@ c_fastcrc.hw_crc8_calculate_range.argtypes = [ ctypes.POINTER( ctypes.c_uint8 ),
 c_fastcrc.hw_crc8_calculate_range.restype = ctypes.POINTER( CRC8ResultArray )
 def hw_crc8_calculate_range( bytes_list, dataCRC, poly, intReg, xorStart, xorEnd ):
     arr_len  = len(bytes_list)
-    arr_type = ctypes.c_ubyte * arr_len
+    arr_type = ctypes.c_uint8 * arr_len
     arr      = arr_type( *bytes_list )
     data_array = c_fastcrc.hw_crc8_calculate_range( arr, arr_len, dataCRC, poly, intReg, xorStart, xorEnd )
     data_content = data_array.contents

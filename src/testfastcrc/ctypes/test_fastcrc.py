@@ -24,7 +24,7 @@
 
 import unittest
 
-from fastcrc.ctypes.fastcrc import hw_crc8_calculate, hw_crc8_calculate_range
+from fastcrc.ctypes.fastcrc8 import hw_crc8_calculate, hw_crc8_calculate_range
 
 
 class HwCRC8Test(unittest.TestCase):

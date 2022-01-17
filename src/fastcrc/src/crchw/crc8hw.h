@@ -3,19 +3,21 @@
 #ifndef CRC8HW_H_
 #define CRC8HW_H_
 
-#include <stddef.h>                            /// NULL, size_t
+#include <stddef.h>                             /// NULL, size_t
+#include <stdint.h>                             /// int types
 
 
-typedef unsigned char uint8;
+// typedef unsigned char uint8_t;
+// typedef unsigned short uint16_t;
 
 
 /// =====================================================
 
 
 typedef struct {
-    uint8 reg;              /// registry initial value
-    uint8 xor;              /// xor-red result
-    uint8 crc;              /// crc
+    uint8_t reg;              /// registry initial value
+    uint8_t xor;              /// xor-red result
+    uint8_t crc;              /// crc
 } CRC8Result;
 
 // CRC8Result_init( CRC8Result* data ) {
@@ -48,11 +50,11 @@ CRC8Result* CRC8ResultArray_get( CRC8ResultArray* array, const size_t index );
  *
  * Compatible with http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
  */
-uint8 hw_crc8_calculate( const uint8* data_buffer, const size_t data_size, const uint8 polynomial, const uint8 init_reg, const uint8 xor_val );
+uint8_t hw_crc8_calculate( const uint8_t* data_buffer, const size_t data_size, const uint8_t polynomial, const uint8_t init_reg, const uint8_t xor_val );
 
-CRC8ResultArray* hw_crc8_calculate_range( const uint8* data_buffer, const size_t data_size, const uint8 data_crc, 
-                                          const uint8 polynomial, const uint8 init_reg, 
-                                          const uint8 xor_start, const uint8 xor_end );
+CRC8ResultArray* hw_crc8_calculate_range( const uint8_t* data_buffer, const size_t data_size, const uint8_t data_crc, 
+                                          const uint8_t polynomial, const uint8_t init_reg, 
+                                          const uint8_t xor_start, const uint8_t xor_end );
 
 
 #endif /* CRC8HW_H_ */

@@ -264,18 +264,13 @@ class HwCRCTest(unittest.TestCase):
 #         print "values: data:{} poly:{:X} init:{:X} xorOut:{:08b} crc:{:08b} revcrc:{:08b}".format( data, inputPoly, regInit, xorOut, crc, revCrc )
         self.assertEqual( crc, revCrc )
 
-    def test_crcmod_c16d80(self):
-        data = NumberMask(0x8E843664A9CB222CE7EC, 80)
+    def test_calculate3_001(self):
+        data = NumberMask(0x0001, 16)
         crcSize = 16
-        inputPoly = NumberMask(0x1ABCD, crcSize)
+        inputPoly = NumberMask(0x10001, crcSize)
         regInit = 0x0
-        xorOut = 0x0
+        xorOut  = 0x0
         reverse = False
-
-        masterPoly = inputPoly.masterData()
-        crc_func = crcmod.mkCrcFun(masterPoly, rev=reverse, initCrc=regInit, xorOut=xorOut)
-        crcLib  = crc_func( data.toASCII() )
-#         print "crc: {:X}".format( crcLib )
 
         crcProc = HwCRC()
         crcProc.setReversed(reverse)
@@ -285,7 +280,84 @@ class HwCRCTest(unittest.TestCase):
         crc = crcProc.calculate3(data, inputPoly)
 
 #         print "values: {} poly:{:X} init:{:X} xorOut:{:08b} rev:{} crc:{:08b} crcmod:{:08b} crcxor:{:08b}".format( data, inputPoly, regInit, xorOut, reverse, crc, crcLib, crc^crcLib )
-        self.assertEqual( crc, crcLib )
+        self.assertEqual( crc, 0x0001 )
+
+    def test_calculate3_002(self):
+        data = NumberMask(0x0010, 16)
+        crcSize = 16
+        inputPoly = NumberMask(0x10001, crcSize)
+        regInit = 0x0
+        xorOut  = 0x0
+        reverse = False
+
+        crcProc = HwCRC()
+        crcProc.setReversed(reverse)
+        crcProc.setXorOutValue( xorOut )
+        crcProc.setInitCRC(regInit, crcSize)
+
+        crc = crcProc.calculate3(data, inputPoly)
+
+#         print "values: {} poly:{:X} init:{:X} xorOut:{:08b} rev:{} crc:{:08b} crcmod:{:08b} crcxor:{:08b}".format( data, inputPoly, regInit, xorOut, reverse, crc, crcLib, crc^crcLib )
+        self.assertEqual( crc, 0x0010 )
+
+    def test_calculate3_003(self):
+        data = NumberMask(0x0100, 16)
+        crcSize = 16
+        inputPoly = NumberMask(0x10001, crcSize)
+        regInit = 0x0
+        xorOut  = 0x0
+        reverse = False
+
+        crcProc = HwCRC()
+        crcProc.setReversed(reverse)
+        crcProc.setXorOutValue( xorOut )
+        crcProc.setInitCRC(regInit, crcSize)
+
+        crc = crcProc.calculate3(data, inputPoly)
+
+#         print "values: {} poly:{:X} init:{:X} xorOut:{:08b} rev:{} crc:{:08b} crcmod:{:08b} crcxor:{:08b}".format( data, inputPoly, regInit, xorOut, reverse, crc, crcLib, crc^crcLib )
+        self.assertEqual( crc, 0x0100 )
+
+    def test_calculate3_004(self):
+        data = NumberMask(0x1000, 16)
+        crcSize = 16
+        inputPoly = NumberMask(0x10001, crcSize)
+        regInit = 0x0
+        xorOut  = 0x0
+        reverse = False
+
+        crcProc = HwCRC()
+        crcProc.setReversed(reverse)
+        crcProc.setXorOutValue( xorOut )
+        crcProc.setInitCRC(regInit, crcSize)
+
+        crc = crcProc.calculate3(data, inputPoly)
+
+#         print "values: {} poly:{:X} init:{:X} xorOut:{:08b} rev:{} crc:{:08b} crcmod:{:08b} crcxor:{:08b}".format( data, inputPoly, regInit, xorOut, reverse, crc, crcLib, crc^crcLib )
+        self.assertEqual( crc, 0x1000 )
+
+    def test_calculate3_c16_d80(self):
+        data = NumberMask(0x8E843664A9CB222CE7EC, 80)
+        crcSize = 16
+        inputPoly = NumberMask(0x1ABCD, crcSize)
+        regInit = 0x0
+        xorOut  = 0x0
+        reverse = False
+
+#         masterPoly = inputPoly.masterData()
+#         crc_func = crcmod.mkCrcFun(masterPoly, rev=reverse, initCrc=regInit, xorOut=xorOut)
+#         crcLib  = crc_func( data.toASCII() )
+# #         print "crc: {:X}".format( crcLib )
+
+        crcProc = HwCRC()
+        crcProc.setReversed(reverse)
+        crcProc.setXorOutValue( xorOut )
+        crcProc.setInitCRC(regInit, crcSize)
+
+        crc = crcProc.calculate3(data, inputPoly)
+
+#         print "values: {} poly:{:X} init:{:X} xorOut:{:08b} rev:{} crc:{:08b} crcmod:{:08b} crcxor:{:08b}".format( data, inputPoly, regInit, xorOut, reverse, crc, crcLib, crc^crcLib )
+#         self.assertEqual( crc, crcLib )
         self.assertEqual( crc, 0xD36F )
 
     def test_crcmod_c8d64_random(self):
@@ -321,6 +393,39 @@ class HwCRCTest(unittest.TestCase):
 #         print "values: {} poly:{:X} init:{:X} xorOut:{:08b} rev:{} crc:{:08b} crcmod:{:08b} crcxor:{:08b}".format( data, inputPoly, regInit, xorOut, reverse, crc, crcLib, crc^crcLib )
         self.assertEqual( crc, crcLib )
 
+
+    def test_crcmod_c16d64_random(self):
+        data = NumberMask(random.randint(1, 0xFFFFFFFFFFFFFFFF), 64)
+        crcSize = 16
+        crcMax = 2**crcSize-1
+        inputPoly = NumberMask((0x1 << crcSize) | random.randint(1, crcMax), crcSize)
+#         regInit = random.randint(0, crcMax)
+#         xorOut = random.randint(0, crcMax)
+        regInit = 0x0
+        xorOut  = 0x0
+        reverse = bool(random.randint(0, 1))
+
+        crc_func = crcmod.mkCrcFun(inputPoly.masterData(), rev=reverse, initCrc=regInit, xorOut=xorOut)
+        crcLib  = crc_func( data.toASCII() )
+#         print "crc: {:X} {:X}".format( crc, crc2 )
+
+        crcProc = HwCRC()
+        crcProc.setReversed(reverse)
+        crcProc.setXorOutValue( xorOut )
+
+        if reverse:
+            data.reverseBytes()
+            inputPoly.reverse()
+            crcInit = reverseBits(regInit^xorOut, crcSize)
+            crcProc.setRegisterInitValue( crcInit )
+        else:
+            crcInit = regInit^xorOut
+            crcProc.setRegisterInitValue( crcInit )
+
+        crc = crcProc.calculate3(data, inputPoly)
+
+#         print "values: {} poly:{:X} init:{:X} xorOut:{:08b} rev:{} crc:{:08b} crcmod:{:08b} crcxor:{:08b}".format( data, inputPoly, regInit, xorOut, reverse, crc, crcLib, crc^crcLib )
+        self.assertEqual( crc, crcLib )
 
 
 if __name__ == "__main__":

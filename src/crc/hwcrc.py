@@ -23,10 +23,12 @@
 
 from crc.crcproc import CRCProc, CRCOperator
 
-from fastcrc.ctypes.fastcrc import hw_crc8_calculate, convert_to_msb_list,\
+from fastcrc.ctypes.fastcrc8 import hw_crc8_calculate, convert_to_msb_list,\
     hw_crc8_calculate_range
 
 from crc.flush import flush_string
+from fastcrc.ctypes.fastcrc16 import hw_crc16_calculate,\
+    hw_crc16_calculate_range
 
 
 USE_FAST_CRC = True
@@ -63,14 +65,17 @@ class HwCRC( CRCProc ):
 
     def calculateMSB(self, dataMask, polyMask):
 #         return self.calculateMSBClassic(dataMask, polyMask)
-        if polyMask.dataSize != 8:
-            ## fast crc only supports CRC8
-            return self.calculateMSBClassic(dataMask, polyMask)
         if dataMask.dataSize % 8 != 0:
             ## fast crc only supports full bytes
             return self.calculateMSBClassic(dataMask, polyMask)
-        bytesList = convert_to_msb_list( dataMask.dataNum, dataMask.dataSize / 8 )
-        return hw_crc8_calculate( bytesList, polyMask.dataNum, self.registerInit, self.xorOut )
+        if polyMask.dataSize == 8:
+            bytesList = convert_to_msb_list( dataMask.dataNum, dataMask.dataSize / 8 )
+            return hw_crc8_calculate( bytesList, polyMask.dataNum, self.registerInit, self.xorOut )
+        if polyMask.dataSize == 16:
+            bytesList = convert_to_msb_list( dataMask.dataNum, dataMask.dataSize / 8 )
+            return hw_crc16_calculate( bytesList, polyMask.dataNum, self.registerInit, self.xorOut )
+        ## fast crc only supports CRC8
+        return self.calculateMSBClassic(dataMask, polyMask)
 
     ## 'poly' without leading '1'
     def calculateMSBClassic(self, dataMask, polyMask):
@@ -120,83 +125,155 @@ class HwCRC( CRCProc ):
     ## inputData: List[ (NumberMask, NumberMask) ]
     def createOperator(self, crcSize, inputData):
         if USE_FAST_CRC is False:
-            print( "fast CRC disabled" )
+            print "fast CRC disabled"
             return CRCProc.createOperator(self, crcSize, inputData)
             
-        if crcSize != 8:
-            print( "unable to morph -- unsupported crc size: ", crcSize )
-            return CRCProc.createOperator(self, crcSize, inputData)
-#         return CRCProc.createOperator(self, crcSize, inputData)
+        if crcSize == 8:
+            dataList = self.morphData( inputData, crcSize )
+            if dataList:
+                print "creating Forward8FastHwOperator"
+                return Forward8FastHwOperator( self, dataList )
+        if crcSize == 16:
+            dataList = self.morphData( inputData, crcSize )
+            if dataList:
+                print "creating Forward16FastHwOperator"
+                return Forward16FastHwOperator( self, dataList )
+                
+        print "unable to morph -- unsupported crc size: ", crcSize
+        return CRCProc.createOperator(self, crcSize, inputData)
 
+
+    def morphData(self, inputData, crcSize):
         dataList = []
         for data in inputData:
             dataMask = data[0]
             if dataMask.dataSize % 8 != 0:
-                print( "unable to morph -- unsupported data size" )
-                return CRCProc.createOperator(self, crcSize, inputData)
+                print "unable to morph -- unsupported data size"
+                #return CRCProc.createOperator(self, crcSize, inputData)
+                return []
             crcMask = data[1]
             if crcMask.dataSize != crcSize:
-                print( "unable to morph -- unsupported crc" )
-                return CRCProc.createOperator(self, crcSize, inputData)
+                print "unable to morph -- unsupported crc"
+                #return CRCProc.createOperator(self, crcSize, inputData)
+                return []
             
 #             crcMask = data[1]
             bytesList = convert_to_msb_list( dataMask.dataNum, dataMask.dataSize / 8 )
             dataList.append( (bytesList, crcMask.dataNum) )
-        
-        ##
-        class Forward8FastHwOperator( CRCOperator ):
+        return dataList
+
+
+##
+##
+##
+class Forward8FastHwOperator( CRCOperator ):
+    
+    def __init__(self, crcProcessor, inputData):
+        CRCOperator.__init__(self)
+        self.processor = crcProcessor
+        self.data = inputData                   ## List[ bytes_list ]
+
+    def calculate(self, polyMask):
+        retList = []
+        for item in self.data:
+            bytes_list = item[0]
+            crc = hw_crc8_calculate( bytes_list, polyMask.dataNum, self.processor.registerInit, self.processor.xorOut )
+            retList.append( crc )
+        return retList
+    
+    def verify(self, polyMask):
+        for item in self.data:
+            bytes_list = item[0]
+            dataCRC    = item[1]
+            crc = hw_crc8_calculate( bytes_list, polyMask.dataNum, self.processor.registerInit, self.processor.xorOut )
+            if dataCRC != crc:
+                return False
             
-            def __init__(self, crcProcessor, inputData):
-                CRCOperator.__init__(self)
-                self.processor = crcProcessor
-                self.data = inputData                   ## List[ bytes_list ]
-        
-            def calculate(self, polyMask):
-                retList = []
-                for item in self.data:
-                    bytes_list = item[0]
-                    crc = hw_crc8_calculate( bytes_list, polyMask.dataNum, self.processor.registerInit, self.processor.xorOut )
-                    retList.append( crc )
-                return retList
+        ## all CRC matches
+        return True
+    
+    def verifyRange(self, polyMask, xorStart, xorStop):
+        xorSet = set()
+        for item in self.data:
+            bytes_list = item[0]
+            dataCRC    = item[1]
+            crc_match = hw_crc8_calculate_range( bytes_list, dataCRC, polyMask.dataNum, self.processor.registerInit, xorStart, xorStop )
+            if not crc_match:
+                ## no result found -- return
+                return False
             
-            def verify(self, polyMask):
-                for item in self.data:
-                    bytes_list = item[0]
-                    dataCRC    = item[1]
-                    crc = hw_crc8_calculate( bytes_list, polyMask.dataNum, self.processor.registerInit, self.processor.xorOut )
-                    if dataCRC != crc:
-                        return False
-                    
-                ## all CRC matches
-                return True
+            if not xorSet:
+                ## empty set 
+                xorSet.update( crc_match )
+                continue
             
-            def verifyRange(self, polyMask, xorStart, xorStop):
-                xorSet = set()
-                for item in self.data:
-                    bytes_list = item[0]
-                    dataCRC    = item[1]
-                    crc_match = hw_crc8_calculate_range( bytes_list, dataCRC, polyMask.dataNum, self.processor.registerInit, xorStart, xorStop )
-                    if not crc_match:
-                        ## no result found -- return
-                        return False
-                    
-                    if not xorSet:
-                        ## empty set 
-                        xorSet.update( crc_match )
-                        continue
-                    
-                    common = xorSet.intersection( crc_match )
-                    if not common:
-                        ## no common results -- return
-                        return False
-                    xorSet = common
-                    
-                for item in xorSet:
+            common = xorSet.intersection( crc_match )
+            if not common:
+                ## no common results -- return
+                return False
+            xorSet = common
+            
+        for item in xorSet:
 #                             initReg = item[0]
-                    flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyMask.dataNum, self.processor.registerInit, item ) )
-                if not xorSet:
-                    return False
-                return True
+            flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyMask.dataNum, self.processor.registerInit, item ) )
+        if not xorSet:
+            return False
+        return True
+
+
+##
+##
+##
+class Forward16FastHwOperator( CRCOperator ):
+    
+    def __init__(self, crcProcessor, inputData):
+        CRCOperator.__init__(self)
+        self.processor = crcProcessor
+        self.data = inputData                   ## List[ bytes_list ]
+
+    def calculate(self, polyMask):
+        retList = []
+        for item in self.data:
+            bytes_list = item[0]
+            crc = hw_crc16_calculate( bytes_list, polyMask.dataNum, self.processor.registerInit, self.processor.xorOut )
+            retList.append( crc )
+        return retList
+    
+    def verify(self, polyMask):
+        for item in self.data:
+            bytes_list = item[0]
+            dataCRC    = item[1]
+            crc = hw_crc16_calculate( bytes_list, polyMask.dataNum, self.processor.registerInit, self.processor.xorOut )
+            if dataCRC != crc:
+                return False
             
-        print( "creating Forward8FastHwOperator" )
-        return Forward8FastHwOperator( self, dataList )
+        ## all CRC matches
+        return True
+    
+    def verifyRange(self, polyMask, xorStart, xorStop):
+        xorSet = set()
+        for item in self.data:
+            bytes_list = item[0]
+            dataCRC    = item[1]
+            crc_match = hw_crc16_calculate_range( bytes_list, dataCRC, polyMask.dataNum, self.processor.registerInit, xorStart, xorStop )
+            if not crc_match:
+                ## no result found -- return
+                return False
+            
+            if not xorSet:
+                ## empty set 
+                xorSet.update( crc_match )
+                continue
+            
+            common = xorSet.intersection( crc_match )
+            if not common:
+                ## no common results -- return
+                return False
+            xorSet = common
+            
+        for item in xorSet:
+#                             initReg = item[0]
+            flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyMask.dataNum, self.processor.registerInit, item ) )
+        if not xorSet:
+            return False
+        return True

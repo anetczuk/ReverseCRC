@@ -24,6 +24,7 @@
 import math
 
 from crc.numbermask import reverseBits, NumberMask
+from crc.flush import flush_string
 
 
 class PolyKey:
@@ -189,6 +190,21 @@ class CRCOperator(object):
 
     def verify(self, polyMask):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
+
+#     def verifyRange(self, polyMask, xorStart, xorStop):
+#         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
+
+    def verifyRange(self, polyMask, xorStart, xorStop):
+        matchesAll = False
+        for self.processor.xorOut in xrange(xorStart, xorStop):
+#                 for xorNum in xrange(xorListStart, xorListStop):
+#                     crc_processor.setXorOutValue( xorNum )
+             
+            crc_match = self.verify( polyMask )
+            if crc_match:
+                flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyMask.dataNum, self.processor.registerInit, self.processor.xorOut ) )
+                matchesAll = True
+        return matchesAll
 
 
 class StandardCRCOperator( CRCOperator ):

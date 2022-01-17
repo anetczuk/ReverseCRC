@@ -21,12 +21,13 @@
 # SOFTWARE.
 #
 
+
 import unittest
 
-from crc.crcproc import PolyKey, CRCKey
+from fastcrc.ctypes.fastcrc import hw_crc8_calculate, hw_crc8_calculate_range
 
 
-class PolyKeyTest(unittest.TestCase):
+class HwCRC8Test(unittest.TestCase):
     def setUp(self):
         # Called before testfunction is executed
         pass
@@ -35,45 +36,18 @@ class PolyKeyTest(unittest.TestCase):
         # Called after testfunction was executed
         pass
 
-    def test_equality(self):
-        key1 = PolyKey()
-        self.assertEqual( key1, key1 )
+    def test_hw_crc8_calculate(self):
+        bytes_list = [ 0xFF, 0xFF, 0xFF, 0xFF ]
+        crc = hw_crc8_calculate( bytes_list, 0xFF, 0x00, 0x00 )
+        self.assertEqual( crc, 240 )
 
-        key2 = PolyKey()
-        self.assertEqual( key1, key2 )
-
-    def test_equality_diff(self):
-        key1 = PolyKey()
-        key2 = PolyKey(-1, True)
-
-        self.assertNotEqual( key1, key2 )
-
-
-class CRCKeyTest(unittest.TestCase):
-    def setUp(self):
-        # Called before testfunction is executed
-        pass
-
-    def tearDown(self):
-        # Called after testfunction was executed
-        pass
-
-    def test_size_0x00(self):
-        key1 = CRCKey( 0x00 )
-        crcsize = key1.size()
-        self.assertEqual( crcsize, 0 )
-
-    def test_size_0x01(self):
-        key1 = CRCKey( 0x01 )
-        crcsize = key1.size()
-        self.assertEqual( crcsize, 0 )
-
-    def test_size_0x123(self):
-        key1 = CRCKey( 0x123 )
-        crcsize = key1.size()
-        self.assertEqual( crcsize, 8 )
+    def test_hw_crc8_calculate_range(self):
+        bytes_list = [ 0xFF, 0xFF, 0xFF, 0xFF ]
+        data_crc = 0xFE
+        results = hw_crc8_calculate_range( bytes_list, data_crc, 0x11, 0x00, 0x00, 0xFF )
+        self.assertEqual( len(results), 1 )
+        self.assertEqual( results[0], 14 )
 
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

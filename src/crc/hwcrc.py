@@ -21,10 +21,13 @@
 # SOFTWARE.
 #
 
-
 from crc.crcproc import CRCProc, CRCOperator
 
-from fastcrc.ctypes.fastcrc import hw_crc8_calculate, convert_to_msb_list
+from fastcrc.ctypes.fastcrc import hw_crc8_calculate, convert_to_msb_list,\
+    hw_crc8_calculate_range
+
+from crc.flush import flush_string
+
 
 USE_FAST_CRC = True
 # USE_FAST_CRC = False
@@ -165,6 +168,34 @@ class HwCRC( CRCProc ):
                         return False
                     
                 ## all CRC matches
+                return True
+            
+            def verifyRange(self, polyMask, xorStart, xorStop):
+                xorSet = set()
+                for item in self.data:
+                    bytes_list = item[0]
+                    dataCRC    = item[1]
+                    crc_match = hw_crc8_calculate_range( bytes_list, dataCRC, polyMask.dataNum, self.processor.registerInit, xorStart, xorStop )
+                    if not crc_match:
+                        ## no result found -- return
+                        return False
+                    
+                    if not xorSet:
+                        ## empty set 
+                        xorSet.update( crc_match )
+                        continue
+                    
+                    common = xorSet.intersection( crc_match )
+                    if not common:
+                        ## no common results -- return
+                        return False
+                    xorSet = common
+                    
+                for item in xorSet:
+#                             initReg = item[0]
+                    flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyMask.dataNum, self.processor.registerInit, item ) )
+                if not xorSet:
+                    return False
                 return True
             
         print( "creating Forward8FastHwOperator" )

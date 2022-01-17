@@ -71,11 +71,11 @@ class VerifySolver(Reverse):
         initListSize  = initListStop - initListStart
         
         xorListStart = 0
-        xorListStop  = rangeSize
+        xorListStop  = rangeSize - 1
         if self.xorVal is not None:
             xorListStart = self.xorVal
-            xorListStop  = xorListStart + 1
-        xorListSize  = xorListStop - xorListStart
+            xorListStop  = xorListStart
+        xorListSize  = xorListStop - xorListStart + 1
 
         inputMasks = InputMaskList( data )
         if inputMasks.empty():
@@ -108,14 +108,18 @@ class VerifySolver(Reverse):
                     value = spaceCounter * 100.0 / spaceSize
                     flush_percent( value, 4 )
                 
-                for crc_processor.xorOut in xrange(xorListStart, xorListStop):
-#                 for xorNum in xrange(xorListStart, xorListStop):
-#                     crc_processor.setXorOutValue( xorNum )
-                    
-                    crc_match = crc_operator.verify( polyMask )
-                    if crc_match:
-                        flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyNum, crc_processor.registerInit, crc_processor.xorOut ) )
-                        matchesAll = True
+                matches = crc_operator.verifyRange( polyMask, xorListStart, xorListStop )
+                if matches:
+                    matchesAll = True
+                
+#                 for crc_processor.xorOut in xrange(xorListStart, xorListStop):
+# #                 for xorNum in xrange(xorListStart, xorListStop):
+# #                     crc_processor.setXorOutValue( xorNum )
+#                     
+#                     crc_match = crc_operator.verify( polyMask )
+#                     if crc_match:
+#                         flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyNum, crc_processor.registerInit, crc_processor.xorOut ) )
+#                         matchesAll = True
 
         if matchesAll:
             print "\nFound poly matching all data"

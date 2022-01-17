@@ -64,11 +64,11 @@ class VerifySolver(Reverse):
         polyListSize  = polyListStop - polyListStart
         
         initListStart = 0
-        initListStop  = rangeSize
+        initListStop  = rangeSize - 1
         if self.initVal is not None:
             initListStart = self.initVal
-            initListStop  = initListStart + 1
-        initListSize  = initListStop - initListStart
+            initListStop  = initListStart
+        initListSize  = initListStop - initListStart + 1
         
         xorListStart = 0
         xorListStop  = rangeSize - 1

@@ -196,8 +196,8 @@ class CRCOperator(object):
 
     def verifyRange(self, polyMask, intRegStart, intRegEnd, xorStart, xorStop):
         matchesAll = False
-        for self.processor.registerInit in xrange(intRegStart, intRegEnd):
-            for self.processor.xorOut in xrange(xorStart, xorStop):
+        for self.processor.registerInit in xrange(intRegStart, intRegEnd + 1):
+            for self.processor.xorOut in xrange(xorStart, xorStop + 1):
                 crc_match = self.verify( polyMask )
                 if crc_match:
                     flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyMask.dataNum, self.processor.registerInit, self.processor.xorOut ) )

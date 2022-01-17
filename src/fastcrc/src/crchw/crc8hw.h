@@ -1,7 +1,7 @@
 ///
 
 #ifndef CRC8HW_H_
-#define CRCH8W_H_
+#define CRC8HW_H_
 
 #include <stddef.h>                            /// NULL, size_t
 

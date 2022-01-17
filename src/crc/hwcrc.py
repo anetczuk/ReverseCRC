@@ -27,7 +27,8 @@ from crc.flush import flush_string
 
 from fastcrc.ctypes.fastcrc8 import hw_crc8_calculate, hw_crc8_calculate_range
 from fastcrc.ctypes.fastcrc16 import hw_crc16_calculate, hw_crc16_calculate_range
-from fastcrc.ctypes.utils import convert_to_msb_list
+from fastcrc.ctypes.utils import convert_to_msb_list, reverse_byte,\
+    convert_to_lsb_list
 
 
 USE_FAST_CRC = True
@@ -55,7 +56,10 @@ class HwCRC( CRCProc ):
             else:
                 self.calculate3 = self.calculateMSBClassic
         else:
-            self.calculate3 = self.calculateLSBClassic            
+            if USE_FAST_CRC:
+                self.calculate3 = self.calculateLSB
+            else:
+                self.calculate3 = self.calculateLSBClassic            
         
     ## leave methon not overriden -- it will be changed during call to 'setReversed()'
 #     ## dataMask: NumberMask
@@ -71,14 +75,48 @@ class HwCRC( CRCProc ):
         if dataMask.dataSize % 8 != 0:
             ## fast crc only supports full bytes
             return self.calculateMSBClassic(dataMask, polyMask)
+        
         if polyMask.dataSize == 8:
             bytesList = convert_to_msb_list( dataMask.dataNum, dataMask.dataSize / 8 )
             return hw_crc8_calculate( bytesList, polyMask.dataNum, self.registerInit, self.xorOut )
+        
         if polyMask.dataSize == 16:
             bytesList = convert_to_msb_list( dataMask.dataNum, dataMask.dataSize / 8 )
             return hw_crc16_calculate( bytesList, polyMask.dataNum, self.registerInit, self.xorOut )
+        
         ## fast crc only supports CRC8
         return self.calculateMSBClassic(dataMask, polyMask)
+
+    def calculateLSB(self, dataMask, polyMask):
+#         return self.calculateLSBClassic(dataMask, polyMask)
+        if dataMask.dataSize % 8 != 0:
+            ## fast crc only supports full bytes
+            return self.calculateLSBClassic(dataMask, polyMask)
+        
+        if polyMask.dataSize == 8:
+            bytesList = convert_to_lsb_list( dataMask.dataNum, dataMask.dataSize / 8 )
+            poly      = reverse_byte( polyMask.dataNum, polyMask.dataSize )
+            
+            initReg = reverse_byte( self.registerInit, polyMask.dataSize )
+            xor_val = reverse_byte( self.xorOut, polyMask.dataSize )
+
+            calc_crc = hw_crc8_calculate( bytesList, poly, initReg, xor_val )
+            
+            return reverse_byte( calc_crc, polyMask.dataSize )
+        
+        if polyMask.dataSize == 16:
+            bytesList = convert_to_lsb_list( dataMask.dataNum, dataMask.dataSize / 8 )
+            poly      = reverse_byte( polyMask.dataNum, polyMask.dataSize )
+            
+            initReg = reverse_byte( self.registerInit, polyMask.dataSize )
+            xor_val = reverse_byte( self.xorOut, polyMask.dataSize )
+
+            calc_crc = hw_crc16_calculate( bytesList, poly, initReg, xor_val )
+            
+            return reverse_byte( calc_crc, polyMask.dataSize )
+        
+        ## fast crc only supports CRC8
+        return self.calculateLSBClassic(dataMask, polyMask)
 
     ## 'poly' without leading '1'
     def calculateMSBClassic(self, dataMask, polyMask):
@@ -101,12 +139,11 @@ class HwCRC( CRCProc ):
 
         return (register ^ self.xorOut) & polyMask.dataMask
 
-    def calculateLSB(self, dataMask, polyMask):
-        return self.calculateLSBClassic( dataMask, polyMask )
-
     ## 'poly' without leading '1'
-    ## 'dataMask' and 'polyMask' have to be reversed
+    ## 'dataMask' and 'polyMask' have to be reversed -- NumberMask
     def calculateLSBClassic(self, dataMask, polyMask):
+#         return self.calculateLSBUsingMSB( dataMask, polyMask )
+    
         register = self.registerInit
 
         dataNum  = dataMask.dataNum
@@ -124,6 +161,23 @@ class HwCRC( CRCProc ):
             dataBit <<= 1
 
         return (register ^ self.xorOut) & polyMask.dataMask
+
+    def calculateLSBUsingMSB(self, dataMask, polyMask):           
+        revData = dataMask.reversed()
+        revPoly = polyMask.reversed()
+
+        oldInit = self.registerInit
+        oldXor  = self.xorOut
+
+        self.registerInit = reverse_byte( self.registerInit, polyMask.dataSize )
+        self.xorOut       = reverse_byte( self.xorOut, polyMask.dataSize )
+
+        calc_crc = self.calculateMSBClassic( revData, revPoly )
+        
+        self.registerInit = oldInit
+        self.xorOut       = oldXor
+        
+        return reverse_byte( calc_crc, polyMask.dataSize )
     
     ## inputData: List[ (NumberMask, NumberMask) ]
     def createOperator(self, crcSize, inputData):

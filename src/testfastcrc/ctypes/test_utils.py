@@ -38,10 +38,10 @@ class BytesTest(unittest.TestCase):
     def test_convert_to_lsb_list(self):
         bytes_list = convert_to_lsb_list( 0x04030201, 4 )
         self.assertEqual( len(bytes_list), 4 )
-        self.assertEqual( bytes_list[0], 0x01 )
-        self.assertEqual( bytes_list[1], 0x02 )
-        self.assertEqual( bytes_list[2], 0x03 )
-        self.assertEqual( bytes_list[3], 0x04 )
+        self.assertEqual( bytes_list[0], 0x80 )     ## 0b 1000 0000
+        self.assertEqual( bytes_list[1], 0x40 )     ## 0b 0100 0000
+        self.assertEqual( bytes_list[2], 0xC0 )     ## 0b 1100 0000
+        self.assertEqual( bytes_list[3], 0x20 )     ## 0b 0010 0000
 
     def test_convert_to_msb_list(self):
         bytes_list = convert_to_msb_list( 0x04030201, 4 )

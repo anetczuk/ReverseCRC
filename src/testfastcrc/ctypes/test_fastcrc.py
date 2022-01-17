@@ -25,7 +25,8 @@
 import unittest
 
 from fastcrc.ctypes.fastcrc8 import hw_crc8_calculate, hw_crc8_calculate_range
-from fastcrc.ctypes.utils import convert_to_msb_list
+from fastcrc.ctypes.utils import convert_to_msb_list, convert_to_lsb_list,\
+    reverse_byte
 
 
 class FastCRC8Test(unittest.TestCase):
@@ -67,6 +68,30 @@ class FastCRC8Test(unittest.TestCase):
         calc_crc = hw_crc8_calculate( bytes_list, poly, 0x00, xorOut )
         
         self.assertEqual( calc_crc, 0x90 )
+
+    def test_hw_crc8_calculate_1_reverse(self):
+        data     = 0x12
+        dataSize = 8
+        poly     = 0xBF
+        
+        poly = reverse_byte( poly, 8 )
+        bytes_list = convert_to_lsb_list( data, dataSize / 8 )
+        calc_crc = hw_crc8_calculate( bytes_list, poly, 0x00, 0x00 )
+        calc_crc = reverse_byte( calc_crc, 8 )
+        
+        self.assertEqual( calc_crc, 0x3F )                         ## 63
+
+    def test_hw_crc8_calculate_3_reverse(self):
+        data     = 0x000300
+        dataSize = 24
+        poly     = 0x1BF
+        
+        poly = reverse_byte( poly, 8 )
+        bytes_list = convert_to_lsb_list( data, dataSize / 8 )
+        calc_crc = hw_crc8_calculate( bytes_list, poly, 0x00, 0x00 )
+        calc_crc = reverse_byte( calc_crc, 8 )
+        
+        self.assertEqual( calc_crc, 0x50 )                         ## 80
 
     def test_hw_crc8_calculate_range(self):
         bytes_list = [ 0xFF, 0xFF, 0xFF, 0xFF ]

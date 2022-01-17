@@ -3,12 +3,12 @@
 ##
 
 
-
 ## least significant byte goes first in list
 def convert_to_lsb_list( number, numberBytesSize ):
     retList = []
     for _ in range(numberBytesSize):
-        byte = number & 0xFF
+        byte = reverse_byte( number, 8 )
+#         byte = number & 0xFF
         retList.append( byte )
         number = number >> 8
     return retList

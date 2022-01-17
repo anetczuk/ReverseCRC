@@ -181,12 +181,19 @@ class HwCRCTest(unittest.TestCase):
         self.assertEqual( crc, 0x14 )
         self.assertEqual( crc ^ 0xA5, 0xB1 )
 
+    def test_calculate2_8rev_01(self):
+        ## input data generated from other tests
+        crcProc = HwCRC()
+        crcProc.setReversed()
+        crc = crcProc.calculate2(0x12, 8, 0x1BF, 8)
+        self.assertEqual( crc, 0x3F )                         ## 63
+
     def test_calculate2_8rev_check(self):
         ## input data generated from other tests
         crcProc = HwCRC()
         crcProc.setReversed()
         crc = crcProc.calculate2(0x000300, 24, 0x1BF, 8)
-        self.assertEqual( crc, 80 )
+        self.assertEqual( crc, 0x50 )                         ## 80
 
     def test_calculate3_8rev(self):
         data = 0xF0

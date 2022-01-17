@@ -1,6 +1,6 @@
 ///
 
-#include "crchw.h"
+#include "crc8hw.h"
 
 #include <stdlib.h>
 #include <stdio.h>

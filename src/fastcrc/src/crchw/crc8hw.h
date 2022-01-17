@@ -1,7 +1,7 @@
 ///
 
-#ifndef CRCHW_H_
-#define CRCHW_H_
+#ifndef CRC8HW_H_
+#define CRCH8W_H_
 
 #include <stddef.h>                            /// NULL, size_t
 
@@ -55,4 +55,4 @@ CRC8ResultArray* hw_crc8_calculate_range( const uint8* data_buffer, const size_t
                                           const uint8 xor_start, const uint8 xor_end );
 
 
-#endif /* CRCHW_H_ */
+#endif /* CRC8HW_H_ */

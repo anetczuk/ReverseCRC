@@ -24,8 +24,8 @@
 from collections import Counter
 
 from crc.numbermask import NumberMask
-from revcrc.solver.reverse import Reverse, print_results, write_results,\
-    flush_number
+from revcrc.solver.reverse import Reverse, print_results, write_results
+from crc.flush import flush_number
 
 
 class BruteForceSolver(Reverse):

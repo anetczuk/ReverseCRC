@@ -23,8 +23,9 @@
 
 from crc.numbermask import NumberMask
 from crc.crcproc import PolyKey
-from revcrc.solver.reverse import Reverse, flush_percent, flush_string,\
+from revcrc.solver.reverse import Reverse,\
     InputMaskList
+from crc.flush import flush_percent
 
 
 class VerifySolver(Reverse):

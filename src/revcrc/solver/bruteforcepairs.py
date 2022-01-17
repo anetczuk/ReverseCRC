@@ -26,9 +26,10 @@ import itertools
 from collections import Counter
 
 from crc.numbermask import NumberMask
+from crc.flush import flush_number
 from crc.crcproc import CRCKey
 from revcrc.solver.reverse import Reverse, print_results, write_results,\
-    flush_number, MessageCRC
+    MessageCRC
 
 
 class BruteForcePairsSolver(Reverse):

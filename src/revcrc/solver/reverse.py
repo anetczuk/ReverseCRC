@@ -85,32 +85,6 @@ def write_results( retList, inputSize, outpath ):
 ## ======================================================================
 
 
-def flush_number( num, bitSize ):
-    formatStr = "\r{:0%sb}" % bitSize
-    sys.stdout.write( formatStr.format(num) )
-    sys.stdout.flush()
-
-
-def flush_float( value, places ):
-    formatStr = "\r{:.%sf}" % places
-    sys.stdout.write( formatStr.format(value) )
-    sys.stdout.flush()
-
-
-def flush_string( value ):
-    sys.stdout.write( "\r{}".format(value) )
-    sys.stdout.flush()
-
-
-def flush_percent( value, places ):
-    formatStr = "\r{:0%s.%sf}%%" % (places + 4, places )
-    sys.stdout.write( formatStr.format(value) )
-    sys.stdout.flush()
-
-
-## ======================================================================
-
-
 class MessageCRC:
     def __init__(self, data, dataSize, crc, crcSize):
         self.dataNum = data

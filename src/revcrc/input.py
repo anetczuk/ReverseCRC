@@ -30,7 +30,7 @@ import re
 
 class InputData:
     def __init__(self, numbersList = [], dataSize = 0, crcSize = 0):
-        self.numbersList = numbersList
+        self.numbersList = numbersList      ## List[ (int, int) ]
         self.dataSize = dataSize
         self.crcSize = crcSize
 
@@ -50,11 +50,11 @@ class InputData:
         for i in xrange(0, len(stringList)):
             dataPair = stringList[i]
             dataString = dataPair[0]
-            crcString = dataPair[1]
+            crcString  = dataPair[1]
             self.dataSize = max( self.dataSize, len(dataString)*4 )
-            self.crcSize = max( self.crcSize, len(crcString)*4 )
+            self.crcSize  = max( self.crcSize, len(crcString)*4 )
             data = int(dataString, 16)
-            crc = int(crcString, 16)
+            crc  = int(crcString, 16)
             self.numbersList.append((data, crc))
 
 

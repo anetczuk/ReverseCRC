@@ -52,7 +52,7 @@ CRC16Result* CRC16ResultArray_get( CRC16ResultArray* array, const size_t index )
  *      https://en.wikipedia.org/wiki/Computation_of_cyclic_redundancy_checks
  *      http://www.sunshine2k.de/articles/coding/crc/understanding_crc.html
  */
-/// 'data_buffer' -- container for data -- least significant byte first
+/// 'data_buffer' -- container for data -- first dataframe bit is in MSB of buffer first item
 uint16_t hw_crc16_calculate( const uint8_t* data_buffer, const size_t data_size, const uint16_t polynomial, const uint16_t init_reg, const uint16_t xor_val ) {
     uint16_t reg = init_reg;
     for ( size_t i = 0; i < data_size; ++i ) {

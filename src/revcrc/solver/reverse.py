@@ -105,6 +105,7 @@ class MessageCRC:
 ## ======================================================================
 
 
+## convert list of raw int to list of NumberMask
 class InputMaskList():
 
     def __init__(self, inputData):

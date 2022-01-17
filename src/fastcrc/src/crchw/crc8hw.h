@@ -49,7 +49,7 @@ CRC8Result* CRC8ResultArray_get( CRC8ResultArray* array, const size_t index );
  *
  * Compatible with http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
  */
-/// 'data_buffer' -- container for data -- least significant byte first
+/// 'data_buffer' -- container for data -- first dataframe bit is in MSB of buffer first item
 uint8_t hw_crc8_calculate( const uint8_t* data_buffer, const size_t data_size, const uint8_t polynomial, const uint8_t init_reg, const uint8_t xor_val );
 
 CRC8ResultArray* hw_crc8_calculate_range( const uint8_t* data_buffer, const size_t data_size, const uint8_t data_crc, 

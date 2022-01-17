@@ -126,6 +126,7 @@ def main():
             profiler.enable()
 
         dataParser = DataParser()
+        ## return InputData
         data = dataParser.parseFile(args.infile)
 
         if len(data.numbersList) < 1:

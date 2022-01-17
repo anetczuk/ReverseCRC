@@ -32,10 +32,8 @@ import random
 from crc.numbermask import NumberMask, reverseBits
 
 
-
 __scriptdir__ = os.path.dirname(os.path.realpath(__file__))
 # logging.basicConfig(level=logging.INFO)
-
 
 
 class HwCRCTest(unittest.TestCase):

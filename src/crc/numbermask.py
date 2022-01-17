@@ -139,6 +139,7 @@ def generateSubstringsReverse(dataString, maxPos = -1):
 class NumberMask:
     """Container for data and it's size given in bits."""
 
+    ## dataSize -- number of bits
     def __init__(self, data, dataSize):
         self.dataSize = dataSize
         self.calculateCache()

@@ -192,31 +192,33 @@ class Forward8FastHwOperator( CRCOperator ):
         ## all CRC matches
         return True
     
-    def verifyRange(self, polyMask, xorStart, xorStop):
-        xorSet = set()
+    def verifyRange(self, polyMask, intRegStart, intRegEnd, xorStart, xorStop):
+        found_data = set()
         for item in self.data:
             bytes_list = item[0]
             dataCRC    = item[1]
-            crc_match = hw_crc8_calculate_range( bytes_list, dataCRC, polyMask.dataNum, self.processor.registerInit, xorStart, xorStop )
+            crc_match = hw_crc8_calculate_range( bytes_list, dataCRC, polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorStop )
             if not crc_match:
                 ## no result found -- return
                 return False
             
-            if not xorSet:
+            if not found_data:
                 ## empty set 
-                xorSet.update( crc_match )
+                found_data.update( crc_match )
                 continue
             
-            common = xorSet.intersection( crc_match )
+            common = found_data.intersection( crc_match )
             if not common:
                 ## no common results -- return
                 return False
-            xorSet = common
+            found_data = common
             
-        for item in xorSet:
-#                             initReg = item[0]
-            flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyMask.dataNum, self.processor.registerInit, item ) )
-        if not xorSet:
+        for item in found_data:
+            initReg = item[0]
+            xorVal  = item[1]
+            flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyMask.dataNum, initReg, xorVal ) )
+
+        if not found_data:
             return False
         return True
 
@@ -250,30 +252,32 @@ class Forward16FastHwOperator( CRCOperator ):
         ## all CRC matches
         return True
     
-    def verifyRange(self, polyMask, xorStart, xorStop):
-        xorSet = set()
+    def verifyRange(self, polyMask, intRegStart, intRegEnd, xorStart, xorStop):
+        found_data = set()
         for item in self.data:
             bytes_list = item[0]
             dataCRC    = item[1]
-            crc_match = hw_crc16_calculate_range( bytes_list, dataCRC, polyMask.dataNum, self.processor.registerInit, xorStart, xorStop )
+            crc_match = hw_crc16_calculate_range( bytes_list, dataCRC, polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorStop )
             if not crc_match:
                 ## no result found -- return
                 return False
             
-            if not xorSet:
+            if not found_data:
                 ## empty set 
-                xorSet.update( crc_match )
+                found_data.update( crc_match )
                 continue
             
-            common = xorSet.intersection( crc_match )
+            common = found_data.intersection( crc_match )
             if not common:
                 ## no common results -- return
                 return False
-            xorSet = common
+            found_data = common
             
-        for item in xorSet:
-#                             initReg = item[0]
-            flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyMask.dataNum, self.processor.registerInit, item ) )
-        if not xorSet:
+        for item in found_data:
+            initReg = item[0]
+            xorVal  = item[1]
+            flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyMask.dataNum, initReg, xorVal ) )
+
+        if not found_data:
             return False
         return True

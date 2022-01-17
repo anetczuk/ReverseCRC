@@ -44,9 +44,9 @@ class HwCRC8Test(unittest.TestCase):
     def test_hw_crc8_calculate_range(self):
         bytes_list = [ 0xFF, 0xFF, 0xFF, 0xFF ]
         data_crc = 0xFE
-        results = hw_crc8_calculate_range( bytes_list, data_crc, 0x11, 0x00, 0x00, 0xFF )
+        results = hw_crc8_calculate_range( bytes_list, data_crc, 0x11, 0x00, 0x00, 0x00, 0xFF )
         self.assertEqual( len(results), 1 )
-        self.assertEqual( results[0], 14 )
+        self.assertEqual( results[0], (0, 14) )
 
 
 if __name__ == "__main__":

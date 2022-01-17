@@ -55,6 +55,7 @@ CRC8Result* CRC8ResultArray_get( CRC8ResultArray* array, const size_t index ) {
  * Performance can be improved by replacing inner loop with "lookup table" for all 256 combinations of "reg" for each polynomial.
  * It can be especially beneficial if the polynomial is fixed or handling large input data.
  */
+/// 'data_buffer' -- container for data -- least significant byte first
 uint8_t hw_crc8_calculate( const uint8_t* data_buffer, const size_t data_size, const uint8_t polynomial, const uint8_t init_reg, const uint8_t xor_val ) {
     uint8_t reg = init_reg;
     for ( size_t i = 0; i < data_size; ++i ) {
@@ -71,29 +72,28 @@ uint8_t hw_crc8_calculate( const uint8_t* data_buffer, const size_t data_size, c
 }
 
 CRC8ResultArray* hw_crc8_calculate_range( const uint8_t* data_buffer, const size_t data_size, const uint8_t data_crc, 
-                                          const uint8_t polynomial, const uint8_t init_reg, 
+                                          const uint8_t polynomial, 
+                                          const uint8_t init_start, const uint8_t init_end, 
                                           const uint8_t xor_start, const uint8_t xor_end ) 
 {
     CRC8ResultArray* crc_array = CRC8ResultArray_alloc( 0 );
-    for ( uint8_t i = xor_start; i < xor_end; ++i ) {
-        const uint8_t curr_crc = hw_crc8_calculate( data_buffer, data_size, polynomial, init_reg, i );
-        if ( curr_crc == data_crc ) {
-            CRC8Result data;
-            data.reg = 0;
-            data.xor = i;
-            data.crc = curr_crc;
-            CRC8ResultArray_pushback( crc_array, data );
+    for ( uint8_t init_reg = init_start; init_reg <= init_end; ++init_reg ) {
+        for ( uint8_t xor_val = xor_start; xor_val <= xor_end; ++xor_val ) {
+            const uint8_t curr_crc = hw_crc8_calculate( data_buffer, data_size, polynomial, init_reg, xor_val );
+            if ( curr_crc == data_crc ) {
+                CRC8Result data;
+                data.reg = 0;
+                data.xor = xor_val;
+                CRC8ResultArray_pushback( crc_array, data );
+            }
+            if ( xor_val == 0xFF) {
+                /// after last value -- 'xor_val' will overflow
+                break;
+            }
         }
-    }
-    if ( xor_end == 0xFF) {
-        /// last value
-        const uint8_t curr_crc = hw_crc8_calculate( data_buffer, data_size, polynomial, init_reg, xor_end );
-        if ( curr_crc == data_crc ) {
-            CRC8Result data;
-            data.reg = 0;
-            data.xor = xor_end;
-            data.crc = curr_crc;
-            CRC8ResultArray_pushback( crc_array, data );
+        if ( init_reg == 0xFF) {
+            /// after last value -- 'xor_val' will overflow
+            break;
         }
     }
 

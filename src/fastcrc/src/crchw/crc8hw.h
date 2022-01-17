@@ -17,7 +17,6 @@
 typedef struct {
     uint8_t reg;              /// registry initial value
     uint8_t xor;              /// xor-red result
-    uint8_t crc;              /// crc
 } CRC8Result;
 
 // CRC8Result_init( CRC8Result* data ) {
@@ -50,10 +49,12 @@ CRC8Result* CRC8ResultArray_get( CRC8ResultArray* array, const size_t index );
  *
  * Compatible with http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
  */
+/// 'data_buffer' -- container for data -- least significant byte first
 uint8_t hw_crc8_calculate( const uint8_t* data_buffer, const size_t data_size, const uint8_t polynomial, const uint8_t init_reg, const uint8_t xor_val );
 
 CRC8ResultArray* hw_crc8_calculate_range( const uint8_t* data_buffer, const size_t data_size, const uint8_t data_crc, 
-                                          const uint8_t polynomial, const uint8_t init_reg, 
+                                          const uint8_t polynomial, 
+                                          const uint8_t init_start, const uint8_t init_end, 
                                           const uint8_t xor_start, const uint8_t xor_end );
 
 

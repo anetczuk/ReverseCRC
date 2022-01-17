@@ -85,13 +85,13 @@ class VerifySolver(Reverse):
         ## List[ (NumberMask, NumberMask) ]
         inputList = inputMasks.getInputMasks()
 
-        spaceSize = polyListSize * initListSize * xorListSize
+        subSpaceSize = initListSize * xorListSize
+        spaceSize = polyListSize * subSpaceSize
         print "search space size:", spaceSize, polyListSize, initListSize, xorListSize
         
         spaceCounter = 0
 
         crc_operator  = self.crcProc.createOperator( crcSize, inputList )
-        crc_processor = crc_operator.processor
 
         matchesAll = False
         polyMask   = NumberMask( 0, crcSize )
@@ -99,27 +99,14 @@ class VerifySolver(Reverse):
         for polyNum in xrange(polyListStart, polyListStop):
             polyMask.setNumber( polyNum )
 
-            for crc_processor.registerInit in xrange(initListStart, initListStop):
-#             for initNum in xrange(initListStart, initListStop):
-#                 crc_processor.setRegisterInitValue( initNum )
-                
-                spaceCounter += xorListSize
-                if self.progress:
-                    value = spaceCounter * 100.0 / spaceSize
-                    flush_percent( value, 4 )
-                
-                matches = crc_operator.verifyRange( polyMask, xorListStart, xorListStop )
-                if matches:
-                    matchesAll = True
-                
-#                 for crc_processor.xorOut in xrange(xorListStart, xorListStop):
-# #                 for xorNum in xrange(xorListStart, xorListStop):
-# #                     crc_processor.setXorOutValue( xorNum )
-#                     
-#                     crc_match = crc_operator.verify( polyMask )
-#                     if crc_match:
-#                         flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyNum, crc_processor.registerInit, crc_processor.xorOut ) )
-#                         matchesAll = True
+            spaceCounter += subSpaceSize
+            if self.progress:
+                value = spaceCounter * 100.0 / spaceSize
+                flush_percent( value, 4 )
+            
+            matches = crc_operator.verifyRange( polyMask, initListStart, initListStop, xorListStart, xorListStop )
+            if matches:
+                matchesAll = True
 
         if matchesAll:
             print "\nFound poly matching all data"

@@ -194,16 +194,14 @@ class CRCOperator(object):
 #     def verifyRange(self, polyMask, xorStart, xorStop):
 #         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
 
-    def verifyRange(self, polyMask, xorStart, xorStop):
+    def verifyRange(self, polyMask, intRegStart, intRegEnd, xorStart, xorStop):
         matchesAll = False
-        for self.processor.xorOut in xrange(xorStart, xorStop):
-#                 for xorNum in xrange(xorListStart, xorListStop):
-#                     crc_processor.setXorOutValue( xorNum )
-             
-            crc_match = self.verify( polyMask )
-            if crc_match:
-                flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyMask.dataNum, self.processor.registerInit, self.processor.xorOut ) )
-                matchesAll = True
+        for self.processor.registerInit in xrange(intRegStart, intRegEnd):
+            for self.processor.xorOut in xrange(xorStart, xorStop):
+                crc_match = self.verify( polyMask )
+                if crc_match:
+                    flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyMask.dataNum, self.processor.registerInit, self.processor.xorOut ) )
+                    matchesAll = True
         return matchesAll
 
 

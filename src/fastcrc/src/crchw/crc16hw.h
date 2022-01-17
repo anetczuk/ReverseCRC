@@ -17,7 +17,6 @@
 typedef struct {
     uint16_t reg;              /// registry initial value
     uint16_t xor;              /// xor-red result
-    uint16_t crc;              /// crc
 } CRC16Result;
 
 // CRC16Result_init( CRC16Result* data ) {
@@ -50,10 +49,12 @@ CRC16Result* CRC16ResultArray_get( CRC16ResultArray* array, const size_t index )
  *
  * Compatible with http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
  */
+/// 'data_buffer' -- container for data -- least significant byte first
 uint16_t hw_crc16_calculate( const uint8_t* data_buffer, const size_t data_size, const uint16_t polynomial, const uint16_t init_reg, const uint16_t xor_val );
 
 CRC16ResultArray* hw_crc16_calculate_range( const uint8_t* data_buffer, const size_t data_size, const uint16_t data_crc, 
-                                            const uint16_t polynomial, const uint16_t init_reg, 
+                                            const uint16_t polynomial, 
+                                            const uint16_t init_start, const uint16_t init_end, 
                                             const uint16_t xor_start, const uint16_t xor_end );
 
 

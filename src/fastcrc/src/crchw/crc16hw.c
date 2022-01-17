@@ -52,6 +52,7 @@ CRC16Result* CRC16ResultArray_get( CRC16ResultArray* array, const size_t index )
  *      https://en.wikipedia.org/wiki/Computation_of_cyclic_redundancy_checks
  *      http://www.sunshine2k.de/articles/coding/crc/understanding_crc.html
  */
+/// 'data_buffer' -- container for data -- least significant byte first
 uint16_t hw_crc16_calculate( const uint8_t* data_buffer, const size_t data_size, const uint16_t polynomial, const uint16_t init_reg, const uint16_t xor_val ) {
     uint16_t reg = init_reg;
     for ( size_t i = 0; i < data_size; ++i ) {
@@ -68,29 +69,28 @@ uint16_t hw_crc16_calculate( const uint8_t* data_buffer, const size_t data_size,
 }
 
 CRC16ResultArray* hw_crc16_calculate_range( const uint8_t* data_buffer, const size_t data_size, const uint16_t data_crc, 
-                                            const uint16_t polynomial, const uint16_t init_reg, 
+                                            const uint16_t polynomial, 
+                                            const uint16_t init_start, const uint16_t init_end, 
                                             const uint16_t xor_start, const uint16_t xor_end ) 
 {
     CRC16ResultArray* crc_array = CRC16ResultArray_alloc( 0 );
-    for ( uint16_t i = xor_start; i < xor_end; ++i ) {
-        const uint16_t curr_crc = hw_crc16_calculate( data_buffer, data_size, polynomial, init_reg, i );
-        if ( curr_crc == data_crc ) {
-            CRC16Result data;
-            data.reg = 0;
-            data.xor = i;
-            data.crc = curr_crc;
-            CRC16ResultArray_pushback( crc_array, data );
+    for ( uint16_t init_reg = init_start; init_reg <= init_end; ++init_reg ) {
+        for ( uint16_t xor_val = xor_start; xor_val <= xor_end; ++xor_val ) {
+            const uint16_t curr_crc = hw_crc16_calculate( data_buffer, data_size, polynomial, init_reg, xor_val );
+            if ( curr_crc == data_crc ) {
+                CRC16Result data;
+                data.reg = init_reg;
+                data.xor = xor_val;
+                CRC16ResultArray_pushback( crc_array, data );
+            }
+            if ( xor_val == 0xFFFF) {
+                /// after last value -- 'xor_val' will overflow
+                break;
+            }
         }
-    }
-    if ( xor_end == 0xFFFF) {
-        /// last value
-        const uint16_t curr_crc = hw_crc16_calculate( data_buffer, data_size, polynomial, init_reg, xor_end );
-        if ( curr_crc == data_crc ) {
-            CRC16Result data;
-            data.reg = 0;
-            data.xor = xor_end;
-            data.crc = curr_crc;
-            CRC16ResultArray_pushback( crc_array, data );
+        if ( init_reg == 0xFFFF) {
+            /// after last value -- 'xor_val' will overflow
+            break;
         }
     }
 

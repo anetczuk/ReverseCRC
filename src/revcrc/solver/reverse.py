@@ -66,6 +66,7 @@ def print_results_to( stream, retList, inputSize ):
 
     popular = get_popular( mostCommon, inputSize )
     if len(popular) < 1:
+        stream.write( "\n\nNO MATCHING KEYS FOUND\n\n" )
         return
 
     stream.write( "\n\nFOUND MATCHING KEYS[{:}]:\n\n".format( len(popular) ) )
@@ -73,8 +74,17 @@ def print_results_to( stream, retList, inputSize ):
 
 
 def print_results( retList, inputSize ):
-    sys.stdout.write( "\n" )
-    print_results_to( sys.stdout, retList, inputSize )
+#     sys.stdout.write( "\n" )
+#     print_results_to( sys.stdout, retList, inputSize )
+
+    mostCommon = retList.most_common()
+    popular = get_popular( mostCommon, inputSize )
+    if len(popular) < 1:
+        sys.stdout.write( "\n\nNO MATCHING KEYS FOUND\n\n" )
+        return
+
+    sys.stdout.write( "\nFOUND MATCHING KEYS[{:}]:\n\n".format( len(popular) ) )
+    print_keys_to( sys.stdout, popular )
 
 
 def write_results( retList, inputSize, outpath ):
@@ -193,10 +203,10 @@ class InputParams(object):
             valListStop  = valListStart
             return ( valListStart, valListStop )
 
-    def getReverseOrder(self):
+    def isReverseOrder(self):
         return False if self.reverseOrder is None else self.reverseOrder
 
-    def getReflectBits(self):
+    def isReflectBits(self):
         return False if self.reflectBits is None else self.reflectBits
 
 

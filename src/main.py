@@ -131,23 +131,17 @@ def main():
         ## return InputData
         data = dataParser.parseFile(args.infile)
 
-        if len(data.numbersList) < 1:
+        if data.empty():
             print "no data found"
+            return 1
+        if data.ready() == False:
+            print "input data not ready"
             return 1
 
         print "input data:", data.numbersList
+        print "List size: {} Data size: {} CRC size: {}".format( len(data.numbersList), data.dataSize, data.crcSize )
 
         printProgress = args.print_progress
-        outfile       = args.outfile
-        if outfile is None:
-            filename = os.path.basename(args.infile)
-            filenameroot = os.path.splitext( filename )[0]
-            dirname = os.path.dirname(args.infile)
-            outdir = os.path.join( dirname, "out" )
-            if os.path.exists( outdir ) is False:
-                os.makedirs( outdir )
-            outname = "%s_%s_%s_%s_%s.txt" % ( filenameroot, args.alg, args.mode, args.init_reg, args.xor_val )
-            outfile = os.path.join( outdir, outname )
 
         processor = create_processor( args.alg )
         if processor is None:
@@ -182,13 +176,26 @@ def main():
         inputParams.reverseOrder = args.reverse_order
         inputParams.reflectBits  = args.reflect_bits
 
+        outfile       = args.outfile
+        if outfile is None:
+            filename = os.path.basename(args.infile)
+            filenameroot = os.path.splitext( filename )[0]
+            dirname = os.path.dirname(args.infile)
+            outdir = os.path.join( dirname, "out" )
+            if os.path.exists( outdir ) is False:
+                os.makedirs( outdir )
+            outname = "%s_%s_%s_%s_%s_%s_%s.txt" % ( filenameroot, args.alg, args.mode, args.init_reg, args.xor_val, inputParams.isReverseOrder(), inputParams.isReflectBits() )
+            outfile = os.path.join( outdir, outname )
+
+        print "input args, poly: %s init: %s, xor: %s crcsize: %s" % ( inputParams.poly, inputParams.initReg, inputParams.xorVal, inputParams.crcSize )
+        print "output path:", outfile
+
         solver.execute( inputParams, outfile )
 
         timeDiff = (time.time()-starttime)
-        print "Calculation time: {:13.8f}s".format(timeDiff)
+        print "\nCalculation time: {:13.8f}s".format(timeDiff)
 
     finally:
-        print ""                    ## print new line
         if profiler != None:
             profiler.disable()
             if profiler_outfile == None:

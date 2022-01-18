@@ -44,15 +44,11 @@ def write_row( outfile, poly ):
 
 
 def main():
-#     table = dict()
-#     for poly in xrange(0, 0x100):
-#         table[ poly ] = generate_subtable( poly )
-        
     ## write output
     header = """///
 
-#ifndef CRC8LOOKUPTABLE_H_
-#define CRC8LOOKUPTABLE_H_
+#ifndef CRC8_LOOKUPTABLE_H_
+#define CRC8_LOOKUPTABLE_H_
 
 #include <stdint.h>                             /// int types
 
@@ -66,7 +62,7 @@ static const uint8_t CRC8_LookupTable[256][256] = {
 
     footer = """};
 
-#endif /* CRC8LOOKUPTABLE_H_ */
+#endif /* CRC8_LOOKUPTABLE_H_ */
 """
 
     with open(out_path, 'w') as outfile:
@@ -85,6 +81,8 @@ static const uint8_t CRC8_LookupTable[256][256] = {
         outfile.write( footer )
         
     print "table written to:", out_path
+    
+    return 0
 
 
 if __name__ == '__main__':

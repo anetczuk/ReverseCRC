@@ -36,7 +36,7 @@ class PolysSolver(Reverse):
     def execute( self, inputParams, outputFile ):
         data = inputParams.data
 
-        retList = self.findPolysInput( data, self.minSearchData )
+        retList = self.findPolys( data, self.minSearchData )
         if len(retList) < 1:
             print "\nNo keys discovered"
             return
@@ -49,7 +49,7 @@ class PolysSolver(Reverse):
         write_results( retList, dataSize, outputFile )
 
     # return Counter[ PolyKey ]
-    def findPolysInput(self, inputData, searchRange = 0):
+    def findPolys(self, inputData, searchRange = 0):
         if inputData.empty():
             return []
         if inputData.ready() == False:

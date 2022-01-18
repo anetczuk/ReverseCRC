@@ -61,7 +61,7 @@ class BruteForcePairsSolverBaseTest(object):
         dataList.append( (data2, crc2) )
 
         dInput = InputData(dataList, dataSize, crcSize)
-        foundCRC = self.crcFinder.bruteForcePairsInput(dInput, 0)
+        foundCRC = self.crcFinder.bruteForcePairs(dInput, 0)
 
 #         print "found data:", foundCRC
         self.assertIn( CRCKey(inputPoly, regInit, xorOut, 0, dataSize, rev=reverse ), foundCRC )
@@ -89,7 +89,7 @@ class BruteForcePairsSolverBaseTest(object):
         dataList.append( (data2, crc2) )
 
         dInput = InputData(dataList, dataSize, crcSize)
-        foundCRC = self.crcFinder.bruteForcePairsInput(dInput, 0)
+        foundCRC = self.crcFinder.bruteForcePairs(dInput, 0)
 
 #         print "found data:", foundCRC
         self.assertIn( CRCKey(inputPoly, regInit, xorOut, 0, dataSize, rev=reverse ), foundCRC )
@@ -117,7 +117,7 @@ class BruteForcePairsSolverBaseTest(object):
         dataList.append( (data2, crc2) )
 
         dInput = InputData(dataList, dataSize, crcSize)
-        foundCRC = self.crcFinder.bruteForcePairsInput(dInput, 0)
+        foundCRC = self.crcFinder.bruteForcePairs(dInput, 0)
 
 #         print "found data:", foundCRC
         self.assertIn( CRCKey( inputPoly, regInit, xorOut, 0, dataSize, rev=reverse ), foundCRC )
@@ -145,7 +145,7 @@ class BruteForcePairsSolverBaseTest(object):
         dataList.append( (data2, crc2) )
 
         dInput = InputData(dataList, dataSize, crcSize)
-        foundCRC = self.crcFinder.bruteForcePairsInput(dInput, 0)
+        foundCRC = self.crcFinder.bruteForcePairs(dInput, 0)
 
 #         print "found data:", foundCRC
         self.assertIn( CRCKey(inputPoly, regInit, xorOut, 0, dataSize, rev=reverse ), foundCRC )

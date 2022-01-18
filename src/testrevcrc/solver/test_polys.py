@@ -209,7 +209,7 @@ class PolysSolverBaseTest(object):
 #         print "polys:", "[{}]".format( ", ".join("0x{:X}".format(x) for x in polyList) )
         self.assertTrue( PolyKey(inputPoly, 0, dataSize, rev=False) in polyList )
 
-    def test_findPolysInput_poly(self):
+    def test_findPolys_poly(self):
         dataList = []
         dataSize = 16
         crcSize = 16
@@ -232,31 +232,31 @@ class PolysSolverBaseTest(object):
         dataList.append( (data2, crc2) )
 
         inputData = InputData(dataList, dataSize, crcSize)
-        foundCRC = self.crcFinder.findPolysInput(inputData, 0)
+        foundCRC = self.crcFinder.findPolys(inputData, 0)
 
 #         print "found data:", foundCRC
         self.assertIn( PolyKey(inputPoly, 0, dataSize, rev=reverse ), foundCRC )
 
-    def test_findPolysInput(self):
+    def test_findPolys(self):
         dataList = []
         dataList.append( ("71FB2EE1", "BE0D") )
         dataList.append( ("D5C0A73B", "D9B4") )
 
         inputData = InputData()
         inputData.convert( dataList )
-        foundCRC = self.crcFinder.findPolysInput(inputData, 0)
+        foundCRC = self.crcFinder.findPolys(inputData, 0)
 
 #         print "found data:", foundCRC
         self.assertIn( PolyKey(0x18005, 0, 32, rev=False ), foundCRC )
 
-    def test_findPolysInput_preamble(self):
+    def test_findPolys_preamble(self):
         dataList = []
         dataList.append( ("CC71FB2EE1", "BE0D") )
         dataList.append( ("FFD5C0A73B", "D9B4") )
 
         inputData = InputData()
         inputData.convert( dataList )
-        foundCRC = self.crcFinder.findPolysInput(inputData, 8)
+        foundCRC = self.crcFinder.findPolys(inputData, 8)
 
 #         print "found data:", foundCRC
         self.assertIn( PolyKey(0x18005, 0, 32, rev=False ), foundCRC )

@@ -37,7 +37,7 @@ class BruteForceSolver(Reverse):
 
     ## inputParams -- InputParams
     def execute( self, inputParams, outputFile ):
-        retList = self.bruteForceStandardInput( inputParams, self.minSearchData )
+        retList = self.bruteForce( inputParams, self.minSearchData )
         if len(retList) < 1:
             print "\nNo keys discovered"
             return
@@ -51,7 +51,7 @@ class BruteForceSolver(Reverse):
         write_results( retList, dataSize, outputFile )
 
     ## inputParams -- InputParams
-    def bruteForceStandardInput(self, inputParams, searchRange = 0):
+    def bruteForce(self, inputParams, searchRange = 0):
         inputData = inputParams.data    # InputData
         
         crcSize = inputParams.getCRCSize()

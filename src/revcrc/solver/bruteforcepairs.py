@@ -41,7 +41,7 @@ class BruteForcePairsSolver(Reverse):
     def execute( self, inputParams, outputFile ):
         data = inputParams.data
         
-        retList = self.bruteForcePairsInput( data, self.minSearchData )
+        retList = self.bruteForcePairs( data, self.minSearchData )
         if len(retList) < 1:
             print "\nNo keys discovered"
             return
@@ -54,7 +54,7 @@ class BruteForcePairsSolver(Reverse):
         write_results( retList, dataSize, outputFile )
 
     # return Counter[ CRCKey ]
-    def bruteForcePairsInput(self, inputData, searchRange = 0):
+    def bruteForcePairs(self, inputData, searchRange = 0):
         if inputData.empty():
             return []
         if inputData.ready() == False:

@@ -145,6 +145,64 @@ class InputMaskList():
 ## ======================================================================
 
 
+class InputParams(object):
+    
+    def __init__(self):
+        self.data = None        # InputData
+        self.crcSize = None     # int, number of bits
+        self.poly = None        # int
+        self.initReg = None        # int
+        self.xorVal  = None        # int
+        self.reverseOrder = None        # bool
+        self.reflectBits  = None        # bool
+
+    def getCRCSize(self):
+        ## CRC size is determined in following order:
+        ## 1. from 'self.crcSize' field set directly
+        ## 2. from 'self.poly' passed directly
+        ## 3. from data CRC set in input file
+        crcSize = None
+        if crcSize is None:
+            crcSize = self.crcSize
+        if crcSize is None and self.poly is not None:
+            polyKey = PolyKey( self.poly )
+            crcSize = polyKey.size()
+        if crcSize is None:
+            crcSize = self.data.crcSize
+        
+        return crcSize
+
+    def getPolySearchRange(self):
+        return self._getSearchRange( self.poly )
+
+    def getInitRegSearchRange(self):
+        return self._getSearchRange( self.initReg )
+
+    def getXorValSearchRange(self):
+        return self._getSearchRange( self.xorVal )
+
+    def _getSearchRange(self, value):
+        if value is None:
+            crc_size   = self.getCRCSize()
+            range_size = 2 ** crc_size
+            valListStart = 0
+            valListStop  = range_size - 1
+            return ( valListStart, valListStop )
+        else:
+            valListStart = value
+            valListStop  = valListStart
+            return ( valListStart, valListStop )
+
+    def getReverseOrder(self):
+        return False if self.reverseOrder is None else self.reverseOrder
+
+    def getReflectBits(self):
+        return False if self.reflectBits is None else self.reflectBits
+
+
+## ======================================================================
+
+
 class Reverse(object):
     '''
     Base class for reverse algorithms
@@ -191,8 +249,8 @@ class Reverse(object):
         self.minSearchData = value
 
     ## abstract method
-    ## data -- InputData
-    def execute( self, data, outputFile ):
+    ## inputParams -- InputParams
+    def execute( self, inputParams, outputFile ):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
 
     # ========================================================

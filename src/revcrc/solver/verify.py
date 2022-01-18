@@ -42,23 +42,13 @@ class VerifySolver(Reverse):
     def __init__(self, crcProcessor, printProgress = None):
         Reverse.__init__(self, crcProcessor, printProgress)
 
-    ## data -- InputData
-    def execute( self, data, outputFile ):
-        print "input args, poly: %s init: %s, xor: %s crcsize: %s" % ( self.poly, self.initVal, self.xorVal, self.crcSize )
+    ## inputParams -- InputParams
+    def execute( self, inputParams, outputFile ):
+        data = inputParams.data
+        
+        print "input args, poly: %s init: %s, xor: %s crcsize: %s" % ( inputParams.poly, inputParams.initReg, inputParams.xorVal, inputParams.crcSize )
 
-        ## CRC size is determined in following order:
-        ## 1. from 'self.crcSize' field set directly
-        ## 2. from 'self.poly' passed directly
-        ## 3. from data CRC set in input file
-        crcSize = None
-        if crcSize is None:
-            crcSize = self.crcSize
-        if crcSize is None and self.poly is not None:
-            polyKey = PolyKey( self.poly )
-            crcSize = polyKey.size()
-        if crcSize is None:
-            crcSize = data.crcSize
-
+        crcSize = inputParams.getCRCSize()
         if crcSize is None:
             print "\nUnable to determine CRC size: pass poly or crcsize as cmd argument"
             return
@@ -72,45 +62,33 @@ class VerifySolver(Reverse):
             print "invalid case -- no data"
             return False
         
-        reverseOrder = False if self.reverseOrder is None else self.reverseOrder
+        print "crc size: %s" % crcSize
+        
+        reverseOrder = inputParams.getReverseOrder()
         if reverseOrder:
             inputMasks.reverseOrder()
           
-        reflectBits = False if self.reflectBits is None else self.reflectBits
+        reflectBits = inputParams.getReflectBits()
         if reflectBits:
             inputMasks.reflectBits()
             
         ## List[ (NumberMask, NumberMask) ]
         inputList = inputMasks.getInputMasks()
-
-        rangeSize = 2 ** crcSize
         
-        polyListStart = 0
-        polyListStop  = rangeSize
-        if self.poly is not None:
-            polyListStart = self.poly
-            polyListStop  = polyListStart + 1
-        polyListSize  = polyListStop - polyListStart
+        polyListStart, polyListStop = inputParams.getPolySearchRange()
+        polyListSize = polyListStop - polyListStart + 1
         
-        initListStart = 0
-        initListStop  = rangeSize - 1
-        if self.initVal is not None:
-            initListStart = self.initVal
-            initListStop  = initListStart
+        initListStart, initListStop = inputParams.getInitRegSearchRange()
         initListSize  = initListStop - initListStart + 1
         
-        xorListStart = 0
-        xorListStop  = rangeSize - 1
-        if self.xorVal is not None:
-            xorListStart = self.xorVal
-            xorListStop  = xorListStart
+        xorListStart, xorListStop = inputParams.getXorValSearchRange()
         xorListSize  = xorListStop - xorListStart + 1
 
         subSpaceSize = initListSize * xorListSize
-        spaceSize = polyListSize * subSpaceSize
+        spaceSize    = polyListSize * subSpaceSize
         print "search space size:", spaceSize, polyListSize, initListSize, xorListSize
         
-        print "poly search range: %s %s" % ( polyListStart, polyListStop-1 )
+        print "poly search range: %s %s" % ( polyListStart, polyListStop )
         print "init search range: %s %s" % ( initListStart, initListStop )
         print " xor search range: %s %s" % ( xorListStart, xorListStop )
         
@@ -118,10 +96,10 @@ class VerifySolver(Reverse):
 
         crc_operator = self.crcProc.createOperator( crcSize, inputList )
 
-        matchesAll = False
-        polyMask   = NumberMask( 0, crcSize )
+        foundResults = False
+        polyMask     = NumberMask( 0, crcSize )
         
-        for polyNum in xrange(polyListStart, polyListStop):
+        for polyNum in xrange(polyListStart, polyListStop + 1):
             polyMask.setNumber( polyNum )
 
             spaceCounter += subSpaceSize
@@ -132,13 +110,13 @@ class VerifySolver(Reverse):
             crc_found = crc_operator.verifyRange( polyMask, initListStart, initListStop, xorListStart, xorListStop )
             
             if crc_found:
-                matchesAll = True
+                foundResults = True
                 for item in crc_found:
                     initReg = item[0]
                     xorVal  = item[1]
                     flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyMask.dataNum, initReg, xorVal ) )
         
-        if matchesAll:
+        if foundResults:
             print "\nFound poly matching all data"
         else:
             print "\nNo matching polys found"

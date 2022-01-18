@@ -33,7 +33,10 @@ class BruteForceSolver(Reverse):
     def __init__(self, crcProcessor, printProgress = None):
         Reverse.__init__(self, crcProcessor, printProgress)
 
-    def execute( self, data, outputFile ):
+    ## inputParams -- InputParams
+    def execute( self, inputParams, outputFile ):
+        data = inputParams.data
+        
         retList = self.bruteForceStandardInput( data, self.minSearchData )
         if len(retList) < 1:
             print "\nNo keys discovered"

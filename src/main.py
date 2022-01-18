@@ -40,6 +40,7 @@ from revcrc.solver.bruteforcepairs import BruteForcePairsSolver
 from revcrc.solver.polys import PolysSolver
 from revcrc.solver.common import CommonSolver
 from revcrc.solver.verify import VerifySolver
+from revcrc.solver.reverse import InputParams
 
 
 def create_processor( algorithm ):
@@ -172,7 +173,16 @@ def main():
         solver.setReverseMode( args.reverse_order, args.reflect_bits )
         solver.setMinSearchData( minSearchData )
 
-        solver.execute( data, outfile )
+        inputParams = InputParams()
+        inputParams.data = data
+        inputParams.crcSize = crcSize
+        inputParams.poly = poly
+        inputParams.initReg = initReg
+        inputParams.xorVal  = xorVal
+        inputParams.reverseOrder = args.reverse_order
+        inputParams.reflectBits  = args.reflect_bits
+
+        solver.execute( inputParams, outfile )
 
         timeDiff = (time.time()-starttime)
         print "Calculation time: {:13.8f}s".format(timeDiff)

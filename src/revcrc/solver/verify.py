@@ -22,10 +22,11 @@
 #
 
 from crc.numbermask import NumberMask
-from crc.crcproc import PolyKey
+from crc.crcproc import PolyKey, CRCKey
 from revcrc.solver.reverse import Reverse,\
-    InputMaskList
+    InputMaskList, print_results, write_results
 from crc.flush import flush_percent, flush_string
+from collections import Counter
 
 
 # class VerifyCRCCollector( CRCCollector ):
@@ -44,32 +45,29 @@ class VerifySolver(Reverse):
 
     ## inputParams -- InputParams
     def execute( self, inputParams, outputFile ):
-        data = inputParams.data
+        inputData = inputParams.data
         
-        print "input args, poly: %s init: %s, xor: %s crcsize: %s" % ( inputParams.poly, inputParams.initReg, inputParams.xorVal, inputParams.crcSize )
-
         crcSize = inputParams.getCRCSize()
         if crcSize is None:
             print "\nUnable to determine CRC size: pass poly or crcsize as cmd argument"
             return
         
-        if data.crcSize != crcSize:
+        if inputData.crcSize != crcSize:
             ## deduced CRC size differs from input crc
-            raise ValueError( "inconsistent crc size [%s] with input data crc[%s]" % ( crcSize, data.crcSize ) )
+            raise ValueError( "inconsistent crc size [%s] with input data crc[%s]" % ( crcSize, inputData.crcSize ) )
 
-        inputMasks = InputMaskList( data )
+        inputMasks = InputMaskList( inputData )
         if inputMasks.empty():
             print "invalid case -- no data"
             return False
         
         print "crc size: %s" % crcSize
         
-        reverseOrder = inputParams.getReverseOrder()
-        if reverseOrder:
+        revOrd = inputParams.isReverseOrder()
+        if revOrd:
             inputMasks.reverseOrder()
-          
-        reflectBits = inputParams.getReflectBits()
-        if reflectBits:
+        refBits = inputParams.isReflectBits()
+        if refBits:
             inputMasks.reflectBits()
             
         ## List[ (NumberMask, NumberMask) ]
@@ -96,8 +94,9 @@ class VerifySolver(Reverse):
 
         crc_operator = self.crcProc.createOperator( crcSize, inputList )
 
-        foundResults = False
         polyMask     = NumberMask( 0, crcSize )
+        
+        results = Counter()
         
         for polyNum in xrange(polyListStart, polyListStop + 1):
             polyMask.setNumber( polyNum )
@@ -110,20 +109,14 @@ class VerifySolver(Reverse):
             crc_found = crc_operator.verifyRange( polyMask, initListStart, initListStop, xorListStart, xorListStop )
             
             if crc_found:
-                foundResults = True
                 for item in crc_found:
                     initReg = item[0]
                     xorVal  = item[1]
-                    flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyMask.dataNum, initReg, xorVal ) )
+#                     flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyMask.dataNum, initReg, xorVal ) )
+                    key = CRCKey( polyMask.dataNum, initReg, xorVal, 0, inputData.dataSize, revOrd=revOrd, refBits=refBits )
+                    results[ key ] += 1
         
-        if foundResults:
-            print "\nFound poly matching all data"
-        else:
-            print "\nNo matching polys found"
+        print "\n\nFound total results: ", len(results)
+        print_results( results, 1 )
 
-#     def createCRCProcessor(self):
-#         raise NotImplementedError
-#
-# #     def createBackwardCRCProcessor(self, dataMask, crc):
-# #         return HwCRCBackward( dataMask, crc )
-
+        write_results( results, 1, outputFile )

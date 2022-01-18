@@ -63,6 +63,13 @@ uint8_t hw_crc8_calculate( const uint8_t* data_buffer, const size_t data_size, c
     uint8_t reg = init_reg;
     for ( size_t i = 0; i < data_size; ++i ) {
         reg ^= data_buffer[i];                      /// xor
+        
+        if ( (reg & 0xFF) == 0 ) {
+            /// there will be no xor-ring with poly -- just shift
+            reg <<= 8;
+            continue ;
+        }
+        
         for ( uint8_t j = 0; j < 8; ++j ) {
             if ( (reg & 0x80) != 0 ) {
                 reg = (reg << 1) ^ polynomial;

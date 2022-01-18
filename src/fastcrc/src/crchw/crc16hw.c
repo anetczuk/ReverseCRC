@@ -60,6 +60,13 @@ uint16_t hw_crc16_calculate( const uint8_t* data_buffer, const size_t data_size,
     uint16_t reg = init_reg;
     for ( size_t i = 0; i < data_size; ++i ) {
         reg ^= data_buffer[i] << 8;                      /// xor into MSB
+        
+        if ( (reg & 0xFF00) == 0 ) {
+            /// there will be no xor-ring with poly -- just shift
+            reg <<= 8;
+            continue ;
+        }
+        
         for ( uint8_t j = 0; j < 8; ++j ) {
             if ( (reg & 0x8000) != 0 ) {
                 reg = (reg << 1) ^ polynomial;

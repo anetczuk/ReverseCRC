@@ -5,6 +5,7 @@
 
 #include <stddef.h>                             /// NULL, size_t
 #include <stdint.h>                             /// int types
+#include <stdbool.h>                            /// bool
 
 
 // typedef unsigned char uint8_t;
@@ -51,6 +52,12 @@ CRC8Result* CRC8ResultArray_get( CRC8ResultArray* array, const size_t index );
  */
 /// 'data_buffer' -- container for data -- first dataframe bit is in MSB of buffer first item
 uint8_t hw_crc8_calculate( const uint8_t* data_buffer, const size_t data_size, const uint8_t polynomial, const uint8_t init_reg, const uint8_t xor_val );
+
+
+uint8_t hw_crc8_calculate_param( const uint8_t* data_buffer, const size_t data_size, 
+                                 const uint8_t polynomial, const uint8_t init_reg, const uint8_t xor_val,
+                                 const bool reverse_order_flag, const bool reflect_bits_flag );
+
 
 CRC8ResultArray* hw_crc8_calculate_range( const uint8_t* data_buffer, const size_t data_size, const uint8_t data_crc, 
                                           const uint8_t polynomial, 

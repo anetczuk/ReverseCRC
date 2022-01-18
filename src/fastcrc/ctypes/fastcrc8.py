@@ -60,6 +60,14 @@ def hw_crc8_calculate( bytesList, poly, intReg, xorVal ):
     return c_fastcrc.hw_crc8_calculate( arr, arr_len, poly, intReg, xorVal )
 
 
+c_fastcrc.hw_crc8_calculate_param.restype = ctypes.c_uint8
+def hw_crc8_calculate_param( bytesList, poly, intReg, xorVal, reverseOrder, reflectBits ):
+    arr_len  = len(bytesList)
+    arr_type = ctypes.c_uint8 * arr_len
+    arr      = arr_type( *bytesList )
+    return c_fastcrc.hw_crc8_calculate_param( arr, arr_len, poly, intReg, xorVal, reverseOrder, reflectBits )
+
+
 c_fastcrc.hw_crc8_calculate_range.argtypes = [ ctypes.POINTER( ctypes.c_uint8 ), ctypes.c_size_t, ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint8 ]
 c_fastcrc.hw_crc8_calculate_range.restype = ctypes.POINTER( CRC8ResultArray )
 def hw_crc8_calculate_range( bytes_list, dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd ):

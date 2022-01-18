@@ -24,8 +24,10 @@
 
 import unittest
 
-from fastcrc.ctypes.fastcrc8 import hw_crc8_calculate, hw_crc8_calculate_range
-from fastcrc.ctypes.utils import convert_to_msb_list, convert_to_lsb_list
+from fastcrc.ctypes.fastcrc8 import hw_crc8_calculate, hw_crc8_calculate_range,\
+    hw_crc8_calculate_param
+from fastcrc.ctypes.utils import convert_to_msb_list, convert_to_lsb_list,\
+    reflect_bits_list
 from crc.numbermask import reverse_number
 
 
@@ -92,6 +94,49 @@ class FastCRC8Test(unittest.TestCase):
         calc_crc = reverse_number( calc_crc, 8 )
         
         self.assertEqual( calc_crc, 0x50 )                         ## 80
+
+    def test_hw_crc8_calculate_param_reverse(self):
+        data     = 0x030201
+        dataSize = 24
+        poly     = 0x1BF
+        
+        msb_bytes_list = convert_to_msb_list( data, dataSize / 8 )
+        param_crc = hw_crc8_calculate_param( msb_bytes_list, poly, 0x00, 0x00, True, False )
+        self.assertEqual( param_crc, 68 )
+        
+        ## check relation
+        msb_bytes_list.reverse()
+        calc_crc = hw_crc8_calculate( msb_bytes_list, poly, 0x00, 0x00 )
+        self.assertEqual( param_crc, calc_crc )
+
+    def test_hw_crc8_calculate_param_reflect(self):
+        data     = 0x030201
+        dataSize = 24
+        poly     = 0x1BF
+        
+        msb_bytes_list = convert_to_msb_list( data, dataSize / 8 )
+        param_crc = hw_crc8_calculate_param( msb_bytes_list, poly, 0x00, 0x00, False, True )
+        self.assertEqual( param_crc, 119 )
+        
+        ## check relation
+        reflect_bits_list( msb_bytes_list )
+        calc_crc = hw_crc8_calculate( msb_bytes_list, poly, 0x00, 0x00 )
+        self.assertEqual( param_crc, calc_crc )
+
+    def test_hw_crc16_calculate_param_rr(self):
+        data     = 0x030201
+        dataSize = 24
+        poly     = 0x1BF
+        
+        msb_bytes_list = convert_to_msb_list( data, dataSize / 8 )
+        param_crc = hw_crc8_calculate_param( msb_bytes_list, poly, 0x00, 0x00, True, True )
+        self.assertEqual( param_crc, 187 )
+        
+        ## check relation
+        msb_bytes_list.reverse()
+        reflect_bits_list( msb_bytes_list )
+        calc_crc = hw_crc8_calculate( msb_bytes_list, poly, 0x00, 0x00 )
+        self.assertEqual( param_crc, calc_crc )
 
     def test_hw_crc8_calculate_range(self):
         bytes_list = [ 0xFF, 0xFF, 0xFF, 0xFF ]

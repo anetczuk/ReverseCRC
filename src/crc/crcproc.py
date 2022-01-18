@@ -209,7 +209,10 @@ class CRCProc(object):
 
     ## inputData: List[ (NumberMask, NumberMask) ]
     def createOperator(self, crcSize, inputData):
-        print( "creating StandardCRCOperator" )
+        return self.createStandardOperator( crcSize, inputData )
+
+    def createStandardOperator(self, crcSize, inputData):
+#         print( "creating StandardCRCOperator" )
         return StandardCRCOperator( self, inputData )
 
 
@@ -326,34 +329,44 @@ class StandardCRCOperator( CRCOperator ):
 
     ## return CRC if matches for all data
     def verifyRange(self, polyMask, intRegStart, intRegEnd, xorStart, xorEnd):
-        results = ResultContainer()
+        if not self.data:
+            return []
+
+        ## first item -- standard iteration
+        item = self.data[0]
+        dataMask = item[0]
+        crcMask  = item[1]
+
+        crc_match = []
+        for self.processor.registerInit in xrange(intRegStart, intRegEnd + 1):
+            for self.processor.xorOut in xrange(xorStart, xorEnd + 1):
+                crc = self.processor.calculate3( dataMask, polyMask )
+                if crc == crcMask.dataNum:
+                    crc_match.append( ( self.processor.registerInit, self.processor.xorOut ) )
+        results = crc_match
+        if not results:
+            ## no common result found -- return
+            return []
         
-        for item in self.data:
+        ##
+        ## iterate over rest elements
+        ##
+        for item in self.data[1:]:
             dataMask = item[0]
             crcMask  = item[1]
 
-            if not results.data:
-                ## no results from previous data item -- standard iteration
-                crc_match = []
-                for self.processor.registerInit in xrange(intRegStart, intRegEnd + 1):
-                    for self.processor.xorOut in xrange(xorStart, xorEnd + 1):
-                        crc = self.processor.calculate3( dataMask, polyMask )
-                        if crc == crcMask.dataNum:
-                            crc_match.append( ( self.processor.registerInit, self.processor.xorOut ) )
-                if results.intersect( crc_match ) is False:
-                    ## no common result found -- return
-                    return []
-                
-            else:
-                ## results from previous data item -- reuse
-                crc_match = []
-                for item in results.data:
-                    self.processor.registerInit = item[0]
-                    self.processor.xorOut       = item[1]
-                    crc = self.processor.calculate3( dataMask, polyMask )
-                    if crc == crcMask.dataNum:
-                        crc_match.append( ( self.processor.registerInit, self.processor.xorOut ) )                
-                if results.intersect( crc_match ) is False:
-                    return []
+            ## results from previous data item -- reuse
+            crc_match = []
+            for item in results:
+                self.processor.registerInit = item[0]
+                self.processor.xorOut       = item[1]
+                crc = self.processor.calculate3( dataMask, polyMask )
+                if crc == crcMask.dataNum:
+                    crc_match.append( ( self.processor.registerInit, self.processor.xorOut ) )  
+                                  
+            results = crc_match
+            if not results:
+                ## no common result found -- return
+                return []
 
-        return results.data
+        return results

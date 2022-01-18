@@ -76,105 +76,92 @@ class BruteForcePairsSolver(Reverse):
             numberPair1 = combPair[0]
             numberPair2 = combPair[1]
 
-            keys = self.findBruteForcePairs(numberPair1, numberPair2, inputData.dataSize, inputData.crcSize, searchRange)
+            data1 = numberPair1[0]
+            crc1  = numberPair1[1]
+            data2 = numberPair2[0]
+            crc2  = numberPair2[1]
+            
+            dataSize = inputData.dataSize
+            crcSize  = inputData.crcSize
+    
+            self.crcProc.setXorOutValue( 0x0 )          ## it OK, XOR method eliminates ('xor value' set to 0x0)
+    
+            # List[ PolyKey ]
+#             print "looking for potential polys:", data1, crc1, data2, crc2, dataSize, crcSize, self.crcProc.registerInit, self.crcProc.xorOut 
+            keyList = self.findPolysXOR(data1, crc1, data2, crc2, dataSize, crcSize, searchRange)
+    
+            if (self.progress):
+                print "Found {} potential polynomials to check".format( len(keyList) )
+    
+            ## finding xor value
+    
+            dataCrc1 = MessageCRC(data1, dataSize, crc1, crcSize)
+            dataCrc2 = MessageCRC(data2, dataSize, crc2, crcSize)
+    
+            keys = []
+            for key in keyList:
+                paramsList = self.findBruteForceParams(dataCrc1, dataCrc2, key)
+                
+                if len(paramsList) < 1:
+                    continue
+                #if self.progress:
+                #    sys.stdout.write("\r")
+                #    print "Found keys: {}".format( paramsList )
+                keys += paramsList
 
             if (self.progress):
                 print "Found keys:", len( keys )
 
             retList += keys
+            
+            #TODO: what is initReg and xorVal for self.crcProc???
+            self.crcProc.setRegisterInitValue( 0xFF )
+
 
         return Counter( retList )
 
-    # return List[ CRCKey ]
-    def findBruteForcePairs(self, dataCrcPair1, dataCrcPair2, dataSize, crcSize, searchRange = 0):
-        data1 = dataCrcPair1[0]
-        crc1  = dataCrcPair1[1]
-        data2 = dataCrcPair2[0]
-        crc2  = dataCrcPair2[1]
-
-        keyList = self.findPolysXOR(data1, crc1, data2, crc2, dataSize, crcSize, searchRange)
-
-        if (self.progress):
-            print "Found {} potential polynomials to check".format( len(keyList) )
-
-        ## finding xor value
-
-        dataCrc1 = MessageCRC(data1, dataSize, crc1, crcSize)
-        dataCrc2 = MessageCRC(data2, dataSize, crc2, crcSize)
-
-        retList = []
-        for key in keyList:
-            paramsList = self.findBruteForceParams(dataCrc1, dataCrc2, key)
-            if len(paramsList) < 1:
-                continue
-            #if self.progress:
-            #    sys.stdout.write("\r")
-            #    print "Found keys: {}".format( paramsList )
-            retList += paramsList
-        return retList
-
+    # dataCrc1 -- MessageCRC
+    # dataCrc2 -- MessageCRC
+    # polyKey -- PolyKey
     # return List[ CRCKey ]
     def findBruteForceParams(self, dataCrc1, dataCrc2, polyKey):
         self.crcProc.setReversed( polyKey.isReversedFully() )     # PolyKey
 
         crcSize = dataCrc1.crcSize
-
-        paramMax = (0x1 << crcSize) - 1
+              
+        polyMask = NumberMask(polyKey.poly, crcSize)
+        
+        dataMask1 = dataCrc1.dataMask()
+        dataMask2 = dataCrc2.dataMask()
+        
+        paramMax = (0x1 << crcSize) - 1         # 0xFFFF
 
         polyList = []
-
+  
+        initValStart = 0
+        initValEnd   = paramMax
         if self.initVal is not None:
-            ## use init value passed by argument
-            if self.progress:
-                flush_number( self.initVal, crcSize )
-            polyList += self._checkXORB( dataCrc1, dataCrc2, polyKey, crcSize, self.initVal, paramMax )
-        else:
-            ## search for init value
-            initVal = -1
-            while initVal < paramMax:
-                initVal += 1
-                if self.progress:
-                    flush_number( initVal, crcSize )
-                keysList = self._checkXORB( dataCrc1, dataCrc2, polyKey, crcSize, initVal, paramMax )
-                polyList.extend( keysList )
+            initValStart = self.initVal
+            initValEnd   = initValStart
+ 
+        crcMask1  = dataCrc1.crcMask()
+        crcMask2  = dataCrc2.crcMask()
+ 
+        inputData = [ (dataMask1, crcMask1), (dataMask2, crcMask2) ]
+        crc_operator = self.crcProc.createOperator( crcSize, inputData )
+            
+        crc_found = crc_operator.verifyRange( polyMask, initValStart, initValEnd, 0, paramMax )
+        
+        for item in crc_found:
+            initReg = item[0]
+            xorVal  = item[1]
+#             print  "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyMask.dataNum, initReg, xorVal )
+            newKey = CRCKey( polyKey.poly, initReg, xorVal, polyKey.dataPos, polyKey.dataLen, revOrd=polyKey.revOrd, refBits=polyKey.refBits )
+            polyList.append( newKey )
 
         if self.progress:
             sys.stdout.write("\r")
             sys.stdout.flush()
-        return polyList
-
-    # return List[ CRCKey ]
-    def _checkXORB(self, dataCrc1, dataCrc2, polyKey, crcSize, initVal, paramMax ):
-        polyList = []
-
-        polyMask = NumberMask(polyKey.poly, crcSize)
-
-        dataMask1 = dataCrc1.dataMask()
-        dataMask2 = dataCrc2.dataMask()
-        crc1 = dataCrc1.crcNum
-        crc2 = dataCrc2.crcNum
-
-        self.crcProc.setRegisterInitValue( initVal )
-
-        xorVal = -1
-        while xorVal < paramMax:
-            xorVal += 1
-
-            self.crcProc.setXorOutValue( xorVal )
-
-            polyCRC = self.crcProc.calculate3(dataMask1, polyMask)
-            if polyCRC != crc1:
-                continue
-            polyCRC = self.crcProc.calculate3(dataMask2, polyMask)
-            if polyCRC != crc2:
-                continue
-
-            newKey = CRCKey( polyKey.poly, initVal, xorVal, polyKey.dataPos, polyKey.dataLen, revOrd=polyKey.revOrd, refBits=polyKey.refBits )
-
-            #if self.progress:
-            #    sys.stdout.write("\r")
-            #    print "Found key: {}".format(newKey)
-
-            polyList.append( newKey )
 
         return polyList
+

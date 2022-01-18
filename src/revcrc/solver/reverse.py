@@ -27,6 +27,7 @@ from collections import Counter
 
 from crc.numbermask import NumberMask
 from crc.crcproc import CRCKey, PolyKey
+from crc.flush import flush_string
 
 
 ## ======================================================================
@@ -66,7 +67,7 @@ def print_results_to( stream, retList, inputSize ):
 
     popular = get_popular( mostCommon, inputSize )
     if len(popular) < 1:
-        stream.write( "\n\nNO MATCHING KEYS FOUND\n\n" )
+        stream.write( "\nNO MATCHING KEYS FOUND\n" )
         return
 
     stream.write( "\n\nFOUND MATCHING KEYS[{:}]:\n\n".format( len(popular) ) )
@@ -271,6 +272,7 @@ class Reverse(object):
         xorCRC = crc1 ^ crc2
         if self.progress:
             print "Checking {:X} {:X} xor {:X} {:X} = {:X} {:X}, {} {}".format(data1, crc1, data2, crc2, xorData, xorCRC, dataSize, crcSize)
+
         xorMask = NumberMask(xorData, dataSize)
         crcMask = NumberMask(xorCRC, crcSize)
 
@@ -284,20 +286,21 @@ class Reverse(object):
 #             print "Checking subnumber {}".format(sub)
             if self.progress:
                 #print "Checking substring {:X}".format(sub.dataNum)
-                sys.stdout.write( "\r{}/{} checking substring {}\n".format(ind, listLen, sub) )
-                sys.stdout.flush()
+                flush_string( "{}/{} checking substring {}\n".format(ind, listLen, sub) )
 
-            dataMask = sub.toNumberMask()
+            subMask = sub.toNumberMask()
+
+            #TODO: what is initReg and xorVal for self.crcProc???
 
             crcList = []
-            crcList += self.findBruteForcePoly(dataMask, crcMask, False)
-            crcList += self.findBruteForcePoly(dataMask, crcMask, True)
+            crcList += self.findBruteForcePoly(subMask, crcMask, False)
+            crcList += self.findBruteForcePoly(subMask, crcMask, True)
 
-            polyList = []
+            polyList = []           # List[ PolyKey ]
             for item in crcList:
                 polyList.append( item.getPolyKey() )
 
-            polyList += self.findBruteForcePolyReverse(dataMask, crcMask)
+            polyList += self.findBruteForcePolyReverse(subMask, crcMask)
 
             if len(polyList) < 1:
                 continue
@@ -337,7 +340,7 @@ class Reverse(object):
 
                 polyValue = poly | polyMax
                 polyInit = self.crcProc.registerInit
-                polyXor = self.crcProc.xorOut
+                polyXor  = self.crcProc.xorOut
                 retList.append( CRCKey(polyValue, polyInit, polyXor, 0, dataMask.dataSize, rev=reverseMode) )
 #                 retList.append( PolyKey(polyValue, 0, dataMask.dataSize, rev=reverseMode) )
 

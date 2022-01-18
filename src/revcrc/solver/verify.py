@@ -108,13 +108,12 @@ class VerifySolver(Reverse):
             
             crc_found = crc_operator.verifyRange( polyMask, initListStart, initListStop, xorListStart, xorListStop )
             
-            if crc_found:
-                for item in crc_found:
-                    initReg = item[0]
-                    xorVal  = item[1]
+            for item in crc_found:
+                initReg = item[0]
+                xorVal  = item[1]
 #                     flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyMask.dataNum, initReg, xorVal ) )
-                    key = CRCKey( polyMask.dataNum, initReg, xorVal, 0, inputData.dataSize, revOrd=revOrd, refBits=refBits )
-                    results[ key ] += 1
+                key = CRCKey( polyMask.dataNum, initReg, xorVal, 0, inputData.dataSize, revOrd=revOrd, refBits=refBits )
+                results[ key ] += 1
         
         print "\n\nFound total results: ", len(results)
         print_results( results, 1 )

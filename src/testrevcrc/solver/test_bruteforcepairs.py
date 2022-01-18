@@ -120,7 +120,7 @@ class BruteForcePairsSolverBaseTest(object):
         foundCRC = self.crcFinder.bruteForcePairsInput(dInput, 0)
 
 #         print "found data:", foundCRC
-        self.assertIn( CRCKey(inputPoly, regInit, xorOut, 0, dataSize, rev=reverse ), foundCRC )
+        self.assertIn( CRCKey( inputPoly, regInit, xorOut, 0, dataSize, rev=reverse ), foundCRC )
 
     def test_bruteForceInput_init(self):
         dataList = []

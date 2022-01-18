@@ -328,8 +328,8 @@ class Reverse(object):
                 polyValue = poly | polyMax
                 polyInit = self.crcProc.registerInit
                 polyXor = self.crcProc.xorOut
-                retList.append( CRCKey(polyValue, reverseMode, polyInit, polyXor, 0, dataMask.dataSize) )
-#                 retList.append( PolyKey(polyValue, reverseMode, 0, dataMask.dataSize) )
+                retList.append( CRCKey(polyValue, polyInit, polyXor, 0, dataMask.dataSize, rev=reverseMode) )
+#                 retList.append( PolyKey(polyValue, 0, dataMask.dataSize, rev=reverseMode) )
 
             poly += 1
 
@@ -364,8 +364,8 @@ class Reverse(object):
                 revPoly = polyMask.reversedData() | polyMax
 #                 polyInit = self.crcProc.registerInit
 #                 polyXor = self.crcProc.xorOut
-#                 retList.append( CRCKey(revPoly, True, polyInit, polyXor, 0, dataMask.dataSize) )
-                retList.append( PolyKey(revPoly, True, 0, dataMask.dataSize) )
+#                 retList.append( CRCKey(revPoly, polyInit, polyXor, 0, dataMask.dataSize, rev=True) )
+                retList.append( PolyKey(revPoly, 0, dataMask.dataSize, rev=True) )
 
             poly += 1
 

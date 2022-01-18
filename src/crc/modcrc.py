@@ -72,7 +72,7 @@ class ModCRC(CRCProc):
         currXor = self.xorOut & polyMask.dataMask
         initReg = self.registerInit ^ currXor
         crc_func = crcmod.mkCrcFun(poly, rev=self._reversed, initCrc=initReg, xorOut=currXor)
-#         crcKey = CRCKey(poly, self._reversed, self.registerInit, currXor)
+#         crcKey = CRCKey(poly, self.registerInit, currXor, rev=self._reversed)
 #         crc_func = CRCModCacheMap.instance.getFunction(crcKey)
         dataString = dataMask.toASCII()
         polyCRC  = crc_func( dataString )

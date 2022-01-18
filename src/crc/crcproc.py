@@ -24,25 +24,36 @@
 import math
 
 from crc.numbermask import reverse_number, NumberMask
-from crc.flush import flush_string
 from collections import Counter
 
 
 class PolyKey:
-    def __init__(self, poly=-1, rev=False, dataPos=-1, dataLen=-1):
+    def __init__(self, poly=-1, dataPos=-1, dataLen=-1, rev=None, revOrd=None, refBits=None ):
         self.poly = poly
-        self.rev = rev
+        
+        self.revOrd  = False
+        self.refBits = False
+        if rev is not None:
+            self.revOrd  = rev
+            self.refBits = rev
+        if revOrd is not None:
+            self.revOrd = revOrd
+        if refBits is not None:
+            self.refBits = refBits
+
         self.dataPos = dataPos
         self.dataLen = dataLen
         self.crcSize = None
 
     def __repr__(self):
-        return "<PolyKey p:0x{:X} r:{:} dP:{:} dL:{:}>".format(self.poly, self.rev, self.dataPos, self.dataLen)
+        return "<PolyKey p:0x{:X} ro:{:} rb:{:} dP:{:} dL:{:}>".format(self.poly, self.revOrd, self.refBits, self.dataPos, self.dataLen)
 
     def __eq__(self, other):
         if self.poly != other.poly:
             return False
-        if self.rev != other.rev:
+        if self.revOrd != other.revOrd:
+            return False
+        if self.refBits != other.refBits:
             return False
         if self.dataPos != other.dataPos:
             return False
@@ -54,7 +65,11 @@ class PolyKey:
         return ((self == other) == False)
 
     def __hash__(self):
-        return hash(str(self.poly) + str(self.rev))
+        return hash( str(self.poly) + str(self.revOrd) + str(self.refBits) )
+
+    ## for backward compatibility
+    def isReversedFully(self):
+        return self.revOrd and self.refBits
 
     def getPolyKey(self):
         return self
@@ -69,9 +84,19 @@ class PolyKey:
 
 
 class CRCKey:
-    def __init__(self, poly=-1, rev=False, init=-1, xor=-1, dataPos=-1, dataLen=-1):
+    def __init__( self, poly=-1, init=-1, xor=-1, dataPos=-1, dataLen=-1, rev=None, revOrd=None, refBits=None ):
         self.poly = poly                    ## with leading 1
-        self.rev = rev
+
+        self.revOrd  = False
+        self.refBits = False
+        if rev is not None:
+            self.revOrd  = rev
+            self.refBits = rev
+        if revOrd is not None:
+            self.revOrd = revOrd
+        if refBits is not None:
+            self.refBits = refBits
+
         self.init = init
         self.xor = xor
         self.dataPos = dataPos              ## counts starting from LSB
@@ -80,13 +105,15 @@ class CRCKey:
 
     def __repr__(self):
         crc_size = str( self.size() / 4 )
-        template = "<CRCKey p:0x{:X} r:{:} i:0x{:0" + crc_size + "X} x:0x{:0" + crc_size + "X} dP:{:} dL:{:}>"
-        return template.format(self.poly, self.rev, self.init, self.xor, self.dataPos, self.dataLen)
+        template = "<CRCKey p:0x{:X} i:0x{:0" + crc_size + "X} x:0x{:0" + crc_size + "X} ro:{:} rb:{:} dP:{:} dL:{:}>"
+        return template.format(self.poly, self.init, self.xor, self.revOrd, self.refBits, self.dataPos, self.dataLen)
 
     def __eq__(self, other):
         if self.poly != other.poly:
             return False
-        if self.rev != other.rev:
+        if self.revOrd != other.revOrd:
+            return False
+        if self.refBits != other.refBits:
             return False
         if self.init != other.init:
             return False
@@ -113,9 +140,15 @@ class CRCKey:
                 self.crcSize = int( math.log( self.poly, 2 ) )
         return self.crcSize
 
-    def getPolyKey(self):
-        return PolyKey( self.poly, self.rev, self.dataPos, self.dataLen )
+    ## for backward compatibility
+    def isReversedFully(self):
+        return self.revOrd and self.refBits
 
+    def getPolyKey(self):
+        return PolyKey( self.poly, self.dataPos, self.dataLen, self.revOrd, self.refBits )
+
+
+## ===================================================================
 
 
 class CRCProc(object):
@@ -151,7 +184,7 @@ class CRCProc(object):
         self._reversed = value
 
     def setValues(self, crcKey):
-        self.setReversed( crcKey.rev )
+        self.setReversed( crcKey.isReversedFully() )
         self.setXorOutValue( crcKey.xor )
         self.setRegisterInitValue( crcKey.init )
 

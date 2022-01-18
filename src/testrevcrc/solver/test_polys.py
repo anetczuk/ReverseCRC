@@ -59,43 +59,43 @@ class PolysSolverBaseTest(object):
         polyList = self.crcFinder.findPolysXOR( data, crc, data2, crc2, 24, crcSize)
 
 #         print "polys:", "[{}]".format( ", ".join("0x{:X}".format(x) for x in polyList) )
-        self.assertTrue( PolyKey(inputPoly, True, 0, 24) in polyList )
+        self.assertTrue( PolyKey(inputPoly, 0, 24, rev=True) in polyList )
 
     def test_findPolysXOR_8_1bit(self):
         polyList = self.crcFinder.findPolysXOR(0x34EC, 0b100, 0x34ED, 0b111, 16, 8)
-        self.assertTrue( PolyKey(0x103, False, 0, 16) in polyList )
+        self.assertTrue( PolyKey(0x103, 0, 16, rev=False) in polyList )
 
         polyList = self.crcFinder.findPolysXOR(0x34EE, 0b010, 0x34EF, 0b001, 16, 8)
-        self.assertTrue( PolyKey(0x103, False, 0, 16) in polyList )
+        self.assertTrue( PolyKey(0x103, 0, 16, rev=False) in polyList )
 
     def test_findPolysXOR_8_2bit(self):
         polyList = self.crcFinder.findPolysXOR(0xA53937C7, 0b01011001, 0xA53937CF, 0b10110001, 32, 8)
-        self.assertTrue( PolyKey(0x11D, False, 0, 32) in polyList )
+        self.assertTrue( PolyKey(0x11D, 0, 32, rev=False) in polyList )
 
         polyList = self.crcFinder.findPolysXOR(0x0000A53937CB, 0b11000101, 0x0000A53937CF, 0b10110001, 32, 8)
-        self.assertTrue( PolyKey(0x11D, False, 0, 32) in polyList )
+        self.assertTrue( PolyKey(0x11D, 0, 32, rev=False) in polyList )
 
         polyList = self.crcFinder.findPolysXOR(0x1234A53937CB, 0b11000101, 0x1234A53937CF, 0b10110001, 48, 8)
-        self.assertTrue( PolyKey(0x11D, False, 0, 48) in polyList )
+        self.assertTrue( PolyKey(0x11D, 0, 48, rev=False) in polyList )
 
         polyList = self.crcFinder.findPolysXOR(0xA53937CF, 0x8C, 0xA53937CE, 0x91, 32, 8)
-        self.assertTrue( PolyKey(0x11D, False, 0, 32) in polyList )
+        self.assertTrue( PolyKey(0x11D, 0, 32, rev=False) in polyList )
 
         polyList = self.crcFinder.findPolysXOR(0xA53937CF, 0x8C, 0xA53937C7, 0x64, 32, 8)
-        self.assertTrue( PolyKey(0x11D, False, 0, 32) in polyList )
+        self.assertTrue( PolyKey(0x11D, 0, 32, rev=False) in polyList )
 
     def test_findPolysXOR_8_3bit(self):
         polyList = self.crcFinder.findPolysXOR(0x1234, 0xF1, 0x1235, 0xF6, 16, 8)
-        self.assertTrue( PolyKey(0x107, False, 0, 16) in polyList )
+        self.assertTrue( PolyKey(0x107, 0, 16, rev=False) in polyList )
 
     def test_findPolysXOR_leading(self):
         polyList = self.crcFinder.findPolysXOR(0x001234, 0xF1, 0x001235, 0xF6, 16, 8)
-        self.assertTrue( PolyKey(0x107, False, 0, 16) in polyList )
+        self.assertTrue( PolyKey(0x107, 0, 16, rev=False) in polyList )
 
     def test_findPolysXOR_xorout(self):
         xorOut = 0xAB
         polyList = self.crcFinder.findPolysXOR(0x1234, 0xF1^xorOut, 0x1235, 0xF6^xorOut, 16, 8)
-        self.assertTrue( PolyKey(0x107, False, 0, 16) in polyList )
+        self.assertTrue( PolyKey(0x107, 0, 16, rev=False) in polyList )
 
     def test_findPolysXOR_c8_init_xorOut(self):
         dataSize = 42                           ## data size does not matter
@@ -109,7 +109,7 @@ class PolysSolverBaseTest(object):
         crc2 = self.crcProc.calculate2(inputVal2, dataSize, inputPoly, 8)
 
         poly = self.crcFinder.findPolysXOR(inputVal, crc, inputVal2, crc2, dataSize, 8)
-        self.assertTrue( PolyKey(inputPoly, False, 0, dataSize) in poly )
+        self.assertTrue( PolyKey(inputPoly, 0, dataSize, rev=False) in poly )
 
     def test_findPolysXOR_crcmod_8A(self):
         data =  0xF90AD50F
@@ -127,7 +127,7 @@ class PolysSolverBaseTest(object):
         polyList = self.crcFinder.findPolysXOR(data, crc, data2, crc2, 32, crcSize)
 
 #         print "polys:", "[{}]".format( ", ".join("0x{:X}".format(x) for x in polyList) )
-        self.assertTrue( PolyKey(inputPoly, False, 0, 32) in polyList )
+        self.assertTrue( PolyKey(inputPoly, 0, 32, rev=False) in polyList )
 
     def test_findPolysXOR_crcmod_8Arev_d32(self):
         data  = 0xF90AD5FD
@@ -148,7 +148,7 @@ class PolysSolverBaseTest(object):
 
 #         revPoly = reverse_number(inputPoly, crcSize)
 #         print "polys: {:X}".format(inputPoly), "[{}]".format( ", ".join("(0x{:X} {})".format(pair[0], pair[1]) for pair in polyList) )
-        self.assertIn( PolyKey(inputPoly, True, 0, dataSize), polyList )
+        self.assertIn( PolyKey(inputPoly, 0, dataSize, rev=True), polyList )
 
     def test_findPolysXOR_crcmod_8_random(self):
         data =  0xF90AD50D769553D3110A4535D37
@@ -167,7 +167,7 @@ class PolysSolverBaseTest(object):
         polyList = self.crcFinder.findPolysXOR(data, crc, data2, crc2, 108, crcSize)
 
 #         print "polys:", "[{}]".format( ", ".join("0x{:X}".format(x) for x in polyList) )
-        self.assertTrue( PolyKey(inputPoly, False, 0, 108) in polyList )
+        self.assertTrue( PolyKey(inputPoly, 0, 108, rev=False) in polyList )
 
     def test_findPolysXOR_crcmod_8_random2(self):
         data =  0xF90AD50D769553D31102453553F
@@ -186,7 +186,7 @@ class PolysSolverBaseTest(object):
         polyList = self.crcFinder.findPolysXOR(data, crc, data2, crc2, 108, crcSize)
 
 #         print "polys:", "[{}]".format( ", ".join("0x{:X}".format(x) for x in polyList) )
-        self.assertTrue( PolyKey(inputPoly, False, 0, 108) in polyList )
+        self.assertTrue( PolyKey(inputPoly, 0, 108, rev=False) in polyList )
 
     def test_findPolysXOR_crcmod_8_random3(self):
         dataSize = 64
@@ -207,7 +207,7 @@ class PolysSolverBaseTest(object):
 
 #         print "data: 0x{:X} 0x{:X} 0x{:X} 0x{:X} 0x{:X}".format( data, data2, inputPoly, regInit, xorOut )
 #         print "polys:", "[{}]".format( ", ".join("0x{:X}".format(x) for x in polyList) )
-        self.assertTrue( PolyKey(inputPoly, False, 0, dataSize) in polyList )
+        self.assertTrue( PolyKey(inputPoly, 0, dataSize, rev=False) in polyList )
 
     def test_findPolysInput_poly(self):
         dataList = []
@@ -235,7 +235,7 @@ class PolysSolverBaseTest(object):
         foundCRC = self.crcFinder.findPolysInput(inputData, 0)
 
 #         print "found data:", foundCRC
-        self.assertIn( PolyKey(inputPoly, reverse, 0, dataSize ), foundCRC )
+        self.assertIn( PolyKey(inputPoly, 0, dataSize, rev=reverse ), foundCRC )
 
     def test_findPolysInput(self):
         dataList = []
@@ -247,7 +247,7 @@ class PolysSolverBaseTest(object):
         foundCRC = self.crcFinder.findPolysInput(inputData, 0)
 
 #         print "found data:", foundCRC
-        self.assertIn( PolyKey(0x18005, False, 0, 32 ), foundCRC )
+        self.assertIn( PolyKey(0x18005, 0, 32, rev=False ), foundCRC )
 
     def test_findPolysInput_preamble(self):
         dataList = []
@@ -259,7 +259,7 @@ class PolysSolverBaseTest(object):
         foundCRC = self.crcFinder.findPolysInput(inputData, 8)
 
 #         print "found data:", foundCRC
-        self.assertIn( PolyKey(0x18005, False, 0, 32 ), foundCRC )
+        self.assertIn( PolyKey(0x18005, 0, 32, rev=False ), foundCRC )
 
 
 class HwCRC_PolysSolver_Test(unittest.TestCase, PolysSolverBaseTest):

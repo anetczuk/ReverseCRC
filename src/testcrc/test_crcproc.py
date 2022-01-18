@@ -44,8 +44,10 @@ class PolyKeyTest(unittest.TestCase):
 
     def test_equality_diff(self):
         key1 = PolyKey()
-        key2 = PolyKey(-1, True)
+        key2 = PolyKey(-1, rev=True)
 
+        self.assertNotEqual( key1.revOrd, key2.revOrd )
+        self.assertNotEqual( key1.refBits, key2.refBits )
         self.assertNotEqual( key1, key2 )
 
 

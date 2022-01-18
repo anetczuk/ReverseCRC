@@ -115,7 +115,7 @@ class BruteForcePairsSolver(Reverse):
 
     # return List[ CRCKey ]
     def findBruteForceParams(self, dataCrc1, dataCrc2, polyKey):
-        self.crcProc.setReversed( polyKey.rev )
+        self.crcProc.setReversed( polyKey.isReversedFully() )     # PolyKey
 
         crcSize = dataCrc1.crcSize
 
@@ -169,7 +169,7 @@ class BruteForcePairsSolver(Reverse):
             if polyCRC != crc2:
                 continue
 
-            newKey = CRCKey(polyKey.poly, polyKey.rev, initVal, xorVal, polyKey.dataPos, polyKey.dataLen)
+            newKey = CRCKey( polyKey.poly, initVal, xorVal, polyKey.dataPos, polyKey.dataLen, revOrd=polyKey.revOrd, refBits=polyKey.refBits )
 
             #if self.progress:
             #    sys.stdout.write("\r")

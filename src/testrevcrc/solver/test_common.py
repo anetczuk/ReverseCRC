@@ -79,7 +79,7 @@ class CommonSolverBaseTest(object):
         foundCRC = self.crcFinder.findCommon(dataList, dataSize, crcSize, 0)
 
 #         print "found data:", foundCRC
-        self.assertIn( CRCKey(inputPoly, reverse, regInit, 0, 0, dataSize ), foundCRC )
+        self.assertIn( CRCKey(inputPoly, regInit, 0, 0, dataSize, rev=reverse ), foundCRC )
 
     def test_findCommon_c16d16_prefix12(self):
         dataList = []
@@ -109,7 +109,7 @@ class CommonSolverBaseTest(object):
         foundCRC = self.crcFinder.findCommon(dataList, preSize+dataSize, crcSize, 12)
 
 #         print "found data:", foundCRC
-        self.assertIn( CRCKey(inputPoly, reverse, regInit, 0, 0, dataSize ), foundCRC )
+        self.assertIn( CRCKey(inputPoly, regInit, 0, 0, dataSize, rev=reverse ), foundCRC )
 
     def test_findCommon_c16d16_rev(self):
         dataList = []
@@ -136,7 +136,7 @@ class CommonSolverBaseTest(object):
         foundCRC = self.crcFinder.findCommon(dataList, dataSize, crcSize, 0)
 
 #         print "found data:", foundCRC
-        self.assertIn( CRCKey(inputPoly, reverse, regInit, 0, 0, dataSize ), foundCRC )
+        self.assertIn( CRCKey(inputPoly, regInit, 0, 0, dataSize, rev=reverse ), foundCRC )
 
     def test_findCommonInput_crc8a(self):
         dataList = []
@@ -151,7 +151,7 @@ class CommonSolverBaseTest(object):
         foundCRC = list( foundCRC )
 
 #         print "found:", foundCRC
-        self.assertIn( CRCKey(0x107, False, 0x0, 0x0, 0, 8), foundCRC )
+        self.assertIn( CRCKey(0x107, 0x0, 0x0, 0, 8, rev=False), foundCRC )
 
     def test_findCommon_crc8b(self):
         dataList = []
@@ -166,7 +166,7 @@ class CommonSolverBaseTest(object):
         foundCRC = list( foundCRC )
 
 #         print "found:", foundCRC
-        self.assertIn( CRCKey(0x107, False, 0x0, 0x0, 0, 16), foundCRC )
+        self.assertIn( CRCKey(0x107, 0x0, 0x0, 0, 16, rev=False), foundCRC )
 
     def test_findCommon_crc8c(self):
         dataList = []
@@ -183,7 +183,7 @@ class CommonSolverBaseTest(object):
 
         foundCRC = self.crcFinder.findCommon(dataList, 16, 8, 0)
 
-        self.assertIn( CRCKey(0x107, False, 0x0, 0x0, 0, 16 ), foundCRC )
+        self.assertIn( CRCKey(0x107, 0x0, 0x0, 0, 16, rev=False ), foundCRC )
 
     def test_findCommon_crc16buypass_d32(self):
         dataList = []
@@ -202,7 +202,7 @@ class CommonSolverBaseTest(object):
         foundCRC = list( foundCRC )
 
 #         print "found:", foundCRC
-        self.assertIn( CRCKey(0x18005, False, 0x0, 0x0, 0, 32), foundCRC )
+        self.assertIn( CRCKey(0x18005, 0x0, 0x0, 0, 32, rev=False), foundCRC )
 
     def test_findCommon_crc16_d32(self):
         dataList = []
@@ -221,7 +221,7 @@ class CommonSolverBaseTest(object):
         foundCRC = list( foundCRC )
 
 #         print "found:", foundCRC
-        self.assertIn( CRCKey(0x18005, True, 0x0, 0x0, 0, 32), foundCRC )
+        self.assertIn( CRCKey(0x18005, 0x0, 0x0, 0, 32, rev=True), foundCRC )
 
     def test_findCommon_crc16_d32_subdata(self):
         dataList = []
@@ -240,7 +240,7 @@ class CommonSolverBaseTest(object):
         foundCRC = list( foundCRC )
 
 #         print "found:", foundCRC
-        self.assertIn( CRCKey(0x18005, True, 0x0, 0x0, 0, 16), foundCRC )
+        self.assertIn( CRCKey(0x18005, 0x0, 0x0, 0, 16, rev=True), foundCRC )
 
     def test_findCommon_crc16dnp(self):
         dataList = []
@@ -259,7 +259,7 @@ class CommonSolverBaseTest(object):
         foundCRC = list( foundCRC )
 
 #         print "found:", foundCRC
-        self.assertIn( CRCKey(0x13D65, True, 0xFFFF, 0xFFFF, 0, 16), foundCRC )
+        self.assertIn( CRCKey(0x13D65, 0xFFFF, 0xFFFF, 0, 16, rev=True), foundCRC )
 
 
 class HwCRC_CommonSolver_Test(unittest.TestCase, CommonSolverBaseTest):

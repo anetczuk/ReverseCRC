@@ -11,7 +11,7 @@ import sys
 BASE_DIR = os.path.dirname( __file__ )
 
 
-out_path = os.path.join( BASE_DIR, "crc8lookup.h" )
+out_path = os.path.join( BASE_DIR, "crc16lookup.h" )
 
 
 ##
@@ -20,14 +20,14 @@ out_path = os.path.join( BASE_DIR, "crc8lookup.h" )
 def generate_subtable( poly ):
     table = dict()
     for div in xrange(0, 0x100):
-        reg = div
+        reg = div << 8
         for _ in xrange(0, 8):
-            if reg & 0x80 != 0:
+            if reg & 0x8000 != 0:
                 reg <<= 1
                 reg ^= poly
             else:
                 reg <<= 1
-        table[ div ] = reg & 0xFF
+        table[ div ] = reg & 0xFFFF
     return table
 
 
@@ -47,8 +47,8 @@ def main():
     ## write output
     header = """///
 
-#ifndef CRC8_LOOKUPTABLE_H_
-#define CRC8_LOOKUPTABLE_H_
+#ifndef CRC16_LOOKUPTABLE_H_
+#define CRC16_LOOKUPTABLE_H_
 
 #include <stdint.h>                             /// int types
 
@@ -57,25 +57,25 @@ def main():
 /// table indexed in following way: [ polynomial ][ registry ]
 /// 2D representation is slightly faster in use than 1D version
 ///
-static const uint8_t CRC8_LookupTable[256][256] = { 
+static const uint16_t CRC16_LookupTable[65536][256] = { 
 """
 
     footer = """};
 
-#endif /* CRC8_LOOKUPTABLE_H_ */
+#endif /* CRC16_LOOKUPTABLE_H_ */
 """
 
     with open(out_path, 'w') as outfile:
         outfile.write( header )
         
-        for poly in xrange(0, 0xFF):
+        for poly in xrange(0, 0xFFFF):
             outfile.write( "\t{" )
             write_row( outfile, poly )
             outfile.write( "},\n" )
             
         ## last poly
         outfile.write( "\t{" )
-        write_row( outfile, 0xFF )
+        write_row( outfile, 0xFFFF )
         outfile.write( "}\n" )
         
         outfile.write( footer )

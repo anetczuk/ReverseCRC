@@ -26,7 +26,7 @@ import itertools
 from collections import Counter
 
 from crc.numbermask import NumberMask
-from crc.flush import flush_number
+from crc.flush import flush_number, flush_string
 from crc.crcproc import CRCKey
 from revcrc.solver.reverse import Reverse, print_results, write_results,\
     MessageCRC
@@ -99,14 +99,14 @@ class BruteForcePairsSolver(Reverse):
             dataCrc2 = MessageCRC(data2, dataSize, crc2, crcSize)
     
             keys = []
-            for key in keyList:
-                paramsList = self.findBruteForceParams(dataCrc1, dataCrc2, key)
+            for item in keyList:
+#                 if self.progress:
+#                     flush_string( "checking key: {}".format( item ) )
+
+                paramsList = self.findBruteForceParams( dataCrc1, dataCrc2, item )
                 
                 if len(paramsList) < 1:
                     continue
-                #if self.progress:
-                #    sys.stdout.write("\r")
-                #    print "Found keys: {}".format( paramsList )
                 keys += paramsList
 
             if (self.progress):

@@ -338,7 +338,7 @@ class Reverse(object):
 #                     sys.stdout.write("\r")
 #                     print "Found poly: 0b{0:b} 0x{0:X}".format(poly)
 
-                polyValue = poly | polyMax
+                polyValue = poly | polyMax                  ## bitwise or -- add master bit
                 polyInit = self.crcProc.registerInit
                 polyXor  = self.crcProc.xorOut
                 retList.append( CRCKey(polyValue, polyInit, polyXor, 0, dataMask.dataSize, rev=reverseMode) )

@@ -53,55 +53,54 @@ class BruteForceSolver(Reverse):
             return []
 
         numbersList = inputData.numbersList
-        if (self.progress):
+        if self.progress:
             print "List size: {} Data size: {} CRC size: {}".format(len(numbersList), inputData.dataSize, inputData.crcSize)
 
         retList = Counter()
 
-        for num in numbersList:
+        dataSize = inputData.dataSize
+        crcSize  = inputData.crcSize
+
+        for dataPair in numbersList:
             ## num -- pair of data and crc
-            keys = self.findBruteForceStandard( num, inputData.dataSize, inputData.crcSize, searchRange )
 
+            data1 = dataPair[0]
+            crc1  = dataPair[1]
+    
+            if self.progress:
+                print "Checking {:X} {:X}, {} {}".format(data1, crc1, dataSize, crcSize)
+    
+            dataMask = NumberMask(data1, dataSize)
+            crcMask  = NumberMask(crc1, crcSize)
+    
+            keysList = []
+    
+            paramMax = (0x1 << crcSize) - 1
+    
+            if self.initVal is not None:
+                ## use init value passed by argument
+                if self.progress:
+                    flush_number( self.initVal, crcSize )
+                keysList += self._checkXORA( dataMask, crcMask, self.initVal, paramMax )
+            else:
+                ## search for init value
+                initVal = -1
+                while initVal < paramMax:
+                    initVal += 1
+                    if self.progress:
+                        flush_number( initVal, crcSize )
+                    keysList += self._checkXORA( dataMask, crcMask, initVal, paramMax )
+    
+            for key in keysList:
+                key.dataPos = 0
+                key.dataLen = dataSize
+    
             if (self.progress):
-                print "\nFound keys:", len( keys )
+                print "\nFound keys:", len( keysList )
 
-            retList.update( keys )
+            retList.update( keysList )
 
         return retList
-
-    def findBruteForceStandard(self, dataCrcPair, dataSize, crcSize, searchRange = 0):
-        data1 = dataCrcPair[0]
-        crc1  = dataCrcPair[1]
-
-        if self.progress:
-            print "Checking {:X} {:X}, {} {}".format(data1, crc1, dataSize, crcSize)
-
-        dataMask = NumberMask(data1, dataSize)
-        crcMask  = NumberMask(crc1, crcSize)
-
-        polyList = []
-
-        paramMax = (0x1 << crcSize) - 1
-
-        if self.initVal is not None:
-            ## use init value passed by argument
-            if self.progress:
-                flush_number( self.initVal, crcSize )
-            polyList += self._checkXORA( dataMask, crcMask, self.initVal, paramMax )
-        else:
-            ## search for init value
-            initVal = -1
-            while initVal < paramMax:
-                initVal += 1
-                if self.progress:
-                    flush_number( initVal, crcSize )
-                polyList += self._checkXORA( dataMask, crcMask, initVal, paramMax )
-
-        for key in polyList:
-            key.dataPos = 0
-            key.dataLen = dataSize
-
-        return polyList
 
     def _checkXORA(self, dataMask, crcMask, initVal, paramMax ):
         polyList = []

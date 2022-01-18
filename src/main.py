@@ -118,7 +118,6 @@ def main():
     profiler = None
 
     try:
-
         profiler_outfile = args.pfile
         if args.profile == True or profiler_outfile != None:
             if profiler_outfile is None:

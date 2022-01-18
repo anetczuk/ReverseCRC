@@ -25,7 +25,16 @@ from crc.numbermask import NumberMask
 from crc.crcproc import PolyKey
 from revcrc.solver.reverse import Reverse,\
     InputMaskList
-from crc.flush import flush_percent
+from crc.flush import flush_percent, flush_string
+
+
+# class VerifyCRCCollector( CRCCollector ):
+#     
+#     def __init__(self):
+#         CRCCollector.__init__(self)
+# 
+#     def collect(self, poly, initReg, xorVal):
+#         flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( poly, initReg, xorVal ) )
 
 
 class VerifySolver(Reverse):
@@ -58,6 +67,22 @@ class VerifySolver(Reverse):
             ## deduced CRC size differs from input crc
             raise ValueError( "inconsistent crc size [%s] with input data crc[%s]" % ( crcSize, data.crcSize ) )
 
+        inputMasks = InputMaskList( data )
+        if inputMasks.empty():
+            print "invalid case -- no data"
+            return False
+        
+        reverseOrder = False if self.reverseOrder is None else self.reverseOrder
+        if reverseOrder:
+            inputMasks.reverseOrder()
+          
+        reflectBits = False if self.reflectBits is None else self.reflectBits
+        if reflectBits:
+            inputMasks.reflectBits()
+            
+        ## List[ (NumberMask, NumberMask) ]
+        inputList = inputMasks.getInputMasks()
+
         rangeSize = 2 ** crcSize
         
         polyListStart = 0
@@ -81,22 +106,6 @@ class VerifySolver(Reverse):
             xorListStop  = xorListStart
         xorListSize  = xorListStop - xorListStart + 1
 
-        inputMasks = InputMaskList( data )
-        if inputMasks.empty():
-            print "invalid case -- no data"
-            return False
-        
-        reverseOrder = False if self.reverseOrder is None else self.reverseOrder
-        if reverseOrder:
-            inputMasks.reverseOrder()
-          
-        reflectBits = False if self.reflectBits is None else self.reflectBits
-        if reflectBits:
-            inputMasks.reflectBits()
-        
-        ## List[ (NumberMask, NumberMask) ]
-        inputList = inputMasks.getInputMasks()
-
         subSpaceSize = initListSize * xorListSize
         spaceSize = polyListSize * subSpaceSize
         print "search space size:", spaceSize, polyListSize, initListSize, xorListSize
@@ -107,7 +116,7 @@ class VerifySolver(Reverse):
         
         spaceCounter = 0
 
-        crc_operator  = self.crcProc.createOperator( crcSize, inputList )
+        crc_operator = self.crcProc.createOperator( crcSize, inputList )
 
         matchesAll = False
         polyMask   = NumberMask( 0, crcSize )
@@ -120,10 +129,15 @@ class VerifySolver(Reverse):
                 value = spaceCounter * 100.0 / spaceSize
                 flush_percent( value, 4 )
             
-            matches = crc_operator.verifyRange( polyMask, initListStart, initListStop, xorListStart, xorListStop )
-            if matches:
+            crc_found = crc_operator.verifyRange( polyMask, initListStart, initListStop, xorListStart, xorListStop )
+            
+            if crc_found:
                 matchesAll = True
-
+                for item in crc_found:
+                    initReg = item[0]
+                    xorVal  = item[1]
+                    flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyMask.dataNum, initReg, xorVal ) )
+        
         if matchesAll:
             print "\nFound poly matching all data"
         else:

@@ -25,6 +25,7 @@ import math
 
 from crc.numbermask import reverse_number, NumberMask
 from crc.flush import flush_string
+from collections import Counter
 
 
 class PolyKey:
@@ -179,6 +180,31 @@ class CRCProc(object):
         return StandardCRCOperator( self, inputData )
 
 
+## =================================================================
+
+
+# class CRCCollector(object):
+#     
+#     def __init__(self):
+#         pass
+# 
+#     def collect(self, poly, initReg, xorVal):
+#         ## do nothing -- override if needed
+#         pass
+
+
+# class FlushCRCCollector( CRCCollector ):
+#     
+#     def __init__(self):
+#         CRCCollector.__init__(self)
+# 
+#     def collect(self, poly, initReg, xorVal):
+#         flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( poly, initReg, xorVal ) )
+
+
+## =================================================================
+
+
 ##
 class CRCOperator(object):
     
@@ -188,29 +214,43 @@ class CRCOperator(object):
     def calculate(self, polyMask):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
 
+    ## return CRC if matches any data
+    def calculateRange(self, polyMask, intRegStart, intRegEnd, xorStart, xorEnd):
+        raise NotImplementedError( "%s not implemented abstract method" % type(self) )
+
     def verify(self, polyMask):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
 
-#     def verifyRange(self, polyMask, xorStart, xorStop):
-#         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
-
+    ## return CRC if matches for all data
     def verifyRange(self, polyMask, intRegStart, intRegEnd, xorStart, xorEnd):
-        matchesAll = False
-        for self.processor.registerInit in xrange(intRegStart, intRegEnd + 1):
-            for self.processor.xorOut in xrange(xorStart, xorEnd + 1):
-                crc_match = self.verify( polyMask )
-                if crc_match:
-                    flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyMask.dataNum, self.processor.registerInit, self.processor.xorOut ) )
-                    matchesAll = True
-        return matchesAll
+        raise NotImplementedError( "%s not implemented abstract method" % type(self) )
+
+
+class ResultContainer( object ):
+    def __init__(self):
+        self.data = set()
+    
+    def empty(self):
+        return len( self.data ) < 1
+    
+    def intersect(self, resultList):
+        if self.data:
+            common = self.data.intersection( resultList )
+            if not common:
+                return False
+            self.data = common
+        else:
+            ## no results -- init
+            self.data.update( resultList )
+        return len( self.data ) > 0
 
 
 class StandardCRCOperator( CRCOperator ):
     
     def __init__(self, crcProcessor, inputData):
         CRCOperator.__init__(self)
-        self.processor = crcProcessor
-        self.data = inputData                   ## List[ (NumberMask, NumberMask) ]
+        self.processor = crcProcessor               ## CRCProc
+        self.data = inputData                       ## List[ (NumberMask, NumberMask) ]
 
     def calculate(self, polyMask):
         retList = []
@@ -230,3 +270,57 @@ class StandardCRCOperator( CRCOperator ):
             
         ## all CRC matches
         return True
+
+    ## return CRC if matches any data
+    def calculateRange(self, polyMask, intRegStart, intRegEnd, xorStart, xorEnd):
+#         print "verify input: 0x%X 0x%X 0x%X 0x%X 0x%X" % ( polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorEnd )
+
+        results = Counter()
+        
+        for item in self.data:
+            dataMask = item[0]
+            crcMask  = item[1]
+            
+            crc_match = []
+            for self.processor.registerInit in xrange(intRegStart, intRegEnd + 1):
+                for self.processor.xorOut in xrange(xorStart, xorEnd + 1):
+                    crc = self.processor.calculate3( dataMask, polyMask )
+                    if crc == crcMask.dataNum:
+                        crc_match.append( ( self.processor.registerInit, self.processor.xorOut ) )
+            results.update( crc_match )
+
+        return results
+
+    ## return CRC if matches for all data
+    def verifyRange(self, polyMask, intRegStart, intRegEnd, xorStart, xorEnd):
+        results = ResultContainer()
+        
+        for item in self.data:
+            dataMask = item[0]
+            crcMask  = item[1]
+
+            if not results.data:
+                ## no results from previous data item -- standard iteration
+                crc_match = []
+                for self.processor.registerInit in xrange(intRegStart, intRegEnd + 1):
+                    for self.processor.xorOut in xrange(xorStart, xorEnd + 1):
+                        crc = self.processor.calculate3( dataMask, polyMask )
+                        if crc == crcMask.dataNum:
+                            crc_match.append( ( self.processor.registerInit, self.processor.xorOut ) )
+                if results.intersect( crc_match ) is False:
+                    ## no common result found -- return
+                    return []
+                
+            else:
+                ## results from previous data item -- reuse
+                crc_match = []
+                for item in results.data:
+                    self.processor.registerInit = item[0]
+                    self.processor.xorOut       = item[1]
+                    crc = self.processor.calculate3( dataMask, polyMask )
+                    if crc == crcMask.dataNum:
+                        crc_match.append( ( self.processor.registerInit, self.processor.xorOut ) )                
+                if results.intersect( crc_match ) is False:
+                    return []
+
+        return results.data

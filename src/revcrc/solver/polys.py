@@ -73,9 +73,9 @@ class PolysSolver(Reverse):
             numberPair2 = combPair[1]
 
             data1 = numberPair1[0]
-            crc1 = numberPair1[1]
+            crc1  = numberPair1[1]
             data2 = numberPair2[0]
-            crc2 = numberPair2[1]
+            crc2  = numberPair2[1]
 
             keys = self.findPolysXOR(data1, crc1, data2, crc2, inputData.dataSize, inputData.crcSize, searchRange)
 

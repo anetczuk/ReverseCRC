@@ -269,7 +269,7 @@ class Reverse(object):
     # return List[ PolyKey ]
     def findPolysXOR(self, data1, crc1, data2, crc2, dataSize, crcSize, searchRange = 0):
         xorData = data1 ^ data2
-        xorCRC = crc1 ^ crc2
+        xorCRC  = crc1  ^ crc2
         if self.progress:
             print "Checking {:X} {:X} xor {:X} {:X} = {:X} {:X}, {} {}".format(data1, crc1, data2, crc2, xorData, xorCRC, dataSize, crcSize)
 

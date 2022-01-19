@@ -58,39 +58,37 @@ def print_keys_to( stream, commonList ):
     stream.write( "\nDiscovered polys[{:}]:\n".format( len(polysList) ) )
     for poly in polysList:
         stream.write( str(poly) + "\n" )
-
+    return polysList
+    
 
 # input: Counter[ CRCKey ]
-def print_results_to( stream, retList, inputSize ):
+def print_results_to( stream, retList, inputSize, onlyMathing=False ):
     mostCommon = retList.most_common()
-    print_keys_to( stream, mostCommon )
+    if onlyMathing is False:
+        print_keys_to( stream, mostCommon )
 
     popular = get_popular( mostCommon, inputSize )
     if len(popular) < 1:
         stream.write( "\nNO MATCHING KEYS FOUND\n" )
         return
 
-    stream.write( "\n\nFOUND MATCHING KEYS[{:}]:\n\n".format( len(popular) ) )
-    print_keys_to( stream, popular )
+    if onlyMathing is False:
+        stream.write( "\n\n" )
+
+    stream.write( "MATCHING KEYS[{:}]:\n\n".format( len(popular) ) )
+    polysList = print_keys_to( stream, popular )
+    
+    stream.write( "\nfound matching keys: {:}\n".format( len(popular) ) )
+    stream.write( "found matching polys: {:}\n".format( len(polysList) ) )
 
 
-def print_results( retList, inputSize ):
-#     sys.stdout.write( "\n" )
-#     print_results_to( sys.stdout, retList, inputSize )
-
-    mostCommon = retList.most_common()
-    popular = get_popular( mostCommon, inputSize )
-    if len(popular) < 1:
-        sys.stdout.write( "\n\nNO MATCHING KEYS FOUND\n\n" )
-        return
-
-    sys.stdout.write( "\nFOUND MATCHING KEYS[{:}]:\n\n".format( len(popular) ) )
-    print_keys_to( sys.stdout, popular )
+def print_results( retList, inputSize, onlyMathing=False ):
+    print_results_to( sys.stdout, retList, inputSize, onlyMathing )
 
 
-def write_results( retList, inputSize, outpath ):
+def write_results( retList, inputSize, outpath, onlyMathing=False ):
     with open(outpath, "w") as text_file:
-        print_results_to( text_file, retList, inputSize )
+        print_results_to( text_file, retList, inputSize, onlyMathing )
 
 
 ## ======================================================================

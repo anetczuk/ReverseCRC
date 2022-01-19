@@ -41,6 +41,7 @@ from revcrc.solver.polys import PolysSolver
 from revcrc.solver.common import CommonSolver
 from revcrc.solver.verify import VerifySolver
 from revcrc.solver.reverse import InputParams
+from revcrc.solver.backward import BackwardSolver
 
 
 def create_processor( algorithm ):
@@ -67,6 +68,8 @@ def create_solver( mode, processor, printProgress ):
         return CommonSolver( processor, printProgress )
     elif mode == "VERIFY":
         return VerifySolver( processor, printProgress )
+    elif mode == "BACKWARD":
+        return BackwardSolver( processor, printProgress )
     return None
 
 
@@ -92,7 +95,7 @@ def convert_hex( value ):
 def main():
     parser = argparse.ArgumentParser(description='Finding CRC algorithm from data')
     parser.add_argument('--alg', action='store', required=True, choices=["HW", "DIV", "MOD"], help='Algorithm' )
-    parser.add_argument('--mode', action='store', required=True, choices=["BF", "BF_PAIRS", "POLY", "COMMON", "VERIFY"], help='Mode' )
+    parser.add_argument('--mode', action='store', required=True, choices=["BF", "BF_PAIRS", "POLY", "COMMON", "VERIFY", "BACKWARD"], help='Mode' )
     parser.add_argument('--infile', action='store', required=True, help='File with data. Numbers strings are written in big endian notion and are directly converted by "int(str, 16)" invocation.' )
     parser.add_argument('--outfile', action='store', default=None, help='Results output file' )
     parser.add_argument('--mindsize', action='store', default=0, help='Minimal data size' )
@@ -184,7 +187,7 @@ def main():
             outdir = os.path.join( dirname, "out" )
             if os.path.exists( outdir ) is False:
                 os.makedirs( outdir )
-            outname = "%s_%s_%s_%s_%s_%s_%s.txt" % ( filenameroot, args.alg, args.mode, args.init_reg, args.xor_val, inputParams.isReverseOrder(), inputParams.isReflectBits() )
+            outname = "%s_%s_%s_p%s_i%s_x%s_ro%s_rb%s.txt" % ( filenameroot, args.alg, args.mode, args.poly, args.init_reg, args.xor_val, inputParams.isReverseOrder(), inputParams.isReflectBits() )
             outfile = os.path.join( outdir, outname )
 
         print "input args, poly: %s init: %s, xor: %s crcsize: %s" % ( inputParams.poly, inputParams.initReg, inputParams.xorVal, inputParams.crcSize )

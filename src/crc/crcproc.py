@@ -106,6 +106,8 @@ class CRCKey:
     def __repr__(self):
         crc_size = str( self.size() / 4 )
         template = "<CRCKey p:0x{:X} i:0x{:0" + crc_size + "X} x:0x{:0" + crc_size + "X} ro:{:} rb:{:} dP:{:} dL:{:}>"
+#         print "template:", template
+#         print "input:", type(self.poly), type(self.init), type(self.xor), type(self.revOrd), type(self.refBits), type(self.dataPos), type(self.dataLen)
         return template.format(self.poly, self.init, self.xor, self.revOrd, self.refBits, self.dataPos, self.dataLen)
 
     def __eq__(self, other):
@@ -169,6 +171,9 @@ class CRCProc(object):
         ## controls if input and result should be reflected during calculation
         self.setReversed( False )
 
+    def setInitValue(self, value):
+        self.registerInit = value
+
     def setRegisterInitValue(self, value):
         self.registerInit = value
 
@@ -197,6 +202,7 @@ class CRCProc(object):
         polyMask = NumberMask(poly, crcSize)
         return self.calculate3(dataMask, polyMask)
 
+    ## returns calculated CRC
     def calculate3(self, dataMask, polyMask):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
 
@@ -215,27 +221,26 @@ class CRCProc(object):
 #         print( "creating StandardCRCOperator" )
         return StandardCRCOperator( self, inputData )
 
+    def createBackwardProcessor(self):
+        raise NotImplementedError( "%s not implemented abstract method" % type(self) )
+
 
 ## =================================================================
 
 
-# class CRCCollector(object):
-#     
-#     def __init__(self):
-#         pass
-# 
-#     def collect(self, poly, initReg, xorVal):
-#         ## do nothing -- override if needed
-#         pass
+class CRCBackwardProc( object ):
+    
+    def __init__(self):
+        pass
 
-
-# class FlushCRCCollector( CRCCollector ):
-#     
-#     def __init__(self):
-#         CRCCollector.__init__(self)
-# 
-#     def collect(self, poly, initReg, xorVal):
-#         flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( poly, initReg, xorVal ) )
+    def setReversed(self, value = True):
+        raise NotImplementedError( "%s not implemented abstract method" % type(self) )
+    
+    def calculate(self, polyMask, xorOut):
+        raise NotImplementedError( "%s not implemented abstract method" % type(self) )
+    
+    def calculateInitReg(self, dataMask, crc, polyMask, xorOut):
+        raise NotImplementedError( "%s not implemented abstract method" % type(self) )
 
 
 ## =================================================================

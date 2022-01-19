@@ -24,6 +24,7 @@
 
 import copy
 import math
+from crc.crcproc import CRCBackwardProc
 
 
 
@@ -92,45 +93,78 @@ class HwCRCBackwardState:
         return hash(str(self.polyMask) + str(self.register) + str(self.valid))
 
 
-
-class HwCRCBackward:
-    def __init__(self, dataMask, crc):
-        self.dataMask = dataMask
-        self.crc = crc
-        self.reversedMode = False
+class HwCRCBackward( CRCBackwardProc ):
+    
+    def __init__(self):
+        CRCBackwardProc.__init__(self)
+        self._reverseMode = False
+        self.setReversed( False )
 
     def setReversed(self, value = True):
-        self.reversedMode = value
+        self._reverseMode = value
+        
+        ## optimize execution time by reducing one level of function call
+        if value is False:
+            self.calculateInitReg = self.calculateInitRegMSB
+        else:
+            self.calculateInitReg = self.calculateInitRegLSB
 
-    def calculate(self, polyMask, xorOut = 0):
+    def calculateInitRegMSB(self, dataMask, crc, polyMask, xorOut):
         collector = []
-        collector.append( HwCRCBackwardState( polyMask, self.crc^xorOut) )
+        collector.append( HwCRCBackwardState( polyMask, crc ^ xorOut) )
 
-        dataNum = self.dataMask.dataNum
+        dataNum = dataMask.dataNum
         dataBit = 1
-        if self.reversedMode:
-            dataBit = (self.dataMask.masterBit >> 1)
 
-        for _ in range(0, self.dataMask.dataSize):
+        for _ in range(0, dataMask.dataSize):
             currBit = dataNum & dataBit
             receiver = []
             for c in collector:
                 c1 = c
                 c2 = c.copy()
 
-                c1.shiftBit(False, currBit, self.reversedMode)
+                c1.shiftMSB(False, currBit)
                 if c1.isValid():
                     receiver.append(c1)
-                c2.shiftBit(True, currBit, self.reversedMode)
+                c2.shiftMSB(True, currBit)
                 if c2.isValid():
                     receiver.append(c2)
-            if self.reversedMode == False:
-                dataBit <<= 1
-            else:
-                dataBit >>= 1
+
+            dataBit <<= 1
     #             print "collection:", receiver
             collector = receiver
 #             print "collector:", collector
+            if len(receiver) < 1:
+                return []
+
+        retList = []
+        for item in collector:
+            retList.append( item.register )
+        return retList
+    
+    def calculateInitRegLSB(self, dataMask, crc, polyMask, xorOut):
+        collector = []
+        collector.append( HwCRCBackwardState( polyMask, crc ^ xorOut) )
+
+        dataNum = dataMask.dataNum
+        dataBit = (dataMask.masterBit >> 1)
+
+        for _ in range(0, dataMask.dataSize):
+            currBit = dataNum & dataBit
+            receiver = []
+            for c in collector:
+                c1 = c
+                c2 = c.copy()
+
+                c1.shiftLSB(False, currBit)
+                if c1.isValid():
+                    receiver.append(c1)
+                c2.shiftLSB(True, currBit)
+                if c2.isValid():
+                    receiver.append(c2)
+
+            dataBit >>= 1
+            collector = receiver
             if len(receiver) < 1:
                 return []
 

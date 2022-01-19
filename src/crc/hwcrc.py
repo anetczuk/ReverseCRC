@@ -30,6 +30,7 @@ from fastcrc.ctypes.fastcrc16 import hw_crc16_calculate, hw_crc16_calculate_rang
 from fastcrc.ctypes.utils import convert_to_msb_list, convert_to_lsb_list
 from crc.numbermask import reverse_number
 from collections import Counter
+from revcrc.hwcrcbackward import HwCRCBackward
 
 
 USE_FAST_CRC = True
@@ -222,6 +223,9 @@ class HwCRC( CRCProc ):
             #rev_crc = reverse_number( crcMask.dataNum, crcSize )
             #dataList.append( (bytesList, rev_crc) )
         return dataList
+    
+    def createBackwardProcessor(self):
+        return HwCRCBackward()
 
 
 ##

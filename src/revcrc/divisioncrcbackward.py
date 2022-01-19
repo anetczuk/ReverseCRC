@@ -24,6 +24,7 @@
 
 import copy
 from crc.numbermask import NumberMask, ReverseNumberMask
+from crc.crcproc import CRCBackwardProc
 
 
 
@@ -105,9 +106,10 @@ class DivisionCRCBackwardState:
 ##
 ## Finds registry init value
 ##
-class DivisionCRCBackward:
+class DivisionCRCBackward( CRCBackwardProc ):
 
     def __init__(self, dataMask, crc):
+        CRCBackwardProc.__init__(self)
         self.dataMask = ReverseNumberMask.from_NumberMask( dataMask )
         self.crc = crc
         self.reversedMode = False
@@ -115,7 +117,7 @@ class DivisionCRCBackward:
     def setReversed(self, value = True):
         self.reversedMode = value
 
-    def calculate(self, polyMask, xorOut = 0):
+    def calculate(self, polyMask, xorOut):
         crcSize = polyMask.dataSize
         collector = []
         collector.append( DivisionCRCBackwardState( polyMask, self.crc^xorOut) )

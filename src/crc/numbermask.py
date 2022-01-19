@@ -168,7 +168,7 @@ class NumberMask:
         self.setNumber(data)
 
     def __repr__(self):
-        digits = divide_ceil( self.size, 4 )
+        digits = divide_ceil( self.dataSize, 4 )
         return ("<NumberMask 0x{0:0" + str(digits) + "X}/{0} {1}>").format(self.dataNum, self.dataSize)
 
     def __eq__(self, other):

@@ -30,9 +30,9 @@ import re
 
 class InputData:
     def __init__(self, numbersList = [], dataSize = 0, crcSize = 0):
-        self.numbersList = numbersList      ## List[ (int, int) ]
+        self.numbersList = numbersList      ## List[ (int, int) ] -- list of pairs (data, crc)
         self.dataSize = dataSize
-        self.crcSize = crcSize
+        self.crcSize  = crcSize
 
     def empty(self):
         return len(self.numbersList) < 1

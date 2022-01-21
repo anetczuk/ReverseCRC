@@ -240,7 +240,22 @@ class CRCBackwardProc( object ):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
     
     def calculateInitReg(self, dataMask, crc, polyMask, xorOut):
+        crc_raw = crc ^ xorOut
+        return self.calculateInitRegBase( dataMask, polyMask, crc_raw )
+        
+    def calculateInitRegBase(self, dataMask, polyMask, crc_raw):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
+        
+    def calculateInitRegRange(self, dataMask, crcNum, polyMask, xorStart, xorEnd):
+        ## default implementation
+        xorDict = list()
+        for xorOut in xrange(xorStart, xorEnd + 1):
+            crc_raw = crcNum ^ xorOut
+            init_found = self.calculateInitRegBase( dataMask, polyMask, crc_raw )
+            if init_found:
+                #xorDict[ xorOut ] = init_found
+                xorDict.append( (xorOut, init_found) )
+        return xorDict
 
 
 ## =================================================================

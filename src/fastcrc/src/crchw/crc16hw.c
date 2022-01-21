@@ -4,50 +4,13 @@
 
 #include "crcutils.h"
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <string.h>                 /// memcpy
 
 
 /// =====================================================
 
 
-CRC16ResultArray* CRC16ResultArray_alloc( const size_t capacity ) {
-    CRC16ResultArray* array = malloc( sizeof(CRC16ResultArray) );
-    CRC16ResultArray_init( array, capacity );
-    return array;
-}
-
-void CRC16ResultArray_init( CRC16ResultArray* array, const size_t capacity ) {
-    array->size = 0;
-    array->capacity = capacity;
-    array->data = malloc( capacity * sizeof(CRC16Result) );
-}
-
-void CRC16ResultArray_free( CRC16ResultArray* array ) {    
-    free( array->data );
-    array->capacity = array->size = 0;
-    array->data = NULL;
-}
-
-void CRC16ResultArray_pushback( CRC16ResultArray* array, const CRC16Result item ) { 
-    if (array->size == array->capacity) {
-        if ( array->capacity < 1 ) {
-            array->capacity = 1;
-        } else {
-            array->capacity *= 2;
-        }
-        array->data = realloc( array->data, array->capacity * sizeof(CRC16Result) );     /// copies memory if needed
-    }
-    array->data[ array->size++ ] = item;
-}
-
-CRC16Result* CRC16ResultArray_get( CRC16ResultArray* array, const size_t index ) {
-    return &array->data[ index ];
-}
-
-
-/// =====================================================
+GENERATE_VECTOR_BODY( CRC16ResultArray, CRC16Result )
 
 
 #define USE_LOOKUP
@@ -100,6 +63,8 @@ CRC16Result* CRC16ResultArray_get( CRC16ResultArray* array, const size_t index )
         uint16_t reg = init_reg;
         for ( size_t i = 0; i < data_size; ++i ) {
             const uint8_t pos = (reg >> 8) ^ data_buffer[i];                /// MSB
+            /// low byte goes directly from table
+            /// high byte is result of xorring table's high byte and reg's low byte
             reg = (reg << 8) ^ CRC16_LookupTable[ polynomial ][ pos ];
         }
     //     printf( "calculation: poly: 0x%X init: 0x%X xor: 0x%X crc: 0x%X\n", polynomial, init_reg, xor_val, reg ^ xor_val );

@@ -5,6 +5,7 @@
 from crc.numbermask import reverse_number
 
 
+## least significant byte goes first in list
 def convert_to_list( number, numberBytesSize ):
     retList = []
     for _ in range(numberBytesSize):

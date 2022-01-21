@@ -61,8 +61,7 @@ class BackwardSolver(Reverse):
 #         if refBits:
 #             inputMasks.reflectBits()
 
-        ## List[ (NumberMask, NumberMask) ]
-        inputList = inputMasks.getInputMasks()
+        inputList = inputMasks.getInputMasks()          # List[ (NumberMask, NumberMask) ]
         numbersLen = len(inputList)
         
         polyListStart, polyListStop = inputParams.getPolySearchRange()
@@ -106,17 +105,16 @@ class BackwardSolver(Reverse):
 
             polyMask.setNumber( polyNum )
             
-            for xorOut in xrange(xorListStart, xorListStop + 1):
-                spaceCounter += numbersLen
-                
-                if self.progress:
-                    value = spaceCounter * 100.0 / spaceSize
-                    flush_percent( value, 7 )
+            spaceCounter += numbersLen * subSpaceSize
+            if self.progress:
+                value = spaceCounter * 100.0 / spaceSize
+                flush_percent( value, 7 )
+            
+            xorDict = crc_backward.calculateInitRegRange( firstDataMask, firstCrc, polyMask, xorListStart, xorListStop )
 
-                init_found = crc_backward.calculateInitReg( firstDataMask, firstCrc, polyMask, xorOut )
-                
-#                 initSum += len(init_found)
-                
+            for xorOutPair in xorDict:
+                xorOut      = xorOutPair[0]
+                init_found  = xorOutPair[1]
                 self.crcProc.setXorOutValue( xorOut )
                 
                 for init_reg in init_found:
@@ -130,7 +128,7 @@ class BackwardSolver(Reverse):
         print "\n\nFound total results: ", len(results), "\n"
 
         print_results( results, 1, True )
-
+ 
         write_results( results, 1, outputFile, True )
 
 #         print "inits per item:", initSum, float(initSum) / (polyListSize*xorListSize*numbersLen)

@@ -163,7 +163,11 @@ class NumberMask:
 
     ## dataSize -- number of bits
     def __init__(self, data, dataSize):
-        self.dataSize = dataSize                ## number of bits
+        self.dataSize  = dataSize                ## number of bits
+        self.masterBit = None                    ## equals to 2 ** dataSize 
+        self.dataMask  = None
+        self.dataNum   = None
+        self.revDataBytes = None
         self.calculateCache()
         self.setNumber(data)
 

@@ -3,6 +3,8 @@
 #ifndef CRC8HW_H_
 #define CRC8HW_H_
 
+#include "vector.h"
+
 #include <stddef.h>                             /// NULL, size_t
 #include <stdint.h>                             /// int types
 #include <stdbool.h>                            /// bool
@@ -25,21 +27,8 @@ typedef struct {
 //     data->xor = 0;
 // }
 
-typedef struct {
-    size_t size;
-    size_t capacity;
-    CRC8Result* data;
-} CRC8ResultArray;
 
-CRC8ResultArray* CRC8ResultArray_alloc( const size_t capacity );
-
-void CRC8ResultArray_init( CRC8ResultArray* array, const size_t capacity );
-
-void CRC8ResultArray_free( CRC8ResultArray* array );
-
-void CRC8ResultArray_pushback( CRC8ResultArray* array, const CRC8Result item );
-
-CRC8Result* CRC8ResultArray_get( CRC8ResultArray* array, const size_t index );
+GENERATE_VECTOR_HEADER( CRC8ResultArray, CRC8Result )
 
 
 /// =====================================================

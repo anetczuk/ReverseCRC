@@ -27,7 +27,7 @@ import unittest
 
 import random
 from crc.hwcrc import HwCRC
-from revcrc.hwcrcbackward import HwCRCBackward, HwCRCBackwardState
+from revcrc.hwcrcbackward import HwCRCBackward
 from crc.numbermask import NumberMask
 
 
@@ -54,7 +54,7 @@ class HwCRCBackwardTest(unittest.TestCase):
 
         cb = HwCRCBackward()
         retList = cb.calculateInitReg( data, crc, inputPoly, xorOut)
-        self.assertIn( HwCRCBackwardState(inputPoly, regInit), retList )
+        self.assertIn( regInit, retList )
 
     def test_calculate_2(self):
         dataSize = 2
@@ -71,7 +71,7 @@ class HwCRCBackwardTest(unittest.TestCase):
 
         cb = HwCRCBackward()
         retList = cb.calculateInitReg( data, crc, inputPoly, xorOut)
-        self.assertIn( HwCRCBackwardState(inputPoly, regInit), retList )
+        self.assertIn( regInit, retList )
 
     def test_calculate_2rev(self):
         dataSize = 2
@@ -91,24 +91,7 @@ class HwCRCBackwardTest(unittest.TestCase):
         cb = HwCRCBackward()
         cb.setReversed(reverse)
         retList = cb.calculateInitReg( data, crc, inputPoly, xorOut)
-        self.assertIn( HwCRCBackwardState(inputPoly, regInit), retList )
-
-    def test_calculate_3(self):
-        dataSize = 8
-        data =  NumberMask(0xC6, dataSize)
-        crcSize = 8
-        inputPoly = NumberMask(0b100011101, crcSize)
-        regInit = 0x00
-        xorOut = 0x00
-
-        crcProc = HwCRC()
-        crcProc.setRegisterInitValue(regInit)
-        crcProc.setXorOutValue(xorOut)
-        crc = crcProc.calculate3(data, inputPoly)
-
-        cb = HwCRCBackward()
-        retList = cb.calculateInitReg( data, crc, inputPoly, xorOut)
-        self.assertIn( HwCRCBackwardState(inputPoly, regInit), retList )
+        self.assertIn( regInit, retList )
 
     def test_calculate_4rev(self):
         dataSize = 4
@@ -128,7 +111,44 @@ class HwCRCBackwardTest(unittest.TestCase):
         cb = HwCRCBackward()
         cb.setReversed(reverse)
         retList = cb.calculateInitReg( data, crc, inputPoly, xorOut)
-        self.assertIn( HwCRCBackwardState(inputPoly, regInit), retList )
+        self.assertIn( regInit, retList )
+
+    def test_calculate_8_001(self):
+        dataSize = 8
+        data = NumberMask(0x01, dataSize)
+        crcSize = 8
+        inputPoly = NumberMask(0b100000001, crcSize)
+        regInit = 0x01
+        xorOut  = 0x00
+
+        crcProc = HwCRC()
+        crcProc.setRegisterInitValue(regInit)
+        crcProc.setXorOutValue(xorOut)
+        crc = crcProc.calculate3(data, inputPoly)
+
+        cb = HwCRCBackward()
+
+#         print "zzzz: 0x%X 0x%X 0x%X" % ( data.dataNum, inputPoly.dataNum, crc )
+
+        retList = cb.calculateInitReg( data, crc, inputPoly, xorOut)
+        self.assertIn( regInit, retList )
+
+    def test_calculate_8_002(self):
+        dataSize = 8
+        data =  NumberMask(0xC6, dataSize)
+        crcSize = 8
+        inputPoly = NumberMask(0b100011101, crcSize)
+        regInit = 0x00
+        xorOut = 0x00
+
+        crcProc = HwCRC()
+        crcProc.setRegisterInitValue(regInit)
+        crcProc.setXorOutValue(xorOut)
+        crc = crcProc.calculate3(data, inputPoly)
+
+        cb = HwCRCBackward()
+        retList = cb.calculateInitReg( data, crc, inputPoly, xorOut)
+        self.assertIn( regInit, retList )
 
     def test_round_c8d8_init_random(self):
         dataSize = 8
@@ -149,7 +169,7 @@ class HwCRCBackwardTest(unittest.TestCase):
         cb = HwCRCBackward()
         cb.setReversed(reverse)
         retList = cb.calculateInitReg( data, crc, inputPoly, xorOut)
-        self.assertIn( HwCRCBackwardState(inputPoly, regInit), retList )
+        self.assertIn( regInit, retList )
 
     def test_round_xor_random(self):
         dataPower = random.randint(1, 8)
@@ -172,7 +192,7 @@ class HwCRCBackwardTest(unittest.TestCase):
         cb = HwCRCBackward()
         cb.setReversed(reverse)
         retList = cb.calculateInitReg( data, crc, inputPoly, xorOut)
-        self.assertIn( HwCRCBackwardState(inputPoly, regInit), retList)
+        self.assertIn( regInit, retList)
 
     def test_round_init_random(self):
         dataPower = random.randint(1, 8)
@@ -195,7 +215,7 @@ class HwCRCBackwardTest(unittest.TestCase):
         cb = HwCRCBackward()
         cb.setReversed(reverse)
         retList = cb.calculateInitReg( data, crc, inputPoly, xorOut)
-        self.assertIn( HwCRCBackwardState(inputPoly, regInit), retList )
+        self.assertIn( regInit, retList )
 
     def test_round_DCRC_init_random(self):
         dataPower = random.randint(1, 8)
@@ -218,8 +238,25 @@ class HwCRCBackwardTest(unittest.TestCase):
         cb = HwCRCBackward()
         cb.setReversed(reverse)
         retList = cb.calculateInitReg( data, crc, inputPoly, xorOut)
-        self.assertIn( HwCRCBackwardState(inputPoly, regInit), retList)
+        self.assertIn( regInit, retList)
 
+    def test_calc_c16d16_random(self):
+        dataSize = 16
+        crcSize = 16
+        data = NumberMask(random.randint(1, 2**dataSize-1), dataSize)
+        crcMax = 2**crcSize-1
+        inputPoly = NumberMask(random.randint(1, crcMax), crcSize)
+        regInit = random.randint(1, crcMax)
+        xorOut = 0x0
+
+        crcFun = HwCRC()
+        crcFun.setRegisterInitValue(regInit)
+        crcFun.setXorOutValue(xorOut)
+        crc = crcFun.calculate3(data, inputPoly)
+
+        cb = HwCRCBackward()
+        retList = cb.calculateInitReg( data, crc, inputPoly, xorOut)
+        self.assertIn( regInit, retList )
 
 
 if __name__ == "__main__":

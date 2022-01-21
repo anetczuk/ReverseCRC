@@ -4,50 +4,13 @@
 
 #include "crcutils.h"
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <string.h>                 /// memcpy
 
 
 /// =====================================================
 
 
-CRC8ResultArray* CRC8ResultArray_alloc( const size_t capacity ) {
-    CRC8ResultArray* array = malloc( sizeof(CRC8ResultArray) );
-    CRC8ResultArray_init( array, capacity );
-    return array;
-}
-
-void CRC8ResultArray_init( CRC8ResultArray* array, const size_t capacity ) {
-    array->size = 0;
-    array->capacity = capacity;
-    array->data = malloc( capacity * sizeof(CRC8Result) );
-}
-
-void CRC8ResultArray_free( CRC8ResultArray* array ) {    
-    free( array->data );
-    array->capacity = array->size = 0;
-    array->data = NULL;
-}
-
-void CRC8ResultArray_pushback( CRC8ResultArray* array, const CRC8Result item ) { 
-    if (array->size == array->capacity) {
-        if ( array->capacity < 1 ) {
-            array->capacity = 1;
-        } else {
-            array->capacity *= 2;
-        }
-        array->data = realloc( array->data, array->capacity * sizeof(CRC8Result) );     /// copies memory if needed
-    }
-    array->data[ array->size++ ] = item;
-}
-
-CRC8Result* CRC8ResultArray_get( CRC8ResultArray* array, const size_t index ) {
-    return &array->data[ index ];
-}
-
-
-/// =====================================================
+GENERATE_VECTOR_BODY( CRC8ResultArray, CRC8Result )
 
 
 #define USE_LOOKUP

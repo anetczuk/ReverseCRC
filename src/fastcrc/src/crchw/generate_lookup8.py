@@ -18,7 +18,7 @@ out_path = os.path.join( BASE_DIR, "crc8lookup.h" )
 ## Implementation based on http://www.sunshine2k.de/articles/coding/crc/understanding_crc.html#ch44
 ##
 def generate_subtable( poly ):
-    table = dict()
+    table = list()
     for div in xrange(0, 0x100):
         reg = div
         for _ in xrange(0, 8):
@@ -27,7 +27,8 @@ def generate_subtable( poly ):
                 reg ^= poly
             else:
                 reg <<= 1
-        table[ div ] = reg & 0xFF
+        table.append( reg & 0xFF )
+#         table[ div ] = reg & 0xFF
     return table
 
 

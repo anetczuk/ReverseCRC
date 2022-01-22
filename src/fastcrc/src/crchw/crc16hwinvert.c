@@ -70,8 +70,8 @@ uint16_array* hw_crc16_invert( const uint8_t* data_buffer, const size_t data_siz
 }
 
 CRC16ResultArray* hw_crc16_invert_range( const uint8_t* data_buffer, const size_t data_size, const uint16_t crc_num, const uint16_t polynomial, const uint16_t xor_start, const uint16_t xor_end ) {
+//     printf( "ccccccccc %i %i %i %i %i\n", data_size, crc_num, polynomial, xor_start, xor_end );
     CRC16ResultArray* result_list = CRC16ResultArray_alloc( 0 );
-    printf( "ccccccccc %i %i %i %i %i\n", data_size, crc_num, polynomial, xor_start, xor_end );
     for ( uint16_t xor_val=xor_start; xor_val<xor_end; ++xor_val ) {
         const uint16_t crc_raw = crc_num ^ xor_val;
         uint16_array* reg_list = hw_crc16_invert( data_buffer, data_size, polynomial, crc_raw );

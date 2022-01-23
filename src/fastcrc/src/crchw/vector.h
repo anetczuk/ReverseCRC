@@ -7,6 +7,7 @@
 
 #include <stddef.h>                             /// NULL, size_t
 #include <stdlib.h>                             /// malloc
+/// #include <stdio.h>                              /// printf
 
 
 #define GENERATE_VECTOR_HEADER( VECTOR_TYPE_NAME, ITEM_TYPE_NAME )                                              \
@@ -43,6 +44,7 @@
     }                                                                                                           \
                                                                                                                 \
     void CONCAT( VECTOR_TYPE_NAME, _free )( VECTOR_TYPE_NAME* array ) {                                         \
+        /* printf( "freeing vector\n" ); */                                                                     \
         free( array->data );                                                                                    \
         array->capacity = array->size = 0;                                                                      \
         array->data = NULL;                                                                                     \

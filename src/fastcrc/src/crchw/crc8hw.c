@@ -5,6 +5,7 @@
 #include "crcutils.h"
 
 #include <string.h>                 /// memcpy
+/// #include <stdio.h>
 
 
 /// =====================================================
@@ -61,6 +62,7 @@ GENERATE_VECTOR_BODY( CRC8ResultArray, CRC8Result )
      */
     /// 'data_buffer' -- container for data -- first dataframe bit is in MSB of buffer first item
     uint8_t hw_crc8_calculate( const uint8_t* data_buffer, const size_t data_size, const uint8_t polynomial, const uint8_t init_reg, const uint8_t xor_val ) {
+//         printf( "hw_crc8_calculate: size: %zu poly: 0x%X init: 0x%X xor: 0x%X\n", data_size, polynomial, init_reg, xor_val );
         uint8_t reg = init_reg;
         for ( size_t i = 0; i < data_size; ++i ) {
             reg ^= data_buffer[i];                      /// xor

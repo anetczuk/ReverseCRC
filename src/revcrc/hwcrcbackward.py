@@ -26,8 +26,8 @@ import copy
 import imp
 
 from crc.crcproc import CRCBackwardProc
-from fastcrc.ctypes.utils import convert_to_msb_list, convert_to_list
-from fastcrc.ctypes.fastcrc16 import hw_crc16_invert, hw_crc16_invert_range
+from fastcrc import convert_to_msb_list, convert_to_list
+from fastcrc import hw_crc16_invert, hw_crc16_invert_range
 
 ## import code from directory that is not a package
 base_dir = os.path.dirname( __file__ )

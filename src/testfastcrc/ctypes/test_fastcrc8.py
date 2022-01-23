@@ -24,10 +24,8 @@
 
 import unittest
 
-from fastcrc.ctypes.fastcrc8 import hw_crc8_calculate, hw_crc8_calculate_range,\
-    hw_crc8_calculate_param
-from fastcrc.ctypes.utils import convert_to_msb_list, convert_to_lsb_list,\
-    reflect_bits_list
+from fastcrc import hw_crc8_calculate, hw_crc8_calculate_param, hw_crc8_calculate_range
+from fastcrc import convert_to_msb_list, convert_to_lsb_list, reflect_bits_list
 from crc.numbermask import reverse_number
 
 

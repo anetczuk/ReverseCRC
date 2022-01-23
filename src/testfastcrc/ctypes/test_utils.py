@@ -23,7 +23,7 @@
 
 import unittest
 
-from fastcrc.ctypes.utils import convert_to_lsb_list, convert_to_msb_list
+from fastcrc import convert_to_lsb_list, convert_to_msb_list
 
 
 class BytesTest(unittest.TestCase):

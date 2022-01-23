@@ -16,7 +16,25 @@ sys.path.append( os.path.join( BASE_DIR, 'build') )
 import cffi_fastcrc.lib as cffi_fastcrc
 
 
-# ffi = cffi.FFI()
+ffi = cffi.FFI()
+
+
+## ========================================================================
+
+
+# class CFFIArrayWrapper():
+#     
+#     def __init__(self, pointer):
+#         self.ptr = pointer
+#     
+#     def __len__(self):
+#         return self.ptr.size
+#     
+#     def __getitem__(self, index):
+#         return self.ptr.data[ index ]
+#     
+#     def __nonzero__(self):
+#         return self.ptr.size > 0
 
 
 ## ========================================================================
@@ -38,13 +56,15 @@ def hw_crc8_calculate_range( bytesList, dataCRC, poly, intRegStart, intRegEnd, x
      
     arr_len  = len(bytesList)
     data_array = cffi_fastcrc.hw_crc8_calculate_range( bytesList, arr_len, dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
-#     data_array = ffi.gc(data_array, cffi_fastcrc.CRC8ResultArray_free)
     
+#     data_array = ffi.gc(data_array, cffi_fastcrc.CRC8ResultArray_free)
+#     return CFFIArrayWrapper( data_array )
+
     data_size = data_array.size
     retList = []
     for i in xrange(0, data_size):
         item = data_array.data[ i ]
         retList.append( ( item.reg, item.xor ) )
-
+ 
     cffi_fastcrc.CRC8ResultArray_free( data_array )
     return retList

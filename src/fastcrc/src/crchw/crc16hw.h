@@ -17,13 +17,13 @@
 
 
 typedef struct {
-    uint16_t reg;              /// registry initial value
-    uint16_t xor;              /// xor-red result
+    uint16_t reginit;              /// registry initial value
+    uint16_t xorout;               /// xor-red result
 } CRC16Result;
 
 // CRC16Result_init( CRC16Result* data ) {
-//     data->reg = 0;
-//     data->xor = 0;
+//     data->reginit = 0;
+//     data->xorout  = 0;
 // }
 
 

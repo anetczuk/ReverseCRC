@@ -64,7 +64,7 @@ def hw_crc8_calculate_range( bytesList, dataCRC, poly, intRegStart, intRegEnd, x
     retList = []
     for i in xrange(0, data_size):
         item = data_array.data[ i ]
-        retList.append( ( item.reg, item.xor ) )
+        retList.append( ( item.reginit, item.xorout ) )
  
     cffi_fastcrc.CRC8ResultArray_free( data_array )
     return retList

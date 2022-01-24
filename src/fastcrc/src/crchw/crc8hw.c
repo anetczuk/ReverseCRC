@@ -116,8 +116,8 @@ CRC8ResultArray* hw_crc8_calculate_range( const uint8_t* data_buffer, const size
             const uint8_t curr_crc = hw_crc8_calculate( data_buffer, data_size, polynomial, init_reg, xor_val );
             if ( curr_crc == data_crc ) {
                 CRC8Result data;
-                data.reg = init_reg;
-                data.xor = xor_val;
+                data.reginit = init_reg;
+                data.xorout  = xor_val;
                 CRC8ResultArray_pushback( crc_array, data );
             }
             if ( xor_val == 0xFF) {

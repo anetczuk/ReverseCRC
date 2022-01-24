@@ -21,8 +21,8 @@ ffibuilder = FFI()
 
 ffibuilder.cdef( r"""
 typedef struct {
-    uint8_t reg;              /// registry initial value
-    uint8_t xor;              /// xor-red result
+    uint8_t reginit;              /// registry initial value
+    uint8_t xorout;               /// xor-red result
 } CRC8Result;
 
 typedef struct {                                                                                            
@@ -56,8 +56,8 @@ CRC8ResultArray* hw_crc8_calculate_range( const uint8_t* data_buffer, const size
 
 
 typedef struct {
-    uint16_t reg;              /// registry initial value
-    uint16_t xor;              /// xor-red result
+    uint16_t reginit;              /// registry initial value
+    uint16_t xorout;               /// xor-red result
 } CRC16Result;
 
 typedef struct {                                                                                            

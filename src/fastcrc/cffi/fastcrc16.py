@@ -61,7 +61,7 @@ def hw_crc16_calculate_range( bytesList, dataCRC, poly, intRegStart, intRegEnd, 
     retList = []
     for i in xrange(0, data_size):
         item = data_array.data[ i ]
-        retList.append( ( item.reg, item.xor ) )
+        retList.append( ( item.reginit, item.xorout ) )
  
     cffi_fastcrc.CRC16ResultArray_free( data_array )
     return retList
@@ -95,11 +95,11 @@ def hw_crc16_invert_range( bytesList, crcNum, poly, xorStart, xorEnd):
     xorList = dict()
     for i in xrange(0, data_size):
         item = data_array.data[ i ]
-        regList = xorList.get( item.xor, None )
+        regList = xorList.get( item.xorout, None )
         if regList is None:
             regList = list()
-            xorList[ item.xor ] = regList
-        regList.append( item.reg )
+            xorList[ item.xorout ] = regList
+        regList.append( item.reginit )
  
     cffi_fastcrc.CRC16ResultArray_free( data_array )
     return xorList.items()

@@ -19,11 +19,11 @@ c_fastcrc = ctypes.CDLL( fastcrc_path )
 class CRC8Result(ctypes.Structure):
     """ creates a struct """
 
-    _fields_ = [('reg', ctypes.c_uint8),
-                ('xor', ctypes.c_uint8)]
+    _fields_ = [('reginit', ctypes.c_uint8),
+                ('xorout', ctypes.c_uint8)]
 
     def __str__(self):
-        return "<CRC8Result 0x%x - init:0x%X, xor:0x%X, crc:0x%X>" % ( id(self), self.reg, self.xor, self.crc )
+        return "<CRC8Result 0x%x - init:0x%X, xor:0x%X, crc:0x%X>" % ( id(self), self.reginit, self.xorout, self.crc )
 
 
 class CRC8ResultArray(ctypes.Structure):
@@ -82,6 +82,6 @@ def hw_crc8_calculate_range( bytes_list, dataCRC, poly, intRegStart, intRegEnd, 
     retList = []
     for i in xrange(0, data_size):
         item = data_content[ i ]
-        retList.append( ( item.reg, item.xor ) )
+        retList.append( ( item.reginit, item.xorout ) )
     c_fastcrc.CRC8ResultArray_free( data_array )
     return retList

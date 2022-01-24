@@ -115,8 +115,8 @@ CRC16ResultArray* hw_crc16_calculate_range( const uint8_t* data_buffer, const si
             const uint16_t curr_crc = hw_crc16_calculate( data_buffer, data_size, polynomial, init_reg, xor_val );
             if ( curr_crc == data_crc ) {
                 CRC16Result data;
-                data.reg = init_reg;
-                data.xor = xor_val;
+                data.reginit = init_reg;
+                data.xorout  = xor_val;
                 CRC16ResultArray_pushback( crc_array, data );
             }
             if ( xor_val == 0xFFFF) {

@@ -19,11 +19,11 @@ c_fastcrc = ctypes.CDLL( fastcrc_path )
 class CRC16Result(ctypes.Structure):
     """ creates a struct """
 
-    _fields_ = [('reg', ctypes.c_uint16 ),
-                ('xor', ctypes.c_uint16)]
+    _fields_ = [('reginit', ctypes.c_uint16 ),
+                ('xorout', ctypes.c_uint16)]
 
     def __str__(self):
-        return "<CRC16Result 0x%x - init:0x%X, xor:0x%X, crc:0x%X>" % ( id(self), self.reg, self.xor, self.crc )
+        return "<CRC16Result 0x%x - init:0x%X, xor:0x%X, crc:0x%X>" % ( id(self), self.reginit, self.xorout, self.crc )
 
 
 class CRC16ResultArray(ctypes.Structure):
@@ -103,7 +103,7 @@ def hw_crc16_calculate_range( bytes_list, dataCRC, poly, intRegStart, intRegEnd,
     retList = []
     for i in xrange(0, data_size):
         item = data_content[ i ]
-        retList.append( ( item.reg, item.xor ) )
+        retList.append( ( item.reginit, item.xorout ) )
     c_fastcrc.CRC16ResultArray_free( data_array )
     return retList
 
@@ -138,10 +138,10 @@ def hw_crc16_invert_range( bytes_list, crcNum, poly, xorStart, xorEnd):
     xorList = dict()
     for i in xrange(0, data_size):
         item = data_content[ i ]
-        regList = xorList.get( item.xor, None )
+        regList = xorList.get( item.xorout, None )
         if regList is None:
             regList = list()
-            xorList[ item.xor ] = regList
-        regList.append( item.reg )
+            xorList[ item.xorout ] = regList
+        regList.append( item.reginit )
     c_fastcrc.CRC16ResultArray_free( data_array )
     return xorList.items()

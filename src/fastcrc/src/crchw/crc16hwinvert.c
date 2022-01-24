@@ -77,8 +77,8 @@ CRC16ResultArray* hw_crc16_invert_range( const uint8_t* data_buffer, const size_
         uint16_array* reg_list = hw_crc16_invert( data_buffer, data_size, polynomial, crc_raw );
         for ( size_t i=0; i<reg_list->size; ++i ) {
             CRC16Result item;
-            item.reg = reg_list->data[i];
-            item.xor = xor_val;
+            item.reginit = reg_list->data[i];
+            item.xorout  = xor_val;
             CRC16ResultArray_pushback( result_list, item );
         }
         uint16_array_free( reg_list );

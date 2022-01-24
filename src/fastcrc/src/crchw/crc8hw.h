@@ -18,13 +18,13 @@
 
 
 typedef struct {
-    uint8_t reg;              /// registry initial value
-    uint8_t xor;              /// xor-red result
+    uint8_t reginit;              /// registry initial value
+    uint8_t xorout;               /// xor-red result
 } CRC8Result;
 
 // CRC8Result_init( CRC8Result* data ) {
-//     data->reg = 0;
-//     data->xor = 0;
+//     data->reginit = 0;
+//     data->xorout  = 0;
 // }
 
 

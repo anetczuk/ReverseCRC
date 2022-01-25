@@ -26,7 +26,9 @@
                                                                                                                 \
     void CONCAT( VECTOR_TYPE_NAME, _pushback )( VECTOR_TYPE_NAME* array, const ITEM_TYPE_NAME item );           \
                                                                                                                 \
-    ITEM_TYPE_NAME* CONCAT( VECTOR_TYPE_NAME, _get )( VECTOR_TYPE_NAME* array, const size_t index );
+    ITEM_TYPE_NAME CONCAT( VECTOR_TYPE_NAME, _getvalue )( VECTOR_TYPE_NAME* array, const size_t index );        \
+                                                                                                                \
+    ITEM_TYPE_NAME* CONCAT( VECTOR_TYPE_NAME, _getptr )( VECTOR_TYPE_NAME* array, const size_t index );
 
 
 #define GENERATE_VECTOR_BODY( VECTOR_TYPE_NAME, ITEM_TYPE_NAME )                                                \
@@ -63,7 +65,11 @@
         array->data[ array->size++ ] = item;                                                                    \
     }                                                                                                           \
                                                                                                                 \
-    ITEM_TYPE_NAME* CONCAT( VECTOR_TYPE_NAME, _get )( VECTOR_TYPE_NAME* array, const size_t index ) {           \
+    ITEM_TYPE_NAME CONCAT( VECTOR_TYPE_NAME, _getvalue )( VECTOR_TYPE_NAME* array, const size_t index ) {       \
+        return array->data[ index ];                                                                            \
+    }                                                                                                           \
+                                                                                                                \
+    ITEM_TYPE_NAME* CONCAT( VECTOR_TYPE_NAME, _getptr )( VECTOR_TYPE_NAME* array, const size_t index ) {        \
         return &array->data[ index ];                                                                           \
     }
 

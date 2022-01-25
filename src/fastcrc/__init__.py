@@ -5,7 +5,7 @@
 import os
 
 
-binding_type = os.environ.get( "FASTCRC_BINDING", "cffi" )
+binding_type = os.getenv( "FASTCRC_BINDING", "swig" )
 
 
 # print "using binding:", binding_type
@@ -33,6 +33,21 @@ elif binding_type == "cffi":
     
     from .cffi.fastcrc16 import hw_crc16_calculate, hw_crc16_calculate_param, hw_crc16_calculate_range
     from .cffi.fastcrc16 import hw_crc16_invert, hw_crc16_invert_range
+    
+    from .ctypes.utils import convert_to_msb_list, convert_to_lsb_list, convert_to_list, reflect_bits_list
+
+
+elif binding_type == "swig":
+    ###
+    ### swig implementation
+    ###
+    
+#     print "importing swig"
+    
+    from .swig.fastcrc8 import hw_crc8_calculate, hw_crc8_calculate_param, hw_crc8_calculate_range
+    
+    from .swig.fastcrc16 import hw_crc16_calculate, hw_crc16_calculate_param, hw_crc16_calculate_range
+    from .swig.fastcrc16 import hw_crc16_invert, hw_crc16_invert_range
     
     from .ctypes.utils import convert_to_msb_list, convert_to_lsb_list, convert_to_list, reflect_bits_list
 

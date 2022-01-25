@@ -21,8 +21,14 @@
 # SOFTWARE.
 #
 
-
 import unittest
+import os
+import sys
+
+binding_type = os.environ[ "FASTCRC_BINDING" ] = "ctypes";
+if 'fastcrc' in sys.modules:
+    ## force reload module
+    reload( sys.modules['fastcrc'] )
 
 from crc.numbermask import reverse_number
 from fastcrc import convert_to_msb_list, convert_to_lsb_list, reflect_bits_list

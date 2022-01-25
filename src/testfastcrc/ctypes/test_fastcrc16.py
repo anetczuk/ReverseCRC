@@ -22,17 +22,10 @@
 #
 
 import unittest
-import os
-import sys
-
-binding_type = os.environ[ "FASTCRC_BINDING" ] = "ctypes";
-if 'fastcrc' in sys.modules:
-    ## force reload module
-    reload( sys.modules['fastcrc'] )
 
 from crc.numbermask import reverse_number
-from fastcrc import convert_to_msb_list, convert_to_lsb_list, reflect_bits_list
-from fastcrc import hw_crc16_calculate, hw_crc16_calculate_param, hw_crc16_calculate_range
+from fastcrc.ctypes.utils import convert_to_msb_list, convert_to_lsb_list, reflect_bits_list
+from fastcrc.ctypes.fastcrc16 import hw_crc16_calculate, hw_crc16_calculate_param, hw_crc16_calculate_range
 
 
 class FastCRC16Test(unittest.TestCase):

@@ -69,9 +69,3 @@ def hw_crc8_calculate_range( bytesList, dataCRC, poly, intRegStart, intRegEnd, x
   
     swig_fastcrc.CRC8ResultArray_free( ret_array )
     return retList
-
-
-if __name__ == '__main__':
-    data = [0x01, 0x02, 0x03]
-    ret = hw_crc8_calculate_range( data, 0x11, 0xFF, 0x00, 0xFF, 0x00, 0xFF )
-    print "ret:", ret

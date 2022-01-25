@@ -56,13 +56,13 @@ def hw_crc16_calculate_range( bytesList, dataCRC, poly, intRegStart, intRegEnd, 
     arr_len  = len(bytesList)
     data_array = convert_to_uint8array( bytesList )
         
-    ret_array = swig_fastcrc.hw_crc16_calculate_range( bytesList, arr_len, dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
+    ret_array = swig_fastcrc.hw_crc16_calculate_range( data_array, arr_len, dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
     swig_fastcrc.delete_Uint8Array( data_array )
     
     data_size = ret_array.size
     retList = []
     for i in xrange(0, data_size):
-        item = ret_array.data[ i ]
+        item = swig_fastcrc.CRC16ResultArray_getptr( ret_array, i )
         retList.append( ( item.reginit, item.xorout ) )
  
     swig_fastcrc.CRC16ResultArray_free( ret_array )
@@ -85,6 +85,7 @@ def hw_crc16_invert( bytesList, poly, regVal ):
  
     swig_fastcrc.uint16_array_free( ret_array )
     return retList
+
 
 def hw_crc16_invert_range( bytesList, crcNum, poly, xorStart, xorEnd):
     arr_len  = len(bytesList)

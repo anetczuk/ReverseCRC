@@ -23,10 +23,9 @@
 
 from crc.crcproc import CRCProc, CRCOperator, ResultContainer
 
-from crc.flush import flush_string
 from crc.numbermask import reverse_number
 from collections import Counter
-from revcrc.hwcrcbackward import HwCRCBackward
+from revcrc.hwcrcbackward import create_backward_processor
 
 from fastcrc.utils import convert_to_msb_list, convert_to_lsb_list
 
@@ -230,8 +229,8 @@ class HwCRC( CRCProc ):
             #dataList.append( (bytesList, rev_crc) )
         return dataList
     
-    def createBackwardProcessor(self):
-        return HwCRCBackward()
+    def createBackwardProcessor(self, crcSize):
+        return create_backward_processor( crcSize )
 
 
 ##

@@ -251,7 +251,7 @@ class HwCRCTest(unittest.TestCase):
         crcProc = HwCRC()
         crcProc.setRegisterInitValue( regInit )
         crcProc.setXorOutValue( xorOut )
-        crc = crcProc.calculateMSB(data, inputPoly)
+        crc = crcProc.calculateMSBClassic(data, inputPoly)
 
         revData = data.reversed()
         revPoly = inputPoly.reversed()
@@ -262,7 +262,7 @@ class HwCRCTest(unittest.TestCase):
         revCrcProc.setReversed()
         revCrcProc.setRegisterInitValue( revRegInit )
         revCrcProc.setXorOutValue( revXorOut )
-        crc2 = revCrcProc.calculateLSB(revData, revPoly)
+        crc2 = revCrcProc.calculateLSBClassic(revData, revPoly)
 
         revCrc = reverse_number(crc2, crcSize)
 

@@ -26,8 +26,23 @@ import copy
 import imp
 
 from crc.crcproc import CRCBackwardProc
-from fastcrc import convert_to_msb_list, convert_to_list
-from fastcrc import hw_crc16_invert, hw_crc16_invert_range
+
+
+USE_FAST_CRC = True
+# USE_FAST_CRC = False
+
+try:
+    if USE_FAST_CRC:
+        from fastcrc.binding import convert_to_msb_list, convert_to_list
+        from fastcrc.binding import hw_crc16_invert, hw_crc16_invert_range
+except ImportError as ex:
+    ## disable fastcrc -- there were problem with importing fastcrc
+    USE_FAST_CRC = False
+    print "unable to import fastcrc:", ex
+
+# if USE_FAST_CRC is False:
+#     print "WARNING: fast CRC is disabled!!!"
+
 
 ## import code from directory that is not a package
 base_dir = os.path.dirname( __file__ )
@@ -274,15 +289,16 @@ class HwCRCBackward( CRCBackwardProc ):
 
     def calculateInitRegRange(self, dataMask, crcNum, polyMask, xorStart, xorEnd):
         if self._reverseMode is False:
-            ## use fast implementation
-            if polyMask.dataSize == 16 and dataMask.dataSize % 8 == 0:
-                full_bytes = int( dataMask.dataSize / 8 )
-                dataNum = dataMask.dataNum
-                bytes_list = self.fast16Data.get( dataNum )
-                if bytes_list is None:
-                    bytes_list = convert_to_list( dataNum, full_bytes  )
-                    self.fast16Data[ dataNum ] = bytes_list 
-                return hw_crc16_invert_range( bytes_list, crcNum, polyMask.dataNum, xorStart, xorEnd )
+            if USE_FAST_CRC:
+                ## use fast implementation
+                if polyMask.dataSize == 16 and dataMask.dataSize % 8 == 0:
+                    full_bytes = int( dataMask.dataSize / 8 )
+                    dataNum = dataMask.dataNum
+                    bytes_list = self.fast16Data.get( dataNum )
+                    if bytes_list is None:
+                        bytes_list = convert_to_list( dataNum, full_bytes  )
+                        self.fast16Data[ dataNum ] = bytes_list 
+                    return hw_crc16_invert_range( bytes_list, crcNum, polyMask.dataNum, xorStart, xorEnd )
 
         ## use standard implementation
         return CRCBackwardProc.calculateInitRegRange(self, dataMask, crcNum, polyMask, xorStart, xorEnd)
@@ -305,16 +321,16 @@ class HwCRCBackward( CRCBackwardProc ):
         
         elif polyMask.dataSize == 16:
 #             return self._calculateBitsMSB( dataMask.dataNum, 0, dataMask.dataSize, polyMask, [ crc_raw ] )
-            
-            regList = self._calculateFast16MSB(dataMask, polyMask.dataNum, crc_raw)
-#             regList = self._calculateCachedMSB(dataMask, polyMask, crc_raw, INVERSE_CACHE16)
-            if not regList:
-                return []
-            if dataMask.dataSize % 8 == 0:
-                return regList
-            full_bytes = int( dataMask.dataSize / 8 )
-            bitStart = full_bytes * 8
-            return self._calculateBitsMSB( dataMask.dataNum, bitStart, dataMask.dataSize, polyMask, regList )
+            if USE_FAST_CRC:
+                regList = self._calculateFast16MSB(dataMask, polyMask.dataNum, crc_raw)
+    #             regList = self._calculateCachedMSB(dataMask, polyMask, crc_raw, INVERSE_CACHE16)
+                if not regList:
+                    return []
+                if dataMask.dataSize % 8 == 0:
+                    return regList
+                full_bytes = int( dataMask.dataSize / 8 )
+                bitStart = full_bytes * 8
+                return self._calculateBitsMSB( dataMask.dataNum, bitStart, dataMask.dataSize, polyMask, regList )
 
         return self._calculateBitsMSB( dataMask.dataNum, 0, dataMask.dataSize, polyMask, [ crc_raw ] )
 

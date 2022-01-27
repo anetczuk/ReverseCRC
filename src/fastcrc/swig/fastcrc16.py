@@ -18,7 +18,12 @@ sys.path.append( BUILD_DIR )
 
 swig_fastcrc_path = os.path.join( BUILD_DIR, 'swig_fastcrc.py' )
 
-swig_fastcrc = imp.load_source( 'fastcrc.swig_fastcrc', swig_fastcrc_path )
+try:
+    swig_fastcrc = imp.load_source( 'fastcrc.swig_fastcrc', swig_fastcrc_path )
+
+except IOError as ex:
+    ## could not load module
+    raise ImportError( ex )
 
 
 # def convert_to_uint8array( bytesList ):

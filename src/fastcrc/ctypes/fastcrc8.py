@@ -10,7 +10,12 @@ base_dir = os.path.dirname( __file__ )
 
 fastcrc_path = os.path.join( base_dir, os.pardir, "build", "install", "libfastcrc.so" )
 
-c_fastcrc = ctypes.CDLL( fastcrc_path )
+try:
+    c_fastcrc = ctypes.CDLL( fastcrc_path )
+
+except OSError as ex:
+    ## could not load module
+    raise ImportError( ex )
 
 
 ## ========================================================================

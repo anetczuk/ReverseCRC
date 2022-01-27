@@ -24,21 +24,27 @@
 from crc.crcproc import CRCProc, CRCOperator, ResultContainer
 
 from crc.flush import flush_string
-
-from fastcrc import hw_crc8_calculate, hw_crc8_calculate_range
-from fastcrc import hw_crc16_calculate, hw_crc16_calculate_range
-from fastcrc import convert_to_msb_list, convert_to_lsb_list
 from crc.numbermask import reverse_number
 from collections import Counter
 from revcrc.hwcrcbackward import HwCRCBackward
+
+from fastcrc.utils import convert_to_msb_list, convert_to_lsb_list
 
 
 USE_FAST_CRC = True
 # USE_FAST_CRC = False
 
+try:
+    if USE_FAST_CRC:
+        from fastcrc.binding import hw_crc8_calculate, hw_crc8_calculate_range
+        from fastcrc.binding import hw_crc16_calculate, hw_crc16_calculate_range
+except ImportError as ex:
+    ## disable fastcrc -- there were problem with importing fastcrc
+    USE_FAST_CRC = False
+#     print "unable to import fastcrc:", ex
 
-if USE_FAST_CRC is False:
-    print "WARNING: fast CRC is disabled!!!"
+# if USE_FAST_CRC is False:
+#     print "WARNING: fast CRC is disabled!!!"
 
 
 ##
@@ -47,6 +53,7 @@ class HwCRC( CRCProc ):
 
     def __init__(self):
         CRCProc.__init__(self)
+#         self.setReversed( False )
         
     ## override
     def setReversed(self, value = True):
@@ -185,7 +192,6 @@ class HwCRC( CRCProc ):
     # return CRCOperator
     def createOperator(self, crcSize, inputData):
         if USE_FAST_CRC is False:
-            print "fast CRC disabled"
             return CRCProc.createOperator(self, crcSize, inputData)
             
         if crcSize == 8:

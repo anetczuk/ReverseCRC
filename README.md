@@ -29,19 +29,40 @@ where first hex number in row is data and second number is calculated CRC.
 
 #### Parameters
 
-- *alg*: input file
 - *infile*: input file
 - *mode*: operation mode:
     - *BF*: finding full key by forward algorithm (brute force)
     - *BF_PAIRS*: finding full key by forward algorithm using pair xoring (brute force)
     - *POLY*: find polynomials by xor-ing data pairs
     - *COMMON*: check common keys used in industry
-- *mode*: decode algorithm:
+- *alg*: decode algorithm:
     - *HW* -- use *HwCRC*
     - *DIV* -- use *DivisionCRC*
     - *MOD* -- use *ModCRC*
 - *mindsize*: Data size in frame, rest of frame will be treated as potential CRC field
-  
+
+#### C bindings
+
+Application comes with fast version of algorithms, that is implemented in C. 
+To use it it's needed to compile proper algorithms and then build Python bindings.
+
+Building algorithms is done by executing `./src/fastcrc/build.sh`
+
+Using *ctypes* bindings does not require additional steps. In order to use *cffi* one has to execute `./src/fastcrc/cffi/build.py`. 
+*Swig* binding can be prepared by calling `./src/fastcrc/swig/build.sh`.
+
+
+There is no more extra steps required to use prepared binding. It will be detected automatically in runtime. 
+There is also possiblitity to enforce use of certain binding. It can be done by setting `FASTCRC_BINDING` env variable to one of following values:
+- `auto` -- automatically select one of available bindings
+- `ctypes` -- use *ctypes*
+- `cffi` -- use *cffi*
+- `swig` -- use *swig*
+
+For testing, following oneliner might be very handy: `FASTCRC_BINDING=cffi ./src/find.sh --mode BF --alg HW ...`
+
+Note that, at the memoent, fast CRC is only implemented for *HW* algorithm.
+
 
 ### Development
 

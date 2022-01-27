@@ -221,7 +221,7 @@ class CRCProc(object):
 #         print( "creating StandardCRCOperator" )
         return StandardCRCOperator( self, inputData )
 
-    def createBackwardProcessor(self):
+    def createBackwardProcessor(self, crcSize):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
 
 
@@ -247,7 +247,7 @@ class CRCBackwardProc( object ):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
         
     def calculateInitRegRange(self, dataMask, crcNum, polyMask, xorStart, xorEnd):
-        ## default implementation
+        ## default (standard) implementation
         xorDict = list()
         for xorOut in xrange(xorStart, xorEnd + 1):
             crc_raw = crcNum ^ xorOut

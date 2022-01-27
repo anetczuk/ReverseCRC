@@ -44,7 +44,7 @@ from revcrc.solver.reverse import InputParams
 from revcrc.solver.backward import BackwardSolver
 
 
-def create_processor( algorithm ):
+def create_alg_processor( algorithm ):
     if algorithm == "HW":
         return HwCRC()
     elif algorithm == "DIV":
@@ -146,7 +146,7 @@ def main():
 
         printProgress = args.print_progress
 
-        processor = create_processor( args.alg )
+        processor = create_alg_processor( args.alg )
         if processor is None:
             print "invalid algorithm:", args.alg
             return 1

@@ -266,7 +266,8 @@ class HwCRC_CommonSolver_Test(unittest.TestCase, CommonSolverBaseTest):
     def setUp(self):
         # Called before testfunction is executed
         self.crcProc = HwCRC()
-        self.crcFinder = CommonSolver( HwCRC() )
+        self.crcFinder = CommonSolver()
+        self.crcFinder.setProcessor( HwCRC() )
     def tearDown(self):
         # Called after testfunction was executed
         pass
@@ -276,7 +277,8 @@ class DivisionCRC_CommonSolver_Test(unittest.TestCase, CommonSolverBaseTest):
     def setUp(self):
         # Called before testfunction is executed
         self.crcProc = DivisionCRC()
-        self.crcFinder = CommonSolver( DivisionCRC() )
+        self.crcFinder = CommonSolver()
+        self.crcFinder.setProcessor( DivisionCRC() )
     def tearDown(self):
         # Called after testfunction was executed
         pass

@@ -158,7 +158,8 @@ class HwCRC_BruteForcePairsSolver_Test(unittest.TestCase, BruteForcePairsSolverB
     def setUp(self):
         # Called before testfunction is executed
         self.crcProc = HwCRC()
-        self.crcFinder = BruteForcePairsSolver( HwCRC() )
+        self.crcFinder = BruteForcePairsSolver()
+        self.crcFinder.setProcessor( HwCRC() )
     def tearDown(self):
         # Called after testfunction was executed
         pass
@@ -168,7 +169,8 @@ class DivisionCRC_BruteForcePairsSolver_Test(unittest.TestCase, BruteForcePairsS
     def setUp(self):
         # Called before testfunction is executed
         self.crcProc = DivisionCRC()
-        self.crcFinder = BruteForcePairsSolver( DivisionCRC() )
+        self.crcFinder = BruteForcePairsSolver()
+        self.crcFinder.setProcessor( DivisionCRC() )
     def tearDown(self):
         # Called after testfunction was executed
         pass

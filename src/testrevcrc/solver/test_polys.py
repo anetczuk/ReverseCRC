@@ -266,7 +266,8 @@ class HwCRC_PolysSolver_Test(unittest.TestCase, PolysSolverBaseTest):
     def setUp(self):
         # Called before testfunction is executed
         self.crcProc = HwCRC()
-        self.crcFinder = PolysSolver( HwCRC() )
+        self.crcFinder = PolysSolver()
+        self.crcFinder.setProcessor( HwCRC() )
     def tearDown(self):
         # Called after testfunction was executed
         pass
@@ -276,7 +277,8 @@ class DivisionCRC_PolysSolver_Test(unittest.TestCase, PolysSolverBaseTest):
     def setUp(self):
         # Called before testfunction is executed
         self.crcProc = DivisionCRC()
-        self.crcFinder = PolysSolver( DivisionCRC() )
+        self.crcFinder = PolysSolver()
+        self.crcFinder.setProcessor( DivisionCRC() )
     def tearDown(self):
         # Called after testfunction was executed
         pass

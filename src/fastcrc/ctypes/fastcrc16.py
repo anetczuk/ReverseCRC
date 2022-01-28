@@ -2,16 +2,13 @@
 ##
 ##
 
-import os
 import ctypes
 
+from ..paths import FASTCRC_CLIB_LIB_PATH
 
-base_dir = os.path.dirname( __file__ )
-
-fastcrc_path = os.path.join( base_dir, os.pardir, "build", "install", "libfastcrc.so" )
 
 try:
-    c_fastcrc = ctypes.CDLL( fastcrc_path )
+    c_fastcrc = ctypes.CDLL( FASTCRC_CLIB_LIB_PATH )
 
 except OSError as ex:
     ## could not load module

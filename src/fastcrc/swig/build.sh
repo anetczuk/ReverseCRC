@@ -6,8 +6,9 @@ set -eu
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 
-FASTCRC_SRC_ROOT=$SCRIPT_DIR/../src
-FASTCRC_LIB_DIR=$SCRIPT_DIR/../build/install
+FASTCRC_CLIB_ROOT=$SCRIPT_DIR/../clib
+FASTCRC_SRC_ROOT=$FASTCRC_CLIB_ROOT/src
+FASTCRC_LIB_DIR=$FASTCRC_CLIB_ROOT/build/install
 
 
 BUILD_DIR=$SCRIPT_DIR/build

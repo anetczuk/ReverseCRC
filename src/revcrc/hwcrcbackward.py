@@ -29,11 +29,13 @@ from crc.crcproc import CRCBackwardProc
 
 from fastcrc.binding import convert_to_list
 
+from fastcrc.paths import FASTCRC_CLIB_SRC_DIR
+
 
 ## import code from directory that is not a package
 base_dir = os.path.dirname( __file__ )
 
-generate_lookup8_path = os.path.join( base_dir, os.pardir, "fastcrc", "src", "crchw", "generate_lookup8.py" )
+generate_lookup8_path = os.path.join( FASTCRC_CLIB_SRC_DIR, "crchw", "generate_lookup8.py" )
 generate_lookup8 = imp.load_source( 'fastcrc.generate_lookup8', generate_lookup8_path )
 
 # generate_lookup16_path = os.path.join( base_dir, os.pardir, "fastcrc", "src", "crchw", "generate_lookup16.py" )

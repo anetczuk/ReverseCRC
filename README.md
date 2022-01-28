@@ -46,7 +46,7 @@ where first hex number in row is data and second number is calculated CRC.
 Application comes with fast version of algorithms, that is implemented in C. 
 To use it it's needed to compile proper algorithms and then build Python bindings.
 
-Building algorithms is done by executing `./src/fastcrc/build.sh`
+Building algorithms is done by executing `./src/fastcrc/clib/build.sh`
 
 Using *ctypes* bindings does not require additional steps. In order to use *cffi* one has to execute `./src/fastcrc/cffi/build.py`. 
 *Swig* binding can be prepared by calling `./src/fastcrc/swig/build.sh`.

@@ -162,11 +162,12 @@ class CommonSolver(Reverse):
 
         ##print "Checking data:", dataMask, crc, crcMaskKey
 
-        self.crcProc.setValues(crcKey)
+        crc_forward = self.procFactory.createForwardProcessor()
+        crc_forward.setValues(crcKey)
 
         polyMask = NumberMask(crcKey.poly, crcMask.dataSize)
 
-        polyCRC = self.crcProc.calculate3(dataMask, polyMask)
+        polyCRC = crc_forward.calculate3(dataMask, polyMask)
         if polyCRC == crcMask.dataNum:
             retList.add( crcKey )
             ## we assume that if key was found then testing on reversed input will fail
@@ -177,10 +178,10 @@ class CommonSolver(Reverse):
 
         #TODO: try to achieve compatibility without reversing
         ## check reversed input (crcmod compatibility)
-        self.crcProc.setInitCRC( crcKey.init, crcMask.dataSize )
+        crc_forward.setInitCRC( crcKey.init, crcMask.dataSize )
         revDataMask = dataMask.reorderedBytes()
         polyMask.reverse()
 
-        polyCRC = self.crcProc.calculate3(revDataMask, polyMask)
+        polyCRC = crc_forward.calculate3(revDataMask, polyMask)
         if polyCRC == crcMask.dataNum:
             retList.add( crcKey )

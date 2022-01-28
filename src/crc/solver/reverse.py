@@ -229,13 +229,14 @@ class Reverse(object):
             self.progress = False
         else:
             self.progress = printProgress
-        self.crcProc = None
+        self.procFactory = None
         
         self.reverseOrder = None        ## bool, should bytes be read in reverse?
         self.reflectBits  = None        ## bool, should reflect bits in each input byte?
 
-    def setProcessor(self, crcProcessor):
-        self.crcProc = crcProcessor
+    # factory -- CRCProcessorFactory
+    def setProcessorFactory(self, factory):
+        self.procFactory = factory
 
     def setReturnOnFirst(self):
         self.returnFirst = True
@@ -265,7 +266,24 @@ class Reverse(object):
     def execute( self, inputParams, outputFile ):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
 
-    # ========================================================
+
+# ========================================================
+
+
+class XORReverse( Reverse ):
+    
+    def __init__(self, printProgress = None):
+        Reverse.__init__(self, printProgress)
+        self.crcProc = None
+
+    # factory -- CRCProcessorFactory
+    def setProcessorFactory(self, factory):
+        Reverse.setProcessorFactory(self, factory)
+        self.crcProc = factory.createForwardProcessor()
+
+    #TODO: remove
+    def setProcessor(self, crcProcessor):
+        self.crcProc = crcProcessor
 
     # return List[ PolyKey ]
     def findPolysXOR(self, data1, crc1, data2, crc2, dataSize, crcSize, searchRange = 0):
@@ -294,14 +312,14 @@ class Reverse(object):
             #TODO: what is initReg and xorVal for self.crcProc???
 
             crcList = []
-            crcList += self.findBruteForcePoly(subMask, crcMask, False)
-            crcList += self.findBruteForcePoly(subMask, crcMask, True)
+            crcList += self._findBruteForcePoly(subMask, crcMask, False)
+            crcList += self._findBruteForcePoly(subMask, crcMask, True)
 
             polyList = []           # List[ PolyKey ]
             for item in crcList:
                 polyList.append( item.getPolyKey() )
 
-            polyList += self.findBruteForcePolyReverse(subMask, crcMask)
+            polyList += self._findBruteForcePolyReverse(subMask, crcMask)
 
             if len(polyList) < 1:
                 continue
@@ -317,9 +335,8 @@ class Reverse(object):
 
         return retList
 
-
     # return List[ PolyKey ]
-    def findBruteForcePoly(self, dataMask, crcMask, reverseMode):
+    def _findBruteForcePoly(self, dataMask, crcMask, reverseMode):
         self.crcProc.setReversed(reverseMode)
         crc = crcMask.dataNum
         poly = 0
@@ -355,7 +372,7 @@ class Reverse(object):
 
     #TODO: try to achieve compatibility without reversing
     ## check reversed input and poly (crcmod compatibility)
-    def findBruteForcePolyReverse(self, dataMask, crcMask, searchRange = 0):
+    def _findBruteForcePolyReverse(self, dataMask, crcMask, searchRange = 0):
         dataMask.reorderBytes()
         self.crcProc.setReversed(True)
         crc = crcMask.dataNum

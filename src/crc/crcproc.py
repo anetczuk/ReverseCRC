@@ -153,6 +153,30 @@ class CRCKey:
 ## ===================================================================
 
 
+class CRCProcessorFactory(object):
+    
+    def __init__(self):
+        pass
+    
+    # return CRCProc
+    def createForwardProcessor(self):
+        raise NotImplementedError( "%s not implemented abstract method" % type(self) )
+
+    # crcSize -- int, number of bits
+    # return CRCBackwardProc
+    def createBackwardProcessor(self, crcSize):
+        raise NotImplementedError( "%s not implemented abstract method" % type(self) )
+    
+    # crcSize -- int, number of bits
+    # inputData: List[ (NumberMask, NumberMask) ]
+    # return CRCOperator
+    def createOperator(self, crcSize, inputData):
+        raise NotImplementedError( "%s not implemented abstract method" % type(self) )
+    
+
+## ===================================================================
+
+
 class CRCProc(object):
     '''
     classdocs
@@ -188,6 +212,7 @@ class CRCProc(object):
     def setReversed(self, value = True):
         self._reversed = value
 
+    # crcKey -- CRCKey
     def setValues(self, crcKey):
         self.setReversed( crcKey.isReversedFully() )
         self.setXorOutValue( crcKey.xor )

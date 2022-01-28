@@ -24,13 +24,13 @@
 import itertools
 from collections import Counter
 
-from crc.solver.reverse import Reverse, print_results, write_results
+from crc.solver.reverse import Reverse, print_results, write_results, XORReverse
 
 
-class PolysSolver(Reverse):
+class PolysSolver( XORReverse ):
 
     def __init__(self, printProgress = None):
-        Reverse.__init__(self, printProgress)
+        XORReverse.__init__(self, printProgress)
 
     ## inputParams -- InputParams
     def execute( self, inputParams, outputFile ):

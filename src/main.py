@@ -32,9 +32,9 @@ import cProfile
 
 from crc.input import DataParser
 
-from crc.hwcrc import HwCRC
+from crc.hwcrc import HwCRC, HwCRCProcessorFactory
 from crc.divisioncrc import DivisionCRC
-from crc.modcrc import ModCRC
+from crc.modcrc import ModCRC, ModCRCProcessorFactory
 from crc.solver.bruteforce import BruteForceSolver
 from crc.solver.bruteforcepairs import BruteForcePairsSolver
 from crc.solver.polys import PolysSolver
@@ -44,13 +44,14 @@ from crc.solver.reverse import InputParams
 from crc.solver.backward import BackwardSolver
 
 
-def create_alg_processor( algorithm ):
+# return CRCProcessorFactory
+def create_alg_factory( algorithm ):
     if algorithm == "HW":
-        return HwCRC()
+        return HwCRCProcessorFactory()
     elif algorithm == "DIV":
         return DivisionCRC()
     elif algorithm == "MOD":
-        return ModCRC()
+        return ModCRCProcessorFactory()
 #     elif args.alg == "COMMON":
 #         finder = RevCRCCommon( printProgress )
     return None
@@ -146,8 +147,8 @@ def main():
 
         printProgress = args.print_progress
 
-        processor = create_alg_processor( args.alg )
-        if processor is None:
+        processorFactory = create_alg_factory( args.alg )
+        if processorFactory is None:
             print "invalid algorithm:", args.alg
             return 1
 
@@ -156,7 +157,7 @@ def main():
         if solver is None:
             print "invalid solver:", args.mode
             return 1
-        solver.setProcessor( processor )
+        solver.setProcessorFactory( processorFactory )
 
         poly    = convert_hex( args.poly )
         initReg = convert_hex( args.init_reg )

@@ -22,7 +22,7 @@
 #
 
 
-from crc.crcproc import CRCProc
+from crc.crcproc import CRCProc, CRCProcessorFactory
 import crcmod
 
 
@@ -51,6 +51,28 @@ class CRCModCacheMap(object):
 
 CRCModCacheMap.instance = CRCModCacheMap()
 
+
+## ===================================================================
+
+
+class ModCRCProcessorFactory( CRCProcessorFactory ):
+    
+    # return CRCProc
+    def createForwardProcessor(self):
+        return ModCRC()
+    
+    # return CRCBackwardProc
+    def createBackwardProcessor(self, crcSize):
+        raise NotImplementedError( "ModCRC -- not implemented" )
+    
+    # crcSize -- int, number of bits
+    # inputData: List[ (NumberMask, NumberMask) ]
+    # return CRCOperator
+    def createOperator(self, crcSize, inputData):
+        raise NotImplementedError( "ModCRC -- not implemented" )
+
+
+## ===================================================================
 
 
 ##

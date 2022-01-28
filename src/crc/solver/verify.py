@@ -92,7 +92,8 @@ class VerifySolver(Reverse):
         
         spaceCounter = 0
 
-        crc_operator = self.crcProc.createOperator( crcSize, inputList )
+        crc_forward  = self.procFactory.createForwardProcessor()
+        crc_operator = crc_forward.createOperator( crcSize, inputList )
 
         polyMask     = NumberMask( 0, crcSize )
         

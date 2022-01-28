@@ -21,8 +21,31 @@
 # SOFTWARE.
 #
 
+from crc.crcproc import CRCProc, CRCProcessorFactory
+from crc.divisioncrcbackward import DivisionCRCBackward
 
-from crc.crcproc import CRCProc
+
+## ===================================================================
+
+
+class DivisionCRCProcessorFactory( CRCProcessorFactory ):
+    
+    # return CRCProc
+    def createForwardProcessor(self):
+        return DivisionCRC()
+    
+    # return CRCBackwardProc
+    def createBackwardProcessor(self, crcSize):
+        return DivisionCRCBackward()
+
+    # crcSize -- int, number of bits
+    # inputData: List[ (NumberMask, NumberMask) ]
+    # return CRCOperator
+    def createOperator(self, crcSize, inputData):
+        raise NotImplementedError( "DivisionCRC -- not implemented" )
+
+
+## ===================================================================
 
 
 class DivisionCRC(CRCProc):

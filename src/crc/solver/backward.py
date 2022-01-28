@@ -79,11 +79,13 @@ class BackwardSolver(Reverse):
         
         spaceCounter = 0
 
-        crc_backward = self.crcProc.createBackwardProcessor( crcSize )       # CRCBackwardProc
+        crc_forward  = self.procFactory.createForwardProcessor()                 # CRCProc
+        crc_backward = self.procFactory.createBackwardProcessor( crcSize )       # CRCBackwardProc
         
         subInputList = inputList[1:]
-        crc_operator = self.crcProc.createOperator( crcSize, subInputList )
-#         crc_operator = self.crcProc.createStandardOperator( crcSize, subInputList )
+        crc_operator = crc_forward.createOperator( crcSize, subInputList )
+#         crc_operator = self.procFactory.createOperator( crcSize, subInputList )
+#         crc_operator = crc_forward.createStandardOperator( crcSize, subInputList )
 
         results = Counter()
         
@@ -115,10 +117,10 @@ class BackwardSolver(Reverse):
             for xorOutPair in xorDict:
                 xorOut      = xorOutPair[0]
                 init_found  = xorOutPair[1]
-                self.crcProc.setXorOutValue( xorOut )
+                crc_forward.setXorOutValue( xorOut )
                 
                 for init_reg in init_found:
-                    self.crcProc.setInitValue( init_reg )
+                    crc_forward.setInitValue( init_reg )
                     
                     valid = crc_operator.verify( polyMask )
                     if valid:

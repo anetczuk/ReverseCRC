@@ -26,8 +26,8 @@ import os
 import crcmod
 
 from crc.numbermask import intToASCII
-from crc.hwcrc import HwCRC
-from crc.divisioncrc import DivisionCRC
+from crc.hwcrc import HwCRC, HwCRCProcessorFactory
+from crc.divisioncrc import DivisionCRC, DivisionCRCProcessorFactory
 from crc.crcproc import CRCKey
 from crc.input import InputData
 from crc.solver.common import CommonSolver
@@ -265,9 +265,10 @@ class CommonSolverBaseTest(object):
 class HwCRC_CommonSolver_Test(unittest.TestCase, CommonSolverBaseTest):
     def setUp(self):
         # Called before testfunction is executed
-        self.crcProc = HwCRC()
+        factory = HwCRCProcessorFactory()
+        self.crcProc = factory.createForwardProcessor()
         self.crcFinder = CommonSolver()
-        self.crcFinder.setProcessor( HwCRC() )
+        self.crcFinder.setProcessorFactory( factory )
     def tearDown(self):
         # Called after testfunction was executed
         pass
@@ -276,9 +277,10 @@ class HwCRC_CommonSolver_Test(unittest.TestCase, CommonSolverBaseTest):
 class DivisionCRC_CommonSolver_Test(unittest.TestCase, CommonSolverBaseTest):
     def setUp(self):
         # Called before testfunction is executed
-        self.crcProc = DivisionCRC()
+        factory = DivisionCRCProcessorFactory()
+        self.crcProc = factory.createForwardProcessor()
         self.crcFinder = CommonSolver()
-        self.crcFinder.setProcessor( DivisionCRC() )
+        self.crcFinder.setProcessorFactory( factory )
     def tearDown(self):
         # Called after testfunction was executed
         pass

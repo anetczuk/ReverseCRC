@@ -21,11 +21,12 @@
 # SOFTWARE.
 #
 
-from crc.crcproc import CRCProc, CRCOperator, ResultContainer
+from crc.crcproc import CRCProc, CRCOperator, ResultContainer,\
+    CRCProcessorFactory
 
 from crc.numbermask import reverse_number
 from collections import Counter
-from crc.hwcrcbackward import create_backward_processor
+from crc.hwcrcbackward import create_backward_processor, HwCRCBackward
 
 from fastcrc.utils import convert_to_msb_list, convert_to_lsb_list
 
@@ -44,6 +45,29 @@ except ImportError as ex:
 
 # if USE_FAST_CRC is False:
 #     print "WARNING: fast CRC is disabled!!!"
+
+
+## ===================================================================
+
+
+class HwCRCProcessorFactory( CRCProcessorFactory ):
+    
+    # return CRCProc
+    def createForwardProcessor(self):
+        return HwCRC()
+    
+    # return CRCBackwardProc
+    def createBackwardProcessor(self, crcSize):
+        return create_backward_processor( crcSize )
+    
+    # crcSize -- int, number of bits
+    # inputData: List[ (NumberMask, NumberMask) ]
+    # return CRCOperator
+    def createOperator(self, crcSize, inputData):
+        return HwCRC().createOperator( crcSize, inputData )
+
+
+## ===================================================================
 
 
 ##

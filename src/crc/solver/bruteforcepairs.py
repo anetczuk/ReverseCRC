@@ -29,13 +29,13 @@ from crc.numbermask import NumberMask
 from crc.flush import flush_number, flush_string
 from crc.crcproc import CRCKey
 from crc.solver.reverse import Reverse, print_results, write_results,\
-    MessageCRC
+    MessageCRC, XORReverse
 
 
-class BruteForcePairsSolver(Reverse):
+class BruteForcePairsSolver( XORReverse ):
 
     def __init__(self, printProgress = None):
-        Reverse.__init__(self, printProgress)
+        XORReverse.__init__(self, printProgress)
 
     ## inputParams -- InputParams
     def execute( self, inputParams, outputFile ):

@@ -28,7 +28,7 @@ from collections import Counter
 from crc.numbermask import NumberMask
 from crc.flush import flush_number, flush_string
 from crc.crcproc import CRCKey
-from revcrc.solver.reverse import Reverse, print_results, write_results,\
+from crc.solver.reverse import Reverse, print_results, write_results,\
     MessageCRC
 
 

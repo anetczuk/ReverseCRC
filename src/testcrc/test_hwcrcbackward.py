@@ -27,7 +27,7 @@ import unittest
 
 import random
 from crc.hwcrc import HwCRC
-from revcrc.hwcrcbackward import HwCRCBackward
+from crc.hwcrcbackward import HwCRCBackward
 from crc.numbermask import NumberMask
 
 

@@ -30,18 +30,18 @@ import argparse
 import logging
 import cProfile
 
-from revcrc.input import DataParser
+from crc.input import DataParser
 
 from crc.hwcrc import HwCRC
 from crc.divisioncrc import DivisionCRC
 from crc.modcrc import ModCRC
-from revcrc.solver.bruteforce import BruteForceSolver
-from revcrc.solver.bruteforcepairs import BruteForcePairsSolver
-from revcrc.solver.polys import PolysSolver
-from revcrc.solver.common import CommonSolver
-from revcrc.solver.verify import VerifySolver
-from revcrc.solver.reverse import InputParams
-from revcrc.solver.backward import BackwardSolver
+from crc.solver.bruteforce import BruteForceSolver
+from crc.solver.bruteforcepairs import BruteForcePairsSolver
+from crc.solver.polys import PolysSolver
+from crc.solver.common import CommonSolver
+from crc.solver.verify import VerifySolver
+from crc.solver.reverse import InputParams
+from crc.solver.backward import BackwardSolver
 
 
 def create_alg_processor( algorithm ):

@@ -23,29 +23,20 @@
 
 from crc.numbermask import NumberMask
 from crc.crcproc import PolyKey, CRCKey
-from revcrc.solver.reverse import Reverse,\
+from crc.solver.reverse import Reverse,\
     InputMaskList, print_results, write_results
 from crc.flush import flush_percent, flush_string
 from collections import Counter
 
 
-# class VerifyCRCCollector( CRCCollector ):
-#     
-#     def __init__(self):
-#         CRCCollector.__init__(self)
-# 
-#     def collect(self, poly, initReg, xorVal):
-#         flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( poly, initReg, xorVal ) )
-
-
-class VerifySolver(Reverse):
+class BackwardSolver(Reverse):
 
     def __init__(self, printProgress = None):
         Reverse.__init__(self, printProgress)
 
     ## inputParams -- InputParams
     def execute( self, inputParams, outputFile ):
-        inputData = inputParams.data
+        inputData = inputParams.data        # InputData
         
         crcSize = inputParams.getCRCSize()
         if crcSize is None:
@@ -63,59 +54,81 @@ class VerifySolver(Reverse):
         
         print "crc size: %s" % crcSize
         
-        revOrd = inputParams.isReverseOrder()
-        if revOrd:
-            inputMasks.reverseOrder()
-        refBits = inputParams.isReflectBits()
-        if refBits:
-            inputMasks.reflectBits()
-            
-        ## List[ (NumberMask, NumberMask) ]
-        inputList = inputMasks.getInputMasks()
+#         revOrd = inputParams.isReverseOrder()
+#         if revOrd:
+#             inputMasks.reverseOrder()
+#         refBits = inputParams.isReflectBits()
+#         if refBits:
+#             inputMasks.reflectBits()
+
+        inputList = inputMasks.getInputMasks()          # List[ (NumberMask, NumberMask) ]
+        numbersLen = len(inputList)
         
         polyListStart, polyListStop = inputParams.getPolySearchRange()
         polyListSize = polyListStop - polyListStart + 1
         
-        initListStart, initListStop = inputParams.getInitRegSearchRange()
-        initListSize  = initListStop - initListStart + 1
-        
         xorListStart, xorListStop = inputParams.getXorValSearchRange()
         xorListSize  = xorListStop - xorListStart + 1
 
-        subSpaceSize = initListSize * xorListSize
-        spaceSize    = polyListSize * subSpaceSize
-        print "search space size:", spaceSize, polyListSize, initListSize, xorListSize
+        subSpaceSize = xorListSize
+        spaceSize    = numbersLen * polyListSize * subSpaceSize
+        print "search space size:", spaceSize, numbersLen, polyListSize, xorListSize
         
         print "poly search range: %s %s" % ( polyListStart, polyListStop )
-        print "init search range: %s %s" % ( initListStart, initListStop )
         print " xor search range: %s %s" % ( xorListStart, xorListStop )
         
         spaceCounter = 0
 
-        crc_operator = self.crcProc.createOperator( crcSize, inputList )
-
-        polyMask     = NumberMask( 0, crcSize )
+        crc_backward = self.crcProc.createBackwardProcessor( crcSize )       # CRCBackwardProc
         
+        subInputList = inputList[1:]
+        crc_operator = self.crcProc.createOperator( crcSize, subInputList )
+#         crc_operator = self.crcProc.createStandardOperator( crcSize, subInputList )
+
         results = Counter()
         
+        dataSize = inputData.dataSize
+        
+        firstDataItem  = inputList[0]
+        firstDataMask = firstDataItem[0]
+        firstCrcMask  = firstDataItem[1]
+        firstCrc      = firstCrcMask.dataNum
+        
+#         initSum = 0
+        
+        polyMask = NumberMask( 0, crcSize )
         for polyNum in xrange(polyListStart, polyListStop + 1):
-            polyMask.setNumber( polyNum )
+            if polyNum is 0x0:
+                ## value does not make sense and it's heavily computable
+                spaceCounter += numbersLen * subSpaceSize
+                continue
 
-            spaceCounter += subSpaceSize
+            polyMask.setNumber( polyNum )
+            
+            spaceCounter += numbersLen * subSpaceSize
             if self.progress:
                 value = spaceCounter * 100.0 / spaceSize
-                flush_percent( value, 4 )
+                flush_percent( value, 7 )
             
-            crc_found = crc_operator.verifyRange( polyMask, initListStart, initListStop, xorListStart, xorListStop )
-            
-            for item in crc_found:
-                initReg = item[0]
-                xorVal  = item[1]
-#                     flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyMask.dataNum, initReg, xorVal ) )
-                key = CRCKey( polyMask.dataNum, initReg, xorVal, 0, inputData.dataSize, revOrd=revOrd, refBits=refBits )
-                results[ key ] += 1
-        
-        print "\n\nFound total results: ", len(results)
-        print_results( results, 1 )
+            xorDict = crc_backward.calculateInitRegRange( firstDataMask, firstCrc, polyMask, xorListStart, xorListStop )
 
-        write_results( results, 1, outputFile )
+            for xorOutPair in xorDict:
+                xorOut      = xorOutPair[0]
+                init_found  = xorOutPair[1]
+                self.crcProc.setXorOutValue( xorOut )
+                
+                for init_reg in init_found:
+                    self.crcProc.setInitValue( init_reg )
+                    
+                    valid = crc_operator.verify( polyMask )
+                    if valid:
+                        key = CRCKey( polyNum, init_reg, xorOut, 0, dataSize, revOrd=False, refBits=False )
+                        results[ key ] += 1
+
+        print "\n\nFound total results: ", len(results), "\n"
+
+        print_results( results, 1, True )
+ 
+        write_results( results, 1, outputFile, True )
+
+#         print "inits per item:", initSum, float(initSum) / (polyListSize*xorListSize*numbersLen)

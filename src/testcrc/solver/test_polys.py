@@ -30,8 +30,8 @@ from crc.numbermask import intToASCII
 from crc.hwcrc import HwCRC
 from crc.divisioncrc import DivisionCRC
 from crc.crcproc import PolyKey
-from revcrc.input import InputData
-from revcrc.solver.polys import PolysSolver
+from crc.input import InputData
+from crc.solver.polys import PolysSolver
 
 
 __scriptdir__ = os.path.dirname(os.path.realpath(__file__))

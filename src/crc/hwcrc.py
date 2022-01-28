@@ -25,7 +25,7 @@ from crc.crcproc import CRCProc, CRCOperator, ResultContainer
 
 from crc.numbermask import reverse_number
 from collections import Counter
-from revcrc.hwcrcbackward import create_backward_processor
+from crc.hwcrcbackward import create_backward_processor
 
 from fastcrc.utils import convert_to_msb_list, convert_to_lsb_list
 

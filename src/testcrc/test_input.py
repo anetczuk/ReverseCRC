@@ -26,7 +26,7 @@ import unittest
 import os
 # import logging
 
-from revcrc.input import DataParser, InputData
+from crc.input import DataParser, InputData
 
 
 __scriptdir__ = os.path.dirname(os.path.realpath(__file__))

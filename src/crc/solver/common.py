@@ -25,7 +25,7 @@ from collections import Counter
 
 from crc.numbermask import NumberMask
 from crc.crcproc import CRCKey
-from revcrc.solver.reverse import Reverse, print_results, write_results
+from crc.solver.reverse import Reverse, print_results, write_results
 
 
 class CommonSolver(Reverse):

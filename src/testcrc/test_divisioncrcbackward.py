@@ -28,7 +28,7 @@ import os
 
 import random
 from crc.divisioncrc import DivisionCRC
-from revcrc.divisioncrcbackward import DivisionCRCBackwardState,\
+from crc.divisioncrcbackward import DivisionCRCBackwardState,\
     DivisionCRCBackward
 from crc.numbermask import NumberMask
 

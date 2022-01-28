@@ -29,8 +29,8 @@ from crc.numbermask import intToASCII
 from crc.hwcrc import HwCRC
 from crc.divisioncrc import DivisionCRC
 from crc.crcproc import CRCKey
-from revcrc.input import InputData
-from revcrc.solver.common import CommonSolver
+from crc.input import InputData
+from crc.solver.common import CommonSolver
 
 
 __scriptdir__ = os.path.dirname(os.path.realpath(__file__))

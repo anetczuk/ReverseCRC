@@ -158,13 +158,14 @@ class CRCProcessorFactory(object):
     def __init__(self):
         pass
     
+    # crcSize -- int, number of bits
     # return CRCProc
-    def createForwardProcessor(self):
+    def createForwardProcessor(self, crcSize=None):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
 
     # crcSize -- int, number of bits
     # return CRCBackwardProc
-    def createBackwardProcessor(self, crcSize):
+    def createBackwardProcessor(self, crcSize=None):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
     
     # crcSize -- int, number of bits

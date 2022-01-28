@@ -27,8 +27,8 @@ import crcmod
 import random
 
 from crc.numbermask import intToASCII
-from crc.hwcrc import HwCRC
-from crc.divisioncrc import DivisionCRC
+from crc.hwcrc import HwCRC, HwCRCProcessorFactory
+from crc.divisioncrc import DivisionCRC, DivisionCRCProcessorFactory
 from crc.crcproc import PolyKey
 from crc.input import InputData
 from crc.solver.polys import PolysSolver
@@ -265,9 +265,10 @@ class PolysSolverBaseTest(object):
 class HwCRC_PolysSolver_Test(unittest.TestCase, PolysSolverBaseTest):
     def setUp(self):
         # Called before testfunction is executed
-        self.crcProc = HwCRC()
+        factory = HwCRCProcessorFactory()
+        self.crcProc = factory.createForwardProcessor()
         self.crcFinder = PolysSolver()
-        self.crcFinder.setProcessor( HwCRC() )
+        self.crcFinder.setProcessorFactory( factory )
     def tearDown(self):
         # Called after testfunction was executed
         pass
@@ -276,9 +277,10 @@ class HwCRC_PolysSolver_Test(unittest.TestCase, PolysSolverBaseTest):
 class DivisionCRC_PolysSolver_Test(unittest.TestCase, PolysSolverBaseTest):
     def setUp(self):
         # Called before testfunction is executed
-        self.crcProc = DivisionCRC()
+        factory = DivisionCRCProcessorFactory()
+        self.crcProc = factory.createForwardProcessor()
         self.crcFinder = PolysSolver()
-        self.crcFinder.setProcessor( DivisionCRC() )
+        self.crcFinder.setProcessorFactory( factory )
     def tearDown(self):
         # Called after testfunction was executed
         pass

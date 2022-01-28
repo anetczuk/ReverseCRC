@@ -424,6 +424,8 @@ class HwCRCBackward( CRCBackwardProc ):
 
 
 def create_backward_processor(crcSize):
+    if crcSize is None:
+        return HwCRCBackward()
     if crcSize != 16:
         return HwCRCBackward()
 
@@ -432,6 +434,7 @@ def create_backward_processor(crcSize):
     
     try:
         from fastcrc.binding import hw_crc16_invert, hw_crc16_invert_range
+
 #     except ImportError as ex:
     except ImportError:
         ## disable fastcrc -- there were problem with importing fastcrc

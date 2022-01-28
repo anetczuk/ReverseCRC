@@ -32,7 +32,7 @@ import cProfile
 
 from crc.input import DataParser
 
-from crc.hwcrc import HwCRC, HwCRCProcessorFactory
+from crc.hwcrc import HwCRCProcessorFactory
 from crc.divisioncrc import DivisionCRC
 from crc.modcrc import ModCRC, ModCRCProcessorFactory
 from crc.solver.bruteforce import BruteForceSolver

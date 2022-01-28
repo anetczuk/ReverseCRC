@@ -21,30 +21,14 @@
 # SOFTWARE.
 #
 
-from crc.crcproc import CRCProc, CRCOperator, ResultContainer,\
-    CRCProcessorFactory
+from crc.crcproc import CRCProc, CRCOperator, CRCProcessorFactory,\
+    StandardCRCOperator
 
 from crc.numbermask import reverse_number
 from collections import Counter
-from crc.hwcrcbackward import create_backward_processor, HwCRCBackward
+from crc.hwcrcbackward import create_backward_processor
 
 from fastcrc.utils import convert_to_msb_list, convert_to_lsb_list
-
-
-USE_FAST_CRC = True
-# USE_FAST_CRC = False
-
-try:
-    if USE_FAST_CRC:
-        from fastcrc.binding import hw_crc8_calculate, hw_crc8_calculate_range
-        from fastcrc.binding import hw_crc16_calculate, hw_crc16_calculate_range
-except ImportError as ex:
-    ## disable fastcrc -- there were problem with importing fastcrc
-    USE_FAST_CRC = False
-#     print "unable to import fastcrc:", ex
-
-# if USE_FAST_CRC is False:
-#     print "WARNING: fast CRC is disabled!!!"
 
 
 ## ===================================================================
@@ -52,12 +36,14 @@ except ImportError as ex:
 
 class HwCRCProcessorFactory( CRCProcessorFactory ):
     
+    # crcSize -- int, number of bits
     # return CRCProc
-    def createForwardProcessor(self):
-        return HwCRC()
+    def createForwardProcessor(self, crcSize=None):
+        return create_processor(crcSize)
     
+    # crcSize -- int, number of bits
     # return CRCBackwardProc
-    def createBackwardProcessor(self, crcSize):
+    def createBackwardProcessor(self, crcSize=None):
         return create_backward_processor( crcSize )
     
     # crcSize -- int, number of bits
@@ -71,27 +57,20 @@ class HwCRCProcessorFactory( CRCProcessorFactory ):
 
 
 ##
-##
+## standard implementation done in pure Python
 class HwCRC( CRCProc ):
 
     def __init__(self):
         CRCProc.__init__(self)
-#         self.setReversed( False )
         
     ## override
     def setReversed(self, value = True):
         CRCProc.setReversed(self, value)
         ## optimize execution time by reducing one level of function call
         if value is False:
-            if USE_FAST_CRC:
-                self.calculate3 = self.calculateMSB
-            else:
-                self.calculate3 = self.calculateMSBClassic
+            self.calculate3 = self.calculateMSBClassic
         else:
-            if USE_FAST_CRC:
-                self.calculate3 = self.calculateLSB
-            else:
-                self.calculate3 = self.calculateLSBClassic            
+            self.calculate3 = self.calculateLSBClassic            
         
     ## leave methon not overriden -- it will be changed during call to 'setReversed()'
 #     ## dataMask: NumberMask
@@ -101,54 +80,6 @@ class HwCRC( CRCProc ):
 #             return self.calculateMSB(dataMask, polyMask)
 #         else:
 #             return self.calculateLSBClassic(dataMask, polyMask)
-
-    def calculateMSB(self, dataMask, polyMask):
-#         return self.calculateMSBClassic(dataMask, polyMask)
-        if dataMask.dataSize % 8 != 0:
-            ## fast crc only supports full bytes
-            return self.calculateMSBClassic(dataMask, polyMask)
-        
-        if polyMask.dataSize == 8:
-            bytesList = convert_to_msb_list( dataMask.dataNum, dataMask.dataSize / 8 )
-            return hw_crc8_calculate( bytesList, polyMask.dataNum, self.registerInit, self.xorOut )
-        
-        if polyMask.dataSize == 16:
-            bytesList = convert_to_msb_list( dataMask.dataNum, dataMask.dataSize / 8 )
-            return hw_crc16_calculate( bytesList, polyMask.dataNum, self.registerInit, self.xorOut )
-        
-        ## fast crc only supports CRC8
-        return self.calculateMSBClassic(dataMask, polyMask)
-
-    def calculateLSB(self, dataMask, polyMask):
-#         return self.calculateLSBClassic(dataMask, polyMask)
-        if dataMask.dataSize % 8 != 0:
-            ## fast crc only supports full bytes
-            return self.calculateLSBClassic(dataMask, polyMask)
-        
-        if polyMask.dataSize == 8:
-            bytesList = convert_to_lsb_list( dataMask.dataNum, dataMask.dataSize / 8 )
-            poly      = reverse_number( polyMask.dataNum, polyMask.dataSize )
-            
-            initReg = reverse_number( self.registerInit, polyMask.dataSize )
-            xor_val = reverse_number( self.xorOut, polyMask.dataSize )
-
-            calc_crc = hw_crc8_calculate( bytesList, poly, initReg, xor_val )
-            
-            return reverse_number( calc_crc, polyMask.dataSize )
-        
-        if polyMask.dataSize == 16:
-            bytesList = convert_to_lsb_list( dataMask.dataNum, dataMask.dataSize / 8 )
-            poly      = reverse_number( polyMask.dataNum, polyMask.dataSize )
-            
-            initReg = reverse_number( self.registerInit, polyMask.dataSize )
-            xor_val = reverse_number( self.xorOut, polyMask.dataSize )
-
-            calc_crc = hw_crc16_calculate( bytesList, poly, initReg, xor_val )
-            
-            return reverse_number( calc_crc, polyMask.dataSize )
-        
-        ## fast crc only supports CRC8
-        return self.calculateLSBClassic(dataMask, polyMask)
 
     ## 'poly' without leading '1'
     def calculateMSBClassic(self, dataMask, polyMask):
@@ -214,24 +145,8 @@ class HwCRC( CRCProc ):
     # inputData: List[ (NumberMask, NumberMask) ]
     # return CRCOperator
     def createOperator(self, crcSize, inputData):
-        if USE_FAST_CRC is False:
-            return CRCProc.createOperator(self, crcSize, inputData)
-            
-        if crcSize == 8:
-            dataList = self.morphData( inputData, crcSize )
-            if dataList:
-#                 print "creating Forward8FastHwOperator"
-                return Forward8FastHwOperator( self, dataList )
-        if crcSize == 16:
-            dataList = self.morphData( inputData, crcSize )
-            if dataList:
-#                 print "creating Forward16FastHwOperator"
-                return Forward16FastHwOperator( self, dataList )
-                
-        print "unable to morph -- unsupported crc size: ", crcSize
         return CRCProc.createOperator(self, crcSize, inputData)
-
-
+            
     def morphData(self, inputData, crcSize):
         dataList = []
         for data in inputData:
@@ -257,174 +172,37 @@ class HwCRC( CRCProc ):
         return create_backward_processor( crcSize )
 
 
-##
-##
-##
-class Forward8FastHwOperator( CRCOperator ):
-    
-    def __init__(self, crcProcessor, inputData):
-        CRCOperator.__init__(self)
-        self.processor = crcProcessor               ## CRCProc
-        self.data = inputData                       ## List[ bytes_list ]
+## ==========================================================
 
-    def calculate(self, polyMask):
-        retList = []
-        for item in self.data:
-            bytes_list = item[0]
-            crc = hw_crc8_calculate( bytes_list, polyMask.dataNum, self.processor.registerInit, self.processor.xorOut )
-            retList.append( crc )
-        return retList
     
-    def verify(self, polyMask):
-        for item in self.data:
-            bytes_list = item[0]
-            dataCRC    = item[1]
-            crc = hw_crc8_calculate( bytes_list, polyMask.dataNum, self.processor.registerInit, self.processor.xorOut )
-            if crc != dataCRC:
-                return False
-            
-        ## all CRC matches
-        return True
-    
-    ## return CRC if matches any data
-    def calculateRange(self, polyMask, intRegStart, intRegEnd, xorStart, xorEnd):
-#         print "verify input: 0x%X 0x%X 0x%X 0x%X 0x%X" % ( polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorEnd )
+def create_processor(crcSize):
+    if crcSize is None:
+        return HwCRC()
 
-        results = Counter()
+    if crcSize == 8:
+        try:
+            from crc.fasthwcrc import Fast8HwCRC
         
-        for item in self.data:
-            bytes_list = item[0]
-            dataCRC    = item[1]
-            crc_match = hw_crc8_calculate_range( bytes_list, dataCRC, polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorEnd )
-            results.update( crc_match )
-
-        return results
-
-    ## return # List[ (int, int) ] -- initReg and xorVal for found CRCs
-    def verifyRange(self, polyMask, intRegStart, intRegEnd, xorStart, xorEnd):
-#         print "verify input: 0x%X 0x%X 0x%X 0x%X 0x%X" % ( polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorEnd )
-
-        if not self.data:
-            return []
-
-        ## first item -- standard iteration
-        item = self.data[0]
-        bytes_list = item[0]
-        dataCRC    = item[1]
-
-        ## no results from previous data item -- standard iteration
-        # List[ (int, int) ]
-        results = hw_crc8_calculate_range( bytes_list, dataCRC, polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorEnd )
-        if not results:
-            ## no common result found -- return
-            return []
+            return Fast8HwCRC()
         
-        ##
-        ## iterate over rest elements
-        ##
-        for item in self.data[1:]:
-            bytes_list = item[0]
-            dataCRC    = item[1]
+    #     except ImportError as ex:
+        except ImportError:
+            ## disable fastcrc -- there were problem with importing fastcrc
+    #         print "unable to import fastcrc:", ex
+    #         print "WARNING: fast CRC is disabled!!!"
+            return HwCRC()
 
-            ## results from previous data item -- reuse
-            crc_match = []
-            for item in results:
-                initReg = item[0]
-                xorVal  = item[1]
-                crc = hw_crc8_calculate( bytes_list, polyMask.dataNum, initReg, xorVal )
-                if crc == dataCRC:
-                    crc_match.append( ( initReg, xorVal ) )  
-
-            results = crc_match
-            if not results:
-                ## no common result found -- return
-                return []
-
-        return results
-
-
-##
-##
-##
-class Forward16FastHwOperator( CRCOperator ):
-    
-    def __init__(self, crcProcessor, inputData):
-        CRCOperator.__init__(self)
-        self.processor = crcProcessor               ## CRCProc
-        self.data = inputData                       ## List[ bytes_list ]
-
-    def calculate(self, polyMask):
-        retList = []
-        for item in self.data:
-            bytes_list = item[0]
-            crc = hw_crc16_calculate( bytes_list, polyMask.dataNum, self.processor.registerInit, self.processor.xorOut )
-            retList.append( crc )
-        return retList
-    
-    ## return True if matches for all data
-    def verify(self, polyMask):
-        for item in self.data:
-            bytes_list = item[0]
-            dataCRC    = item[1]
-            crc = hw_crc16_calculate( bytes_list, polyMask.dataNum, self.processor.registerInit, self.processor.xorOut )
-            if dataCRC != crc:
-                return False
-            
-        ## all CRC matches
-        return True
-
-    ## return CRC if matches any data
-    def calculateRange(self, polyMask, intRegStart, intRegEnd, xorStart, xorEnd):
-#         print "verify input: 0x%X 0x%X 0x%X 0x%X 0x%X" % ( polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorEnd )
-
-        results = Counter()
+    elif crcSize == 16:
+        try:
+            from crc.fasthwcrc import Fast16HwCRC
         
-        for item in self.data:
-            bytes_list = item[0]
-            dataCRC    = item[1]
-            crc_match = hw_crc16_calculate_range( bytes_list, dataCRC, polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorEnd )
-            results.update( crc_match )
+            return Fast16HwCRC()
+        
+    #     except ImportError as ex:
+        except ImportError:
+            ## disable fastcrc -- there were problem with importing fastcrc
+    #         print "unable to import fastcrc:", ex
+    #         print "WARNING: fast CRC is disabled!!!"
+            return HwCRC()
 
-        return results
-
-    ## return CRC if matches for all data
-    def verifyRange(self, polyMask, intRegStart, intRegEnd, xorStart, xorEnd):
-#         print "verify input: 0x%X 0x%X 0x%X 0x%X 0x%X" % ( polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorEnd )
-
-        if not self.data:
-            return []
-
-        ## first item -- standard iteration
-        item = self.data[0]
-        bytes_list = item[0]
-        dataCRC    = item[1]
-
-        ## no results from previous data item -- standard iteration
-        # List[ (int, int) ]
-        results = hw_crc16_calculate_range( bytes_list, dataCRC, polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorEnd )
-        if not results:
-            ## no common result found -- return
-            return []
-
-        ##        
-        ## iterate over rest elements
-        ##
-        for item in self.data[1:]:
-            bytes_list = item[0]
-            dataCRC    = item[1]
-
-            ## results from previous data item -- reuse
-            crc_match = []
-            for item in results:
-                initReg = item[0]
-                xorVal  = item[1]
-                crc = hw_crc16_calculate( bytes_list, polyMask.dataNum, initReg, xorVal )
-                if crc == dataCRC:
-                    crc_match.append( ( initReg, xorVal ) )                
-                    
-            results = crc_match
-            if not results:
-                ## no common result found -- return
-                return []
-
-        return results
+    return HwCRC()

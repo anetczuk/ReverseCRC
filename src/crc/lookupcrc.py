@@ -22,7 +22,7 @@
 #
 
 
-from crc.hwcrc import HwCRC
+from crc.hwcrc import create_processor
 from crc.numbermask import NumberMask
 from crc.crcproc import CRCProc
 
@@ -65,7 +65,8 @@ class LookupCRC(CRCProc):
 
     def prepareTable(self, polyMask):
         lookup = {}
-        crcProc = HwCRC()
+        crcSize = polyMask.dataSize
+        crcProc = create_processor( crcSize )
         maxVal = 1 << self.lookupSize
         for i in range(0, maxVal):
             data = NumberMask(i, self.lookupSize)

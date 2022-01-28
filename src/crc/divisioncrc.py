@@ -30,12 +30,14 @@ from crc.divisioncrcbackward import DivisionCRCBackward
 
 class DivisionCRCProcessorFactory( CRCProcessorFactory ):
     
+    # crcSize -- int, number of bits
     # return CRCProc
-    def createForwardProcessor(self):
+    def createForwardProcessor(self, crcSize=None):
         return DivisionCRC()
     
+    # crcSize -- int, number of bits
     # return CRCBackwardProc
-    def createBackwardProcessor(self, crcSize):
+    def createBackwardProcessor(self, crcSize=None):
         return DivisionCRCBackward()
 
     # crcSize -- int, number of bits

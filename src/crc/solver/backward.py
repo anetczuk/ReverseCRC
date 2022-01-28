@@ -79,7 +79,7 @@ class BackwardSolver(Reverse):
         
         spaceCounter = 0
 
-        crc_forward  = self.procFactory.createForwardProcessor()                 # CRCProc
+        crc_forward  = self.procFactory.createForwardProcessor( crcSize )                 # CRCProc
         crc_backward = self.procFactory.createBackwardProcessor( crcSize )       # CRCBackwardProc
         
         subInputList = inputList[1:]

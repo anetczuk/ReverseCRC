@@ -161,11 +161,13 @@ class CommonSolver(Reverse):
         ## crcKey: CRCKey
 
         ##print "Checking data:", dataMask, crc, crcMaskKey
+        
+        crcSize = crcMask.dataSize
 
-        crc_forward = self.procFactory.createForwardProcessor()
+        crc_forward = self.procFactory.createForwardProcessor( crcSize )
         crc_forward.setValues(crcKey)
 
-        polyMask = NumberMask(crcKey.poly, crcMask.dataSize)
+        polyMask = NumberMask(crcKey.poly, crcSize)
 
         polyCRC = crc_forward.calculate3(dataMask, polyMask)
         if polyCRC == crcMask.dataNum:
@@ -178,7 +180,7 @@ class CommonSolver(Reverse):
 
         #TODO: try to achieve compatibility without reversing
         ## check reversed input (crcmod compatibility)
-        crc_forward.setInitCRC( crcKey.init, crcMask.dataSize )
+        crc_forward.setInitCRC( crcKey.init, crcSize )
         revDataMask = dataMask.reorderedBytes()
         polyMask.reverse()
 

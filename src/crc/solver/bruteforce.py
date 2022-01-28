@@ -96,7 +96,7 @@ class BruteForceSolver(Reverse):
         print " xor search range: %s %s" % ( xorListStart, xorListStop )
         
 
-        crc_forward  = self.procFactory.createForwardProcessor()
+        crc_forward  = self.procFactory.createForwardProcessor( crcSize )
         crc_operator = crc_forward.createOperator( crcSize, inputList )
 
         retList = Counter()

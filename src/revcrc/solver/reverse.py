@@ -217,7 +217,7 @@ class Reverse(object):
     Base class for reverse algorithms
     '''
 
-    def __init__(self, crcProcessor, printProgress = None):
+    def __init__(self, printProgress = None):
         self.poly    = None
         self.initVal = None
         self.xorVal  = None
@@ -229,10 +229,13 @@ class Reverse(object):
             self.progress = False
         else:
             self.progress = printProgress
-        self.crcProc = crcProcessor
+        self.crcProc = None
         
         self.reverseOrder = None        ## bool, should bytes be read in reverse?
         self.reflectBits  = None        ## bool, should reflect bits in each input byte?
+
+    def setProcessor(self, crcProcessor):
+        self.crcProc = crcProcessor
 
     def setReturnOnFirst(self):
         self.returnFirst = True

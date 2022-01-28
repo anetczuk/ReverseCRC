@@ -32,8 +32,8 @@ from crc.crcproc import CRCKey
 
 class BruteForceSolver(Reverse):
 
-    def __init__(self, crcProcessor, printProgress = None):
-        Reverse.__init__(self, crcProcessor, printProgress)
+    def __init__(self, printProgress = None):
+        Reverse.__init__(self, printProgress)
 
     ## inputParams -- InputParams
     def execute( self, inputParams, outputFile ):

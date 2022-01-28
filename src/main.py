@@ -57,19 +57,19 @@ def create_alg_processor( algorithm ):
 
 
 ## return Reverse
-def create_solver( mode, processor, printProgress ):
+def create_solver( mode, printProgress ):
     if mode == "BF":
-        return BruteForceSolver( processor, printProgress )
+        return BruteForceSolver( printProgress )
     elif mode == "BF_PAIRS":
-        return BruteForcePairsSolver( processor, printProgress )
+        return BruteForcePairsSolver( printProgress )
     elif mode == "POLY":
-        return PolysSolver( processor, printProgress )
+        return PolysSolver( printProgress )
     elif mode == "COMMON":
-        return CommonSolver( processor, printProgress )
+        return CommonSolver( printProgress )
     elif mode == "VERIFY":
-        return VerifySolver( processor, printProgress )
+        return VerifySolver( printProgress )
     elif mode == "BACKWARD":
-        return BackwardSolver( processor, printProgress )
+        return BackwardSolver( printProgress )
     return None
 
 
@@ -152,10 +152,11 @@ def main():
             return 1
 
         ## type Reverse
-        solver = create_solver( args.mode, processor, printProgress )
+        solver = create_solver( args.mode, printProgress )
         if solver is None:
             print "invalid solver:", args.mode
             return 1
+        solver.setProcessor( processor )
 
         poly    = convert_hex( args.poly )
         initReg = convert_hex( args.init_reg )

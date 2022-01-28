@@ -29,8 +29,8 @@ from revcrc.solver.reverse import Reverse, print_results, write_results
 
 class PolysSolver(Reverse):
 
-    def __init__(self, crcProcessor, printProgress = None):
-        Reverse.__init__(self, crcProcessor, printProgress)
+    def __init__(self, printProgress = None):
+        Reverse.__init__(self, printProgress)
 
     ## inputParams -- InputParams
     def execute( self, inputParams, outputFile ):

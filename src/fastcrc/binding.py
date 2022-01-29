@@ -54,7 +54,7 @@ if BINDING_FOUND is False and binding_type in ["auto", "ctypes"]:
             raise
         
 
-if BINDING_FOUND is False and binding_type in ["auto", "swig"]:
+if BINDING_FOUND is False and binding_type in ["auto", "swigraw"]:
     ###
     ### swig implementation
     ###
@@ -62,9 +62,30 @@ if BINDING_FOUND is False and binding_type in ["auto", "swig"]:
 #     print "importing swig"
 
     try:
-        from .swig.fastcrc8 import hw_crc8_calculate, hw_crc8_calculate_param, hw_crc8_calculate_range
-        from .swig.fastcrc16 import hw_crc16_calculate, hw_crc16_calculate_param, hw_crc16_calculate_range
-        from .swig.fastcrc16 import hw_crc16_invert, hw_crc16_invert_range
+        from .swigraw.fastcrc8 import hw_crc8_calculate, hw_crc8_calculate_param, hw_crc8_calculate_range
+        from .swigraw.fastcrc16 import hw_crc16_calculate, hw_crc16_calculate_param, hw_crc16_calculate_range
+        from .swigraw.fastcrc16 import hw_crc16_invert, hw_crc16_invert_range
+        
+        BINDING_FOUND = True
+        
+#         print "using binding swig"
+        
+    except ImportError:
+        if binding_type != "auto":
+            raise
+        
+
+if BINDING_FOUND is False and binding_type in ["auto", "swigoo"]:
+    ###
+    ### swig implementation
+    ###
+    
+#     print "importing swig"
+
+    try:
+        from .swigoo.fastcrc8 import hw_crc8_calculate, hw_crc8_calculate_param, hw_crc8_calculate_range
+        from .swigoo.fastcrc16 import hw_crc16_calculate, hw_crc16_calculate_param, hw_crc16_calculate_range
+        from .swigoo.fastcrc16 import hw_crc16_invert, hw_crc16_invert_range
         
         BINDING_FOUND = True
         

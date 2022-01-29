@@ -49,7 +49,9 @@ To use it it's needed to compile proper algorithms and then build Python binding
 Building algorithms is done by executing `./src/fastcrc/clib/build.sh`
 
 Using *ctypes* bindings does not require additional steps. In order to use *cffi* one has to execute `./src/fastcrc/cffi/build.py`. 
-*Swig* binding can be prepared by calling `./src/fastcrc/swig/build.sh`.
+*Swig* binding goes in two configurations. First, *swigraw* intended to be as fast and as close to pure C as possible can be 
+prepared by calling `./src/fastcrc/swigraw/build.sh`. The othre configuration, *swigoo* intended to be as convinient to use as 
+object-oriented paradigm allows, can be prepared by calling `./src/fastcrc/swigoo/build.sh`
 
 
 There is no more extra steps required to use prepared binding. It will be detected automatically in runtime. 
@@ -57,7 +59,8 @@ There is also possiblitity to enforce use of certain binding. It can be done by 
 - `auto` -- automatically select one of available bindings
 - `ctypes` -- use *ctypes*
 - `cffi` -- use *cffi*
-- `swig` -- use *swig*
+- `swigraw` -- use *swigraw*
+- `swigoo` -- use *swigoo*
 
 For testing, following oneliner might be very handy: `FASTCRC_BINDING=cffi ./src/find.sh --mode BF --alg HW ...`
 

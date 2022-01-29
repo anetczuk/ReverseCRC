@@ -1,5 +1,5 @@
-/// will create swig_fastcrc.py
-%module swig_fastcrc
+/// will create swigraw_fastcrc.py
+%module swigraw_fastcrc
 
 /// declarations for C/C++ side binding
 %{

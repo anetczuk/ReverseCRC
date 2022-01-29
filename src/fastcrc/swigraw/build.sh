@@ -22,7 +22,7 @@ swig3.0 -python -outcurrentdir -I$FASTCRC_SRC_ROOT $SCRIPT_DIR/fastcrc.swg
 
 #ld -shared example.o example_wrap.o -o _example.so 
 
-gcc -fPIC -Wall -Wextra -shared fastcrc_wrap.c -o _swig_fastcrc.so \
+gcc -fPIC -Wall -Wextra -shared fastcrc_wrap.c -o _swigraw_fastcrc.so \
     -I$SCRIPT_DIR \
     -L$FASTCRC_LIB_DIR/ -lfastcrc -I/usr/include/python2.7/ -lpython2.7 \
     -Wl,-rpath=$FASTCRC_LIB_DIR

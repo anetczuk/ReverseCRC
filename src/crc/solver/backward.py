@@ -129,7 +129,8 @@ class BackwardSolver(Reverse):
 
         print "\n\nFound total results: ", len(results), "\n"
 
-        print_results( results, 1, True )
+        if self.progress:
+            print_results( results, 1, True )
  
         write_results( results, 1, outputFile, True )
 

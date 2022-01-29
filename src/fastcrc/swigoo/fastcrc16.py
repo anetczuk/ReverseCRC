@@ -56,7 +56,7 @@ def hw_crc16_calculate_range( bytesList, dataCRC, poly, intRegStart, intRegEnd, 
     data_array = convert_to_uint8array( bytesList )
 
     ret_array = swigoo_fastcrc.hw_crc16_calculate_range( data_array.cast(), arr_len, dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
-    print "ffffffff:", type(ret_array)
+
     data_size = ret_array.size
     retList = []
     for i in xrange(0, data_size):

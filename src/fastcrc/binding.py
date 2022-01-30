@@ -10,7 +10,7 @@ binding_type = os.getenv( "FASTCRC_BINDING", "auto" )
 
 
 # print "trying binding:", binding_type
-from .utils import convert_to_msb_list, convert_to_lsb_list, convert_to_list, reflect_bits_list
+# from .utils import convert_to_msb_list, convert_to_lsb_list, convert_to_list, reflect_bits_list
 
 
 BINDING_FOUND = False

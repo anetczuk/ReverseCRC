@@ -28,13 +28,12 @@ import sys
 import time
 import argparse
 import logging
-import cProfile
 
 from crc.input import DataParser
 
 from crc.hwcrc import HwCRCProcessorFactory
 from crc.divisioncrc import DivisionCRC
-from crc.modcrc import ModCRC, ModCRCProcessorFactory
+from crc.modcrc import ModCRCProcessorFactory
 from crc.solver.bruteforce import BruteForceSolver
 from crc.solver.bruteforcepairs import BruteForcePairsSolver
 from crc.solver.polys import PolysSolver
@@ -110,6 +109,7 @@ def main():
     parser.add_argument('--xor_val', action='store', default=None, help='CRC output xor (for VERIFY mode)' )
     parser.add_argument('--reverse_order', '-ro', action='store', default=None, help='Should input bytes be read in reverse? (for VERIFY mode)' )
     parser.add_argument('--reflect_bits', '-rb', action='store', default=None, help='Should reflect bits in each input byte? (for VERIFY mode)' )
+    parser.add_argument('--binding', '-b', action='store', choices=['auto', 'ctypes', 'cffi', 'swigraw', 'swigoo'], default=None, help='Set fastcrc binding' )
     parser.add_argument('--print_progress', '-pp', action='store_const', const=True, default=False, help='Print progress' )
 
 
@@ -119,6 +119,9 @@ def main():
     print "Executed:", " ".join( sys.argv )
     print "Starting:", args.alg, args.mode
 
+
+    if args.binding is not None:
+        os.environ[ "FASTCRC_BINDING" ] = args.binding
 
     starttime = time.time()
 

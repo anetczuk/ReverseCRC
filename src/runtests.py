@@ -23,15 +23,12 @@
 # SOFTWARE.
 #
 
-import sys
 import os
 
 import logging
 import unittest
 import re
 import argparse
-
-import tempfile
 
 
 script_dir = os.path.dirname(os.path.abspath(__file__))

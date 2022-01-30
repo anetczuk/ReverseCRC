@@ -27,8 +27,6 @@ import imp
 
 from crc.crcproc import CRCBackwardProc
 
-from fastcrc.binding import convert_to_list
-
 from fastcrc.paths import FASTCRC_CLIB_SRC_DIR
 
 
@@ -433,6 +431,7 @@ def create_backward_processor(crcSize):
 
 
     try:
+        from fastcrc.utils import convert_to_list
         from fastcrc.binding import hw_crc16_invert, hw_crc16_invert_range
 
 #     except ImportError as ex:

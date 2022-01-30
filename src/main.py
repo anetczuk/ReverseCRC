@@ -99,6 +99,7 @@ def main():
     parser.add_argument('--mode', action='store', required=True, choices=["BF", "BF_PAIRS", "POLY", "COMMON", "VERIFY", "BACKWARD"], help='Mode' )
     parser.add_argument('--infile', action='store', required=True, help='File with data. Numbers strings are written in big endian notion and are directly converted by "int(str, 16)" invocation.' )
     parser.add_argument('--outfile', action='store', default=None, help='Results output file' )
+    parser.add_argument('--default_outfile', '-dof', action='store_const', const=True, default=False, help='Use default output file' )
     parser.add_argument('--mindsize', action='store', default=0, help='Minimal data size' )
     parser.add_argument('--poly', action='store', default=None, help='Polynomial (for VERIFY mode)' )
     parser.add_argument('--crc_size', action='store', default=None, help='CRC size (for VERIFY mode)' )
@@ -181,8 +182,8 @@ def main():
         inputParams.reverseOrder = args.reverse_order
         inputParams.reflectBits  = args.reflect_bits
 
-        outfile       = args.outfile
-        if outfile is None:
+        outfile = args.outfile
+        if outfile is None and args.default_outfile:
             filename = os.path.basename(args.infile)
             filenameroot = os.path.splitext( filename )[0]
             dirname = os.path.dirname(args.infile)

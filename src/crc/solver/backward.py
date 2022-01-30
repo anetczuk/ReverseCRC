@@ -132,6 +132,7 @@ class BackwardSolver(Reverse):
         if self.progress:
             print_results( results, 1, True )
  
-        write_results( results, 1, outputFile, True )
+        if outputFile is not None:
+            write_results( results, 1, outputFile, True )
 
 #         print "inits per item:", initSum, float(initSum) / (polyListSize*xorListSize*numbersLen)

@@ -14,7 +14,6 @@
 
 %include "stdint.i"             /// uint8_t
 %include "carrays.i"            /// C array wrappers
-%include "cpointer.i"
 
 
 %array_functions( uint8_t, Uint8Array );

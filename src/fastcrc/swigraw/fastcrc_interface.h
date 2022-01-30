@@ -1,6 +1,8 @@
+///
+///
+///
 
 #include <stdbool.h>                            /// bool
-#include <stdint.h>                             /// int types
 
 
 typedef struct {
@@ -13,7 +15,6 @@ typedef struct {
     size_t capacity;                                                                                        
     CRC8Result* data;                                                                                   
 } CRC8ResultArray; 
-
 
 CRC8Result* CRC8ResultArray_getptr( CRC8ResultArray* array, const size_t index );
 
@@ -50,7 +51,7 @@ typedef struct {
     size_t size;                                                                                            
     size_t capacity;                                                                                        
     CRC16Result* data;                                                                                   
-} CRC16ResultArray; 
+} CRC16ResultArray;
 
 CRC16Result* CRC16ResultArray_getptr( CRC16ResultArray* array, const size_t index );
 
@@ -84,7 +85,6 @@ typedef struct {
     uint16_t* data;                                                                                   
 } uint16_array; 
 
-    
 uint16_t uint16_array_getvalue( uint16_array* array, const size_t index );
 
 void uint16_array_free( uint16_array* array );

@@ -89,15 +89,7 @@ Output file will be stored inside *out.prof* of *current working directory*.
 
 #### Code coverage
 
-Executing application with code coverage can be done by following call: *find.sh {params} --coverage*.
-
-After the call _htmlcov_ directory will be created inside run directory.
-
-Running code coverage on tests is done by *test_runner.py*.
-
-Call command: *test_runner.py --coverage*.
-
-As a result *htmlcov* directory will be created inside run directory.
+Executing application with code coverage can be done by following script: `./tools/coverage.sh`, for example `./tools/coverage.sh ./src/main.py {params}`.
 
 
 ### Various techniques

@@ -30,7 +30,6 @@ import logging
 import unittest
 import re
 import argparse
-import cProfile
 
 import tempfile
 
@@ -93,27 +92,9 @@ if __name__ == '__main__':
     parser.add_argument('-r', '--repeat', action='store', type=int, default=0, help='Repeat tests given number of times' )
     parser.add_argument('-ut', '--untilfailure', action="store_true", help='Run tests in loop until failure' )
     parser.add_argument('-v', '--verbose', action="store_true", help='Verbose output' )
-    parser.add_argument('-cov', '--coverage', action="store_true", help='Measure code coverage' )
 
 
     args = parser.parse_args()
-
-
-    coverageData = None
-    ## start code coverage
-    if args.coverage is True:
-        try:
-            import coverage
-        except ImportError:
-            print( "Missing coverage module. Try running 'pip install coverage'" )
-            print( "Python info:", sys.version )
-            raise
-
-        print( "Executing code coverage" )
-        currScript = os.path.realpath(__file__)
-        coverageData = coverage.Coverage(branch=True, omit=currScript)
-        ##coverageData.load()
-        coverageData.start()
 
 
     if args.run_test:
@@ -125,41 +106,22 @@ if __name__ == '__main__':
 
     testsRepeats = int(args.repeat)
 
-    profiler = None
-
-    try:
-        ## run proper tests
-        if args.untilfailure is True:
-            counter = 1
-            while True:
-                print "Tests iteration:", counter
-                counter += 1
-                testResult = unittest.TextTestRunner().run(suite)
-                if testResult.wasSuccessful() is False:
-                    break
-                print "\n"
-        elif testsRepeats > 0:
-            for counter in xrange(1, testsRepeats + 1):
-                print "Tests iteration:", counter
-                testResult = unittest.TextTestRunner().run(suite)
-                if testResult.wasSuccessful() is False:
-                    break
-                print "\n"
-        else:
-            unittest.TextTestRunner().run(suite)
-
-    finally:
-        ## prepare coverage results
-        if coverageData is not None:
-            ## convert results to html
-            tmprootdir = tempfile.gettempdir()
-            revCrcTmpDir = tmprootdir + "/revcrc"
-            if not os.path.exists(revCrcTmpDir):
-                os.makedirs(revCrcTmpDir)
-            htmlcovdir = revCrcTmpDir + "/htmlcov"
-
-            coverageData.stop()
-            coverageData.save()
-            coverageData.html_report(directory=htmlcovdir)
-            print "\nCoverage HTML output:", (htmlcovdir+"/index.html")
-
+    ## run proper tests
+    if args.untilfailure is True:
+        counter = 1
+        while True:
+            print "Tests iteration:", counter
+            counter += 1
+            testResult = unittest.TextTestRunner().run(suite)
+            if testResult.wasSuccessful() is False:
+                break
+            print "\n"
+    elif testsRepeats > 0:
+        for counter in xrange(1, testsRepeats + 1):
+            print "Tests iteration:", counter
+            testResult = unittest.TextTestRunner().run(suite)
+            if testResult.wasSuccessful() is False:
+                break
+            print "\n"
+    else:
+        unittest.TextTestRunner().run(suite)

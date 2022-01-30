@@ -28,7 +28,7 @@ from crc.numbermask import reverse_number
 
 try:
     from fastcrc.utils import convert_to_msb_list, convert_to_lsb_list, reflect_bits_list
-    from fastcrc.swig.fastcrc8 import hw_crc8_calculate, hw_crc8_calculate_param, hw_crc8_calculate_range
+    from fastcrc.swigoo.fastcrc8 import hw_crc8_calculate, hw_crc8_calculate_param, hw_crc8_calculate_range
     USE_FAST_CRC = True
 except ImportError as ex:
     ## disable fastcrc -- there were problem with importing fastcrc

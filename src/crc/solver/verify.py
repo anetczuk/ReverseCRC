@@ -30,10 +30,10 @@ from collections import Counter
 
 
 # class VerifyCRCCollector( CRCCollector ):
-#     
+#
 #     def __init__(self):
 #         CRCCollector.__init__(self)
-# 
+#
 #     def collect(self, poly, initReg, xorVal):
 #         flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( poly, initReg, xorVal ) )
 
@@ -46,12 +46,12 @@ class VerifySolver(Reverse):
     ## inputParams -- InputParams
     def execute( self, inputParams, outputFile ):
         inputData = inputParams.data
-        
+
         crcSize = inputParams.getCRCSize()
         if crcSize is None:
             print "\nUnable to determine CRC size: pass poly or crcsize as cmd argument"
             return
-        
+
         if inputData.crcSize != crcSize:
             ## deduced CRC size differs from input crc
             raise ValueError( "inconsistent crc size [%s] with input data crc[%s]" % ( crcSize, inputData.crcSize ) )
@@ -60,45 +60,45 @@ class VerifySolver(Reverse):
         if inputMasks.empty():
             print "invalid case -- no data"
             return False
-        
+
         print "crc size: %s" % crcSize
-        
+
         revOrd = inputParams.isReverseOrder()
         if revOrd:
             inputMasks.reverseOrder()
         refBits = inputParams.isReflectBits()
         if refBits:
             inputMasks.reflectBits()
-            
+
         ## List[ (NumberMask, NumberMask) ]
         inputList = inputMasks.getInputMasks()
-        
+
         polyListStart, polyListStop = inputParams.getPolySearchRange()
         polyListSize = polyListStop - polyListStart + 1
-        
+
         initListStart, initListStop = inputParams.getInitRegSearchRange()
         initListSize  = initListStop - initListStart + 1
-        
+
         xorListStart, xorListStop = inputParams.getXorValSearchRange()
         xorListSize  = xorListStop - xorListStart + 1
 
         subSpaceSize = initListSize * xorListSize
         spaceSize    = polyListSize * subSpaceSize
         print "search space size:", spaceSize, polyListSize, initListSize, xorListSize
-        
+
         print "poly search range: %s %s" % ( polyListStart, polyListStop )
         print "init search range: %s %s" % ( initListStart, initListStop )
         print " xor search range: %s %s" % ( xorListStart, xorListStop )
-        
+
         spaceCounter = 0
 
         crc_forward  = self.procFactory.createForwardProcessor( crcSize )
         crc_operator = crc_forward.createOperator( crcSize, inputList )
 
         polyMask     = NumberMask( 0, crcSize )
-        
+
         results = Counter()
-        
+
         for polyNum in xrange(polyListStart, polyListStop + 1):
             polyMask.setNumber( polyNum )
 
@@ -106,16 +106,16 @@ class VerifySolver(Reverse):
             if self.progress:
                 value = spaceCounter * 100.0 / spaceSize
                 flush_percent( value, 4 )
-            
+
             crc_found = crc_operator.verifyRange( polyMask, initListStart, initListStop, xorListStart, xorListStop )
-            
+
             for item in crc_found:
                 initReg = item[0]
                 xorVal  = item[1]
 #                     flush_string( "Found CRC - poly: 0x{:X} initVal: 0x{:X} xorVal: 0x{:X}\n".format( polyMask.dataNum, initReg, xorVal ) )
                 key = CRCKey( polyMask.dataNum, initReg, xorVal, 0, inputData.dataSize, revOrd=revOrd, refBits=refBits )
                 results[ key ] += 1
-        
+
         print "\n\nFound total results: ", len(results)
         print_results( results, 1 )
 

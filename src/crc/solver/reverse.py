@@ -59,7 +59,7 @@ def print_keys_to( stream, commonList ):
     for poly in polysList:
         stream.write( str(poly) + "\n" )
     return polysList
-    
+
 
 # input: Counter[ CRCKey ]
 def print_results_to( stream, retList, inputSize, onlyMathing=False ):
@@ -77,7 +77,7 @@ def print_results_to( stream, retList, inputSize, onlyMathing=False ):
 
     stream.write( "MATCHING KEYS[{:}]:\n\n".format( len(popular) ) )
     polysList = print_keys_to( stream, popular )
-    
+
     stream.write( "\nfound matching keys: {:}\n".format( len(popular) ) )
     stream.write( "found matching polys: {:}\n".format( len(polysList) ) )
 
@@ -120,31 +120,31 @@ class InputMaskList():
     def __init__(self, inputData):
         self.inputData = inputData
         self.items = list()             ## List[ (NumberMask, NumberMask) ]
-        
+
         inputList = inputData.numbersList
         dataSize  = inputData.dataSize
         crcSize   = inputData.crcSize
-                
+
         for num in inputList:
             data = num[0]
             crc  = num[1]
             dataMask = NumberMask( data, dataSize )
             crcMask  = NumberMask( crc, crcSize )
-            
+
             self.items.append( (dataMask, crcMask) )
 
     def empty(self):
-        return len( self.items ) < 1 
+        return len( self.items ) < 1
 
     def getInputMasks(self):
         return self.items
-    
+
     ## reverse order of bytes
     def reverseOrder(self):
         for dataMask, crcMask in self.items:
             dataMask.reorderBytes()
             crcMask.reorderBytes()
-    
+
     def reflectBits(self):
         for dataMask, crcMask in self.items:
             dataMask.reflectBits()
@@ -155,7 +155,7 @@ class InputMaskList():
 
 
 class InputParams(object):
-    
+
     def __init__(self):
         self.data = None        # InputData
         self.crcSize = None     # int, number of bits
@@ -178,7 +178,7 @@ class InputParams(object):
             crcSize = polyKey.size()
         if crcSize is None:
             crcSize = self.data.crcSize
-        
+
         return crcSize
 
     def getPolySearchRange(self):
@@ -230,7 +230,7 @@ class Reverse(object):
         else:
             self.progress = printProgress
         self.procFactory = None
-        
+
         self.reverseOrder = None        ## bool, should bytes be read in reverse?
         self.reflectBits  = None        ## bool, should reflect bits in each input byte?
 
@@ -271,7 +271,7 @@ class Reverse(object):
 
 
 class XORReverse( Reverse ):
-    
+
     def __init__(self, printProgress = None):
         Reverse.__init__(self, printProgress)
         self.crcProc = None

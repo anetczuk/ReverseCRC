@@ -36,7 +36,7 @@ class CommonSolver(Reverse):
     ## inputParams -- InputParams
     def execute( self, inputParams, outputFile ):
         data = inputParams.data
-        
+
         retList = self.findCommonInput( data, self.minSearchData )
         if len(retList) < 1:
             print "\nNo keys discovered"
@@ -161,7 +161,7 @@ class CommonSolver(Reverse):
         ## crcKey: CRCKey
 
         ##print "Checking data:", dataMask, crc, crcMaskKey
-        
+
         crcSize = crcMask.dataSize
 
         crc_forward = self.procFactory.createForwardProcessor( crcSize )

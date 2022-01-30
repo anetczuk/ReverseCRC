@@ -164,7 +164,7 @@ class NumberMask:
     ## dataSize -- number of bits
     def __init__(self, data, dataSize):
         self.dataSize  = dataSize                ## number of bits
-        self.masterBit = None                    ## equals to 2 ** dataSize 
+        self.masterBit = None                    ## equals to 2 ** dataSize
         self.dataMask  = None
         self.dataNum   = None
         self.revDataBytes = None
@@ -245,7 +245,7 @@ class NumberMask:
     def getLSB(self, length):
         bitsMask = (1 << length) -1
         return (self.dataNum & bitsMask)
-    
+
     def generateSubnumbers(self, minLen = -1, maxPos = -1):
         valSet = set()
         retSet = set()
@@ -268,7 +268,7 @@ class NumberMask:
 
     def toASCII(self):
         return intToASCII(self.dataNum)
-    
+
     ## 0b 11  1100 0011  1111 1111 -> 0b 0000 0011  1100 0011  1111 1111 -> 0b 1111 1111  1100 0011  0000 0011
     def _calcReorderBytes(self):
         if self.revDataBytes != None:
@@ -280,7 +280,7 @@ class NumberMask:
 
 
 class ReverseNumberMask( NumberMask ):
-    
+
     def __init__(self, data = 0, dataSize = 0):
         NumberMask.__init__( self, data, dataSize )
 

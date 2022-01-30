@@ -34,16 +34,16 @@ class CRC16ResultArray(ctypes.Structure):
     _fields_ = [('size', ctypes.c_size_t),
                 ('capacity', ctypes.c_size_t),
                 ('data', ctypes.POINTER( CRC16Result ))]
-    
+
     def __len__(self):
         return self.size
-    
+
     def __getitem__(self, index):
         return self.data[ index ]
-    
+
     def __str__(self):
         return "<CRC16ResultArray 0x%x: %s, %s, 0x%x>" % ( id(self), self.size, self.capacity, id(self.data.contents) )
-    
+
 #     def release(self):
 #         c_fastcrc.CRC16ResultArray_free( self )
 
@@ -57,16 +57,16 @@ class uint16_array(ctypes.Structure):
     _fields_ = [('size', ctypes.c_size_t),
                 ('capacity', ctypes.c_size_t),
                 ('data', ctypes.POINTER( ctypes.c_uint16 ))]
-    
+
     def __len__(self):
         return self.size
-    
+
     def __getitem__(self, index):
         return self.data[ index ]
-    
+
     def __str__(self):
         return "<uint16_array 0x%x: %s, %s, 0x%x>" % ( id(self), self.size, self.capacity, id(self.data.contents) )
-    
+
 #     def release(self):
 #         c_fastcrc.CRC16ResultArray_free( self )
 

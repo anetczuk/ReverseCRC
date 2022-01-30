@@ -35,17 +35,17 @@ from fastcrc.utils import convert_to_msb_list, convert_to_lsb_list
 
 
 class HwCRCProcessorFactory( CRCProcessorFactory ):
-    
+
     # crcSize -- int, number of bits
     # return CRCProc
     def createForwardProcessor(self, crcSize=None):
         return create_processor(crcSize)
-    
+
     # crcSize -- int, number of bits
     # return CRCBackwardProc
     def createBackwardProcessor(self, crcSize=None):
         return create_backward_processor( crcSize )
-    
+
     # crcSize -- int, number of bits
     # inputData: List[ (NumberMask, NumberMask) ]
     # return CRCOperator
@@ -62,7 +62,7 @@ class HwCRC( CRCProc ):
 
     def __init__(self):
         CRCProc.__init__(self)
-        
+
     ## override
     def setReversed(self, value = True):
         CRCProc.setReversed(self, value)
@@ -70,8 +70,8 @@ class HwCRC( CRCProc ):
         if value is False:
             self.calculate3 = self.calculateMSBClassic
         else:
-            self.calculate3 = self.calculateLSBClassic            
-        
+            self.calculate3 = self.calculateLSBClassic
+
     ## leave methon not overriden -- it will be changed during call to 'setReversed()'
 #     ## dataMask: NumberMask
 #     ## polyMask: NumberMask
@@ -106,7 +106,7 @@ class HwCRC( CRCProc ):
     ## 'dataMask' and 'polyMask' have to be reversed -- NumberMask
     def calculateLSBClassic(self, dataMask, polyMask):
 #         return self.calculateLSBUsingMSB( dataMask, polyMask )
-    
+
         register = self.registerInit
 
         dataNum  = dataMask.dataNum
@@ -125,7 +125,7 @@ class HwCRC( CRCProc ):
 
         return (register ^ self.xorOut) & polyMask.dataMask
 
-    def calculateLSBUsingMSB(self, dataMask, polyMask):           
+    def calculateLSBUsingMSB(self, dataMask, polyMask):
         revData = dataMask.reversed()
         revPoly = polyMask.reversed()
 
@@ -136,17 +136,17 @@ class HwCRC( CRCProc ):
         self.xorOut       = reverse_number( self.xorOut, polyMask.dataSize )
 
         calc_crc = self.calculateMSBClassic( revData, revPoly )
-        
+
         self.registerInit = oldInit
         self.xorOut       = oldXor
-        
+
         return reverse_number( calc_crc, polyMask.dataSize )
-    
+
     # inputData: List[ (NumberMask, NumberMask) ]
     # return CRCOperator
     def createOperator(self, crcSize, inputData):
         return CRCProc.createOperator(self, crcSize, inputData)
-            
+
     def morphData(self, inputData, crcSize):
         dataList = []
         for data in inputData:
@@ -160,21 +160,21 @@ class HwCRC( CRCProc ):
                 print "unable to morph data -- unsupported crc:", crcMask.dataSize
                 #return CRCProc.createOperator(self, crcSize, inputData)
                 return []
-            
+
 #             crcMask = data[1]
             bytesList = convert_to_msb_list( dataMask.dataNum, dataMask.dataSize / 8 )
             dataList.append( (bytesList, crcMask.dataNum) )
             #rev_crc = reverse_number( crcMask.dataNum, crcSize )
             #dataList.append( (bytesList, rev_crc) )
         return dataList
-    
+
     def createBackwardProcessor(self, crcSize):
         return create_backward_processor( crcSize )
 
 
 ## ==========================================================
 
-    
+
 def create_processor(crcSize):
     if crcSize is None:
         return HwCRC()
@@ -182,9 +182,9 @@ def create_processor(crcSize):
     if crcSize == 8:
         try:
             from crc.fasthwcrc import Fast8HwCRC
-        
+
             return Fast8HwCRC()
-        
+
     #     except ImportError as ex:
         except ImportError:
             ## disable fastcrc -- there were problem with importing fastcrc
@@ -195,9 +195,9 @@ def create_processor(crcSize):
     elif crcSize == 16:
         try:
             from crc.fasthwcrc import Fast16HwCRC
-        
+
             return Fast16HwCRC()
-        
+
     #     except ImportError as ex:
         except ImportError:
             ## disable fastcrc -- there were problem with importing fastcrc

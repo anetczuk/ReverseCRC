@@ -56,17 +56,17 @@ CRCModCacheMap.instance = CRCModCacheMap()
 
 
 class ModCRCProcessorFactory( CRCProcessorFactory ):
-    
+
     # crcSize -- int, number of bits
     # return CRCProc
     def createForwardProcessor(self, crcSize=None):
         return ModCRC()
-    
+
     # crcSize -- int, number of bits
     # return CRCBackwardProc
     def createBackwardProcessor(self, crcSize=None):
         raise NotImplementedError( "ModCRC -- not implemented" )
-    
+
     # crcSize -- int, number of bits
     # inputData: List[ (NumberMask, NumberMask) ]
     # return CRCOperator

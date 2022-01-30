@@ -34,7 +34,7 @@ def generate_subtable( poly ):
 
 def write_row( outfile, poly ):
     subtable = generate_subtable( poly )
-    
+
     for sub in xrange(0, 0xFF):
         item = subtable[sub]
         outfile.write( str(item) + ", " )
@@ -58,7 +58,7 @@ def main():
 /// table indexed in following way: [ polynomial ][ registry ]
 /// 2D representation is slightly faster in use than 1D version
 ///
-static const uint8_t CRC8_LookupTable[256][256] = { 
+static const uint8_t CRC8_LookupTable[256][256] = {
 """
 
     footer = """};
@@ -68,21 +68,21 @@ static const uint8_t CRC8_LookupTable[256][256] = {
 
     with open(out_path, 'w') as outfile:
         outfile.write( header )
-        
+
         for poly in xrange(0, 0xFF):
             outfile.write( "\t{" )
             write_row( outfile, poly )
             outfile.write( "},\n" )
-            
+
         ## last poly
         outfile.write( "\t{" )
         write_row( outfile, 0xFF )
         outfile.write( "}\n" )
-        
+
         outfile.write( footer )
-        
+
     print "table written to:", out_path
-    
+
     return 0
 
 

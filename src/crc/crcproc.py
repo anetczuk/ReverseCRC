@@ -30,7 +30,7 @@ from collections import Counter
 class PolyKey:
     def __init__(self, poly=-1, dataPos=-1, dataLen=-1, rev=None, revOrd=None, refBits=None ):
         self.poly = poly
-        
+
         self.revOrd  = False
         self.refBits = False
         if rev is not None:
@@ -154,10 +154,10 @@ class CRCKey:
 
 
 class CRCProcessorFactory(object):
-    
+
     def __init__(self):
         pass
-    
+
     # crcSize -- int, number of bits
     # return CRCProc
     def createForwardProcessor(self, crcSize=None):
@@ -167,13 +167,13 @@ class CRCProcessorFactory(object):
     # return CRCBackwardProc
     def createBackwardProcessor(self, crcSize=None):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
-    
+
     # crcSize -- int, number of bits
     # inputData: List[ (NumberMask, NumberMask) ]
     # return CRCOperator
     def createOperator(self, crcSize, inputData):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
-    
+
 
 ## ===================================================================
 
@@ -255,23 +255,23 @@ class CRCProc(object):
 
 
 class CRCBackwardProc( object ):
-    
+
     def __init__(self):
         pass
 
     def setReversed(self, value = True):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
-    
+
     def calculate(self, polyMask, xorOut):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
-    
+
     def calculateInitReg(self, dataMask, crc, polyMask, xorOut):
         crc_raw = crc ^ xorOut
         return self.calculateInitRegBase( dataMask, polyMask, crc_raw )
-        
+
     def calculateInitRegBase(self, dataMask, polyMask, crc_raw):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
-        
+
     def calculateInitRegRange(self, dataMask, crcNum, polyMask, xorStart, xorEnd):
         ## default (standard) implementation
         xorDict = list()
@@ -289,7 +289,7 @@ class CRCBackwardProc( object ):
 
 ##
 class CRCOperator(object):
-    
+
     def __init__(self):
         pass
 
@@ -311,10 +311,10 @@ class CRCOperator(object):
 class ResultContainer( object ):
     def __init__(self):
         self.data = set()
-    
+
     def empty(self):
         return len( self.data ) < 1
-    
+
     def intersect(self, resultList):
         if self.data:
             common = self.data.intersection( resultList )
@@ -328,7 +328,7 @@ class ResultContainer( object ):
 
 
 class StandardCRCOperator( CRCOperator ):
-    
+
     def __init__(self, crcProcessor, inputData):
         CRCOperator.__init__(self)
         self.processor = crcProcessor               ## CRCProc
@@ -341,7 +341,7 @@ class StandardCRCOperator( CRCOperator ):
             crc = self.processor.calculate3( dataMask, polyMask )
             retList.append( crc )
         return retList
-    
+
     def verify(self, polyMask):
         for item in self.data:
             dataMask = item[0]
@@ -349,7 +349,7 @@ class StandardCRCOperator( CRCOperator ):
             crc = self.processor.calculate3( dataMask, polyMask )
             if crc != crcMask.dataNum:
                 return False
-            
+
         ## all CRC matches
         return True
 
@@ -358,11 +358,11 @@ class StandardCRCOperator( CRCOperator ):
 #         print "verify input: 0x%X 0x%X 0x%X 0x%X 0x%X" % ( polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorEnd )
 
         results = Counter()
-        
+
         for item in self.data:
             dataMask = item[0]
             crcMask  = item[1]
-            
+
             crc_match = []
             for self.processor.registerInit in xrange(intRegStart, intRegEnd + 1):
                 for self.processor.xorOut in xrange(xorStart, xorEnd + 1):
@@ -393,7 +393,7 @@ class StandardCRCOperator( CRCOperator ):
         if not results:
             ## no common result found -- return
             return []
-        
+
         ##
         ## iterate over rest elements
         ##
@@ -408,8 +408,8 @@ class StandardCRCOperator( CRCOperator ):
                 self.processor.xorOut       = item[1]
                 crc = self.processor.calculate3( dataMask, polyMask )
                 if crc == crcMask.dataNum:
-                    crc_match.append( ( self.processor.registerInit, self.processor.xorOut ) )  
-                                  
+                    crc_match.append( ( self.processor.registerInit, self.processor.xorOut ) )
+
             results = crc_match
             if not results:
                 ## no common result found -- return

@@ -62,7 +62,7 @@ def hw_crc16_calculate_range( bytesList, dataCRC, poly, intRegStart, intRegEnd, 
     for i in xrange(0, data_size):
         item = swigoo_fastcrc.CRC16ResultArray_getptr( ret_array, i )
         retList.append( ( item.reginit, item.xorout ) )
- 
+
     return retList
 
 
@@ -71,14 +71,14 @@ def hw_crc16_invert( bytesList, poly, regVal ):
     data_array = convert_to_uint8array( bytesList )
 
     ret_array = swigoo_fastcrc.hw_crc16_invert( data_array.cast(), arr_len, poly, regVal )
-    
+
     ret_size = ret_array.size
     retList = []
     for i in xrange(0, ret_size):
         item = swigoo_fastcrc.uint16_array_getvalue( ret_array, i )
         retList.append( item )
 #     retList = list( data_content )
- 
+
     return retList
 
 
@@ -87,7 +87,7 @@ def hw_crc16_invert_range( bytesList, crcNum, poly, xorStart, xorEnd):
     data_array = convert_to_uint8array( bytesList )
 
     ret_array = swigoo_fastcrc.hw_crc16_invert_range( data_array.cast(), arr_len, crcNum, poly, xorStart, xorEnd )
-    
+
     data_size = ret_array.size
     xorList = dict()
     for i in xrange(0, data_size):

@@ -44,7 +44,7 @@ class HwCRCTest(unittest.TestCase):
     def tearDown(self):
         # Called after testfunction was executed
         pass
-    
+
     def test_calculateCRC_8_b(self):
         dataSize = 56
         inputPoly = 0x11D
@@ -52,7 +52,7 @@ class HwCRCTest(unittest.TestCase):
         regInit = 0x00
         xorOut  = 0x8F
         proc = HwCRC()
-        
+
         crc = proc.calculateCRC( 0x0D00C0F0FFFFFF, dataSize, inputPoly, crcSize, init=regInit, xorout=xorOut )
         self.assertEqual( crc, 0x90 )
 

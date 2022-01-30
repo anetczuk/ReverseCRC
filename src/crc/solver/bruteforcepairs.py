@@ -40,7 +40,7 @@ class BruteForcePairsSolver( XORReverse ):
     ## inputParams -- InputParams
     def execute( self, inputParams, outputFile ):
         data = inputParams.data
-        
+
         retList = self.bruteForcePairs( data, self.minSearchData )
         if len(retList) < 1:
             print "\nNo keys discovered"
@@ -80,31 +80,31 @@ class BruteForcePairsSolver( XORReverse ):
             crc1  = numberPair1[1]
             data2 = numberPair2[0]
             crc2  = numberPair2[1]
-            
+
             dataSize = inputData.dataSize
             crcSize  = inputData.crcSize
-    
+
             self.crcProc.setXorOutValue( 0x0 )          ## it OK, XOR method eliminates ('xor value' set to 0x0)
-    
+
             # List[ PolyKey ]
-#             print "looking for potential polys:", data1, crc1, data2, crc2, dataSize, crcSize, self.crcProc.registerInit, self.crcProc.xorOut 
+#             print "looking for potential polys:", data1, crc1, data2, crc2, dataSize, crcSize, self.crcProc.registerInit, self.crcProc.xorOut
             keyList = self.findPolysXOR(data1, crc1, data2, crc2, dataSize, crcSize, searchRange)
-    
+
             if (self.progress):
                 print "Found {} potential polynomials to check".format( len(keyList) )
-    
+
             ## finding xor value
-    
+
             dataCrc1 = MessageCRC(data1, dataSize, crc1, crcSize)
             dataCrc2 = MessageCRC(data2, dataSize, crc2, crcSize)
-    
+
             keys = []
             for item in keyList:
 #                 if self.progress:
 #                     flush_string( "checking key: {}".format( item ) )
 
                 paramsList = self.findBruteForceParams( dataCrc1, dataCrc2, item )
-                
+
                 if len(paramsList) < 1:
                     continue
                 keys += paramsList
@@ -113,7 +113,7 @@ class BruteForcePairsSolver( XORReverse ):
                 print "Found keys:", len( keys )
 
             retList += keys
-            
+
             #TODO: what is initReg and xorVal for self.crcProc???
             self.crcProc.setRegisterInitValue( 0xFF )
 
@@ -128,30 +128,30 @@ class BruteForcePairsSolver( XORReverse ):
         self.crcProc.setReversed( polyKey.isReversedFully() )     # PolyKey
 
         crcSize = dataCrc1.crcSize
-              
+
         polyMask = NumberMask(polyKey.poly, crcSize)
-        
+
         dataMask1 = dataCrc1.dataMask()
         dataMask2 = dataCrc2.dataMask()
-        
+
         paramMax = (0x1 << crcSize) - 1         # 0xFFFF
 
         polyList = []
-  
+
         initValStart = 0
         initValEnd   = paramMax
         if self.initVal is not None:
             initValStart = self.initVal
             initValEnd   = initValStart
- 
+
         crcMask1  = dataCrc1.crcMask()
         crcMask2  = dataCrc2.crcMask()
- 
+
         inputData = [ (dataMask1, crcMask1), (dataMask2, crcMask2) ]
         crc_operator = self.crcProc.createOperator( crcSize, inputData )
-            
+
         crc_found = crc_operator.verifyRange( polyMask, initValStart, initValEnd, 0, paramMax )
-        
+
         for item in crc_found:
             initReg = item[0]
             xorVal  = item[1]

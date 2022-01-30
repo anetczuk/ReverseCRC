@@ -86,19 +86,19 @@ class InvertLookupTable8():
 ## ILT[ poly ][ data ][ reg_next ] -- returns list of potential "reg" values
 ##
 class InvertLookupTable16():
-    
+
     def __init__(self):
         pass
 
     def generate(self):
-        ## to be implemented, but it seems that declaring 
+        ## to be implemented, but it seems that declaring
         ## static structure of 65536 * 256 * 65536 ~= 1 100 000 000 000
         ## is too much
         pass
 
 
 class InvertCache():
-    
+
     def __init__(self, polySpaceSize, subSpaceSize=None):
         self.data = list()
         if subSpaceSize is None:
@@ -162,12 +162,12 @@ class HwCRCBackwardState:
         ## reversing MSB mode
 
         self.register ^= polyMask.dataNum
-        
+
         ## valid if last bit is '0'
         ## it's not allowed to pop 1 from register
         if (self.register & 1) != 0:
             return False
-        
+
         if dataBit == 0:
             self.register |= polyMask.masterBit        ## add master bit to MSB
         self.register >>= 1
@@ -175,12 +175,12 @@ class HwCRCBackwardState:
 
     def shiftMSB_0(self, dataBit, polyMask):
         ## reversing MSB mode
-        
+
         ## valid if last bit is '0'
         ## it's not allowed to pop 1 from register
         if (self.register & 1) != 0:
             return False
-            
+
         if dataBit > 0:
             self.register ^= polyMask.masterBit
         self.register >>= 1
@@ -196,15 +196,15 @@ class HwCRCBackwardState:
 #                 print "p pushing 1: 0x%X" % self.register
                 return [self]
             return []
- 
+
         ## zero or one
         reg_one = self.register ^ polyMask.dataNum
- 
+
         ## treat self as 0
         if dataBit > 0:
             self.register ^= polyMask.masterBit
         self.register >>= 1
-          
+
         ## valid if last bit is '0'
         ## it's not allowed to pop 1 from register
         if (reg_one & 1) != 0:
@@ -212,7 +212,7 @@ class HwCRCBackwardState:
 #             print "p pushing 0: 0x%X" % self.register
             return [self]
 
-        ## for one    
+        ## for one
         if dataBit == 0:
             reg_one |= polyMask.masterBit        ## add master bit to MSB
         reg_one >>= 1
@@ -258,7 +258,7 @@ class HwCRCBackwardState:
 
 
 class HwCRCBackward( CRCBackwardProc ):
-    
+
     def __init__(self):
         CRCBackwardProc.__init__(self)
         self._reverseMode = False
@@ -266,7 +266,7 @@ class HwCRCBackward( CRCBackwardProc ):
 
     def setReversed(self, value = True):
         self._reverseMode = value
-        
+
         ## optimize execution time by reducing one level of function call
         if value is False:
             self.calculateInitRegBase = self.calculateTabularMSB
@@ -286,7 +286,7 @@ class HwCRCBackward( CRCBackwardProc ):
             full_bytes = int( dataMask.dataSize / 8 )
             bitStart = full_bytes * 8
             return self._calculateBitsMSB( dataMask.dataNum, bitStart, dataMask.dataSize, polyMask, regList )
-        
+
         elif polyMask.dataSize == 16:
             regList = self._calculateCachedMSB(dataMask, polyMask, crc_raw, INVERSE_CACHE16)
             if not regList:
@@ -304,7 +304,7 @@ class HwCRCBackward( CRCBackwardProc ):
 
         dataNum = dataMask.dataNum
         poly_lookup = INVERSE_TABLE8.getPolyDict( poly )
-        
+
         full_bytes = int( dataMask.dataSize / 8 )
         for _ in range(0, full_bytes):
             dataByte = dataNum & 0xFF
@@ -321,7 +321,7 @@ class HwCRCBackward( CRCBackwardProc ):
                 return []
             regList = newList
             dataNum >>= 8
-        
+
         return regList
 
     def _calculateCachedMSB(self, dataMask, polyMask, crc_raw, cache_map):
@@ -329,24 +329,24 @@ class HwCRCBackward( CRCBackwardProc ):
 
         dataNum = dataMask.dataNum
         poly_lookup = cache_map.getPolyDict( polyMask.dataNum )
-        
+
         full_bytes = int( dataMask.dataSize / 8 )
         for _ in range(0, full_bytes):
             dataByte = dataNum & 0xFF
-            
+
             data_lookup = poly_lookup.get( dataByte )       # dict
             if data_lookup is None:
                 data_lookup = dict()
                 poly_lookup[ dataByte ] = data_lookup
-            
+
             newList = []
             for regVal in regList:
-                
+
                 nextRegList = data_lookup.get( regVal )
                 if nextRegList is None:
                     nextRegList = self._calculateBitsMSB( dataByte, 0, 8, polyMask, [regVal] )
                     data_lookup[ regVal ] = nextRegList
-                
+
                 if not nextRegList:
                     ## no registry value -- invalid case
                     continue
@@ -354,12 +354,12 @@ class HwCRCBackward( CRCBackwardProc ):
 
             if not newList:
                 return []
-            
+
             regList = newList
             dataNum >>= 8
-        
+
         return regList
-    
+
     def _calculateBitsMSB(self, dataNum, bitStart, bitEnd, polyMask, regList):
         collector = []
         for reg in regList:
@@ -384,7 +384,7 @@ class HwCRCBackward( CRCBackwardProc ):
         for item in collector:
             retList.append( item.register )
         return retList
-    
+
     ## ===================================
 
     def calculateInitRegBaseLSB(self, dataMask, polyMask, crc_raw):
@@ -401,7 +401,7 @@ class HwCRCBackward( CRCBackwardProc ):
             for c in collector:
                 c1 = c
                 c2 = c.copy()
- 
+
                 c1_valid = c1.shiftLSB(False, currBit, polyMask)
                 if c1_valid:
                     receiver.append(c1)
@@ -430,8 +430,8 @@ def create_backward_processor(crcSize):
         return HwCRCBackward()
 
 #     return HwCRCBackward()
-    
-    
+
+
     try:
         from fastcrc.binding import hw_crc16_invert, hw_crc16_invert_range
 
@@ -445,11 +445,11 @@ def create_backward_processor(crcSize):
 
     ## assuming that CRC is 16 bit
     class Fast16HwCRCBackward( HwCRCBackward ):
-        
+
         def __init__(self):
             HwCRCBackward.__init__(self)
             self.fast16Data = dict()
-    
+
         def calculateInitRegRange(self, dataMask, crcNum, polyMask, xorStart, xorEnd):
             if self._reverseMode is False:
                 ## use fast implementation
@@ -459,12 +459,12 @@ def create_backward_processor(crcSize):
                     bytes_list = self.fast16Data.get( dataNum )
                     if bytes_list is None:
                         bytes_list = convert_to_list( dataNum, full_bytes  )
-                        self.fast16Data[ dataNum ] = bytes_list 
+                        self.fast16Data[ dataNum ] = bytes_list
                     return hw_crc16_invert_range( bytes_list, crcNum, polyMask.dataNum, xorStart, xorEnd )
-    
+
             ## use standard implementation
             return HwCRCBackward.calculateInitRegRange(self, dataMask, crcNum, polyMask, xorStart, xorEnd)
-    
+
         ## polyMask -- NumberMask
         ## dataMask -- NumberMask
         def calculateTabularMSB(self, dataMask, polyMask, crc_raw):
@@ -476,7 +476,7 @@ def create_backward_processor(crcSize):
             full_bytes = int( dataMask.dataSize / 8 )
             bitStart = full_bytes * 8
             return self._calculateBitsMSB( dataMask.dataNum, bitStart, dataMask.dataSize, polyMask, regList )
-    
+
         ### implementation of "self._calculateBitsMSB()" method using C
         def _calculateFast16MSB(self, dataMask, poly, crc_raw):
             full_bytes = int( dataMask.dataSize / 8 )
@@ -484,7 +484,7 @@ def create_backward_processor(crcSize):
             bytes_list = self.fast16Data.get( dataNum )
             if bytes_list is None:
                 bytes_list = convert_to_list( dataNum, full_bytes  )
-                self.fast16Data[ dataNum ] = bytes_list 
+                self.fast16Data[ dataNum ] = bytes_list
             return hw_crc16_invert( bytes_list, poly, crc_raw )
 
     return Fast16HwCRCBackward()

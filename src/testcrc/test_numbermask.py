@@ -145,25 +145,25 @@ class NumberMaskTest(unittest.TestCase):
     def test_in_instance(self):
         data = NumberMask(0, 0)
         self.assertIn(data, [data])
-        
+
     def test_reorderedBytes_fullBytes(self):
         data = NumberMask(0xABCDEF, 24)
         reordered = data.reorderedBytes()
         self.assertEqual( reordered.dataSize, data.dataSize )
         self.assertEqual( reordered.dataNum, 0xEFCDAB )
-        
+
     def test_reorderedBytes_partialBytes(self):
         data = NumberMask(0xABCDE, 20)
         reordered = data.reorderedBytes()
         self.assertEqual( reordered.dataSize, data.dataSize )
         self.assertEqual( reordered.dataNum, 0xEBC0A )
-        
+
     def test_reflectBits_fullBytes(self):
         data = NumberMask( 0b111011001001010100001111, 24 )
         data.reflectBits()
         self.assertEqual( data.dataSize, 24 )
         self.assertEqual( data.dataNum, 0b001101111010100111110000 )
-        
+
     def test_reflectBits_partialBytes(self):
         data = NumberMask( 0b000011001001010100001111, 20 )
         data.reflectBits()

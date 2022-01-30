@@ -44,6 +44,9 @@ from crc.solver.reverse import InputParams
 from crc.solver.backward import BackwardSolver
 
 
+logging.basicConfig(level=logging.DEBUG)
+
+
 # return CRCProcessorFactory
 def create_alg_factory( algorithm ):
     if algorithm == "HW":
@@ -108,109 +111,85 @@ def main():
     parser.add_argument('--reverse_order', '-ro', action='store', default=None, help='Should input bytes be read in reverse? (for VERIFY mode)' )
     parser.add_argument('--reflect_bits', '-rb', action='store', default=None, help='Should reflect bits in each input byte? (for VERIFY mode)' )
     parser.add_argument('--print_progress', '-pp', action='store_const', const=True, default=False, help='Print progress' )
-    parser.add_argument('--profile', action='store_const', const=True, default=False, help='Profile the code' )
-    parser.add_argument('--pfile', action='store', default=None, help='Profile the code and output data to file' )
 
 
     args = parser.parse_args()
 
 
-    logging.basicConfig(level=logging.DEBUG)
-
+    print "Executed:", " ".join( sys.argv )
     print "Starting:", args.alg, args.mode
 
 
     starttime = time.time()
-    profiler = None
 
-    try:
-        profiler_outfile = args.pfile
-        if args.profile == True or profiler_outfile != None:
-            if profiler_outfile is None:
-                profiler_outfile = "out.prof"
-            print "Starting profiler"
-            profiler = cProfile.Profile()
-            profiler.enable()
+    dataParser = DataParser()
+    ## return InputData
+    data = dataParser.parseFile(args.infile)
 
-        dataParser = DataParser()
-        ## return InputData
-        data = dataParser.parseFile(args.infile)
+    if data.empty():
+        print "no data found"
+        return 1
+    if data.ready() == False:
+        print "input data not ready"
+        return 1
 
-        if data.empty():
-            print "no data found"
-            return 1
-        if data.ready() == False:
-            print "input data not ready"
-            return 1
+    print "input data:", data.numbersList
+    print "List size: {} Data size: {} CRC size: {}".format( len(data.numbersList), data.dataSize, data.crcSize )
 
-        print "input data:", data.numbersList
-        print "List size: {} Data size: {} CRC size: {}".format( len(data.numbersList), data.dataSize, data.crcSize )
+    printProgress = args.print_progress
 
-        printProgress = args.print_progress
+    processorFactory = create_alg_factory( args.alg )
+    if processorFactory is None:
+        print "invalid algorithm:", args.alg
+        return 1
 
-        processorFactory = create_alg_factory( args.alg )
-        if processorFactory is None:
-            print "invalid algorithm:", args.alg
-            return 1
+    ## type Reverse
+    solver = create_solver( args.mode, printProgress )
+    if solver is None:
+        print "invalid solver:", args.mode
+        return 1
+    solver.setProcessorFactory( processorFactory )
 
-        ## type Reverse
-        solver = create_solver( args.mode, printProgress )
-        if solver is None:
-            print "invalid solver:", args.mode
-            return 1
-        solver.setProcessorFactory( processorFactory )
+    poly    = convert_hex( args.poly )
+    initReg = convert_hex( args.init_reg )
+    xorVal  = convert_hex( args.xor_val )
+    crcSize = convert_int( args.crc_size )
+    minSearchData = int(args.mindsize)
 
-        poly    = convert_hex( args.poly )
-        initReg = convert_hex( args.init_reg )
-        xorVal  = convert_hex( args.xor_val )
-        crcSize = convert_int( args.crc_size )
-        minSearchData = int(args.mindsize)
+    solver.setPoly( poly )
+    solver.setInitValue( initReg )
+    solver.setXorValue( xorVal )
+    solver.setCRCSize( crcSize )
+    solver.setReverseMode( args.reverse_order, args.reflect_bits )
+    solver.setMinSearchData( minSearchData )
 
-        solver.setPoly( poly )
-        solver.setInitValue( initReg )
-        solver.setXorValue( xorVal )
-        solver.setCRCSize( crcSize )
-        solver.setReverseMode( args.reverse_order, args.reflect_bits )
-        solver.setMinSearchData( minSearchData )
+    inputParams = InputParams()
+    inputParams.data = data
+    inputParams.crcSize = crcSize
+    inputParams.poly = poly
+    inputParams.initReg = initReg
+    inputParams.xorVal  = xorVal
+    inputParams.reverseOrder = args.reverse_order
+    inputParams.reflectBits  = args.reflect_bits
 
-        inputParams = InputParams()
-        inputParams.data = data
-        inputParams.crcSize = crcSize
-        inputParams.poly = poly
-        inputParams.initReg = initReg
-        inputParams.xorVal  = xorVal
-        inputParams.reverseOrder = args.reverse_order
-        inputParams.reflectBits  = args.reflect_bits
+    outfile = args.outfile
+    if outfile is None and args.default_outfile:
+        filename = os.path.basename(args.infile)
+        filenameroot = os.path.splitext( filename )[0]
+        dirname = os.path.dirname(args.infile)
+        outdir = os.path.join( dirname, "out" )
+        if os.path.exists( outdir ) is False:
+            os.makedirs( outdir )
+        outname = "%s_%s_%s_p%s_i%s_x%s_ro%s_rb%s.txt" % ( filenameroot, args.alg, args.mode, args.poly, args.init_reg, args.xor_val, inputParams.isReverseOrder(), inputParams.isReflectBits() )
+        outfile = os.path.join( outdir, outname )
 
-        outfile = args.outfile
-        if outfile is None and args.default_outfile:
-            filename = os.path.basename(args.infile)
-            filenameroot = os.path.splitext( filename )[0]
-            dirname = os.path.dirname(args.infile)
-            outdir = os.path.join( dirname, "out" )
-            if os.path.exists( outdir ) is False:
-                os.makedirs( outdir )
-            outname = "%s_%s_%s_p%s_i%s_x%s_ro%s_rb%s.txt" % ( filenameroot, args.alg, args.mode, args.poly, args.init_reg, args.xor_val, inputParams.isReverseOrder(), inputParams.isReflectBits() )
-            outfile = os.path.join( outdir, outname )
+    print "input args, poly: %s init: %s, xor: %s crcsize: %s" % ( inputParams.poly, inputParams.initReg, inputParams.xorVal, inputParams.crcSize )
+    print "output path:", outfile
 
-        print "input args, poly: %s init: %s, xor: %s crcsize: %s" % ( inputParams.poly, inputParams.initReg, inputParams.xorVal, inputParams.crcSize )
-        print "output path:", outfile
+    solver.execute( inputParams, outfile )
 
-        solver.execute( inputParams, outfile )
-
-        timeDiff = (time.time()-starttime)
-        print "\nCalculation time: {:13.8f}s".format(timeDiff)
-
-    finally:
-        if profiler != None:
-            profiler.disable()
-            if profiler_outfile == None:
-                print "Generating profiler data"
-                profiler.print_stats(1)
-            else:
-                print "Storing profiler data to", profiler_outfile
-                profiler.dump_stats( profiler_outfile )
-                print "pyprof2calltree -k -i", profiler_outfile
+    timeDiff = (time.time()-starttime)
+    print "\nCalculation time: {:13.8f}s".format(timeDiff)
 
     return 0
 

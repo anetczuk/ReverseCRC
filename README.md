@@ -35,11 +35,15 @@ where first hex number in row is data and second number is calculated CRC.
     - *BF_PAIRS*: finding full key by forward algorithm using pair xoring (brute force)
     - *POLY*: find polynomials by xor-ing data pairs
     - *COMMON*: check common keys used in industry
+    - *VERIFY*: verify found keys, simillar to *BF*
+    - *BACKWARD*: reduces search space by one dimmension (of init registry values)
 - *alg*: decode algorithm:
     - *HW* -- use *HwCRC*
     - *DIV* -- use *DivisionCRC*
     - *MOD* -- use *ModCRC*
 - *mindsize*: Data size in frame, rest of frame will be treated as potential CRC field
+
+Note: currently C implementation is used only for *HW* algorithm in conjunction with *BF*, *VERIFY* or *BACKWARD*.
 
 #### C bindings
 
@@ -77,15 +81,10 @@ Following techniques were used in the project:
 
 #### Profiler
 
-To run main application it needs to run one of following commands:
-* *find.sh {params} --profile*
-* *find.sh {params} --pfile={output file}*
+To run main application under code profiler (*cProfile*) use following script: `./tools/profiler.sh`, for example as follow:
+`./tools/profiler.sh ./src/main.py {params}`.
 
-In first case output will be displayed on stdout. In second case output will be stored inside *{output file}*. 
-
-Tests can be run with profiler by one of following commands:
-* *test_runner.py {params} --profile*
-* *test_runner.py {params} --pfile={output file}*
+Output file will be stored inside *out.prof* of *current working directory*. 
 
 
 #### Code coverage

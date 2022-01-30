@@ -31,7 +31,6 @@ import unittest
 import re
 import argparse
 import cProfile
-import subprocess
 
 import tempfile
 
@@ -95,8 +94,7 @@ if __name__ == '__main__':
     parser.add_argument('-ut', '--untilfailure', action="store_true", help='Run tests in loop until failure' )
     parser.add_argument('-v', '--verbose', action="store_true", help='Verbose output' )
     parser.add_argument('-cov', '--coverage', action="store_true", help='Measure code coverage' )
-    parser.add_argument('--profile', action="store_true", help='Profile the code' )
-    parser.add_argument('--pfile', action='store', default=None, help='Profile the code and output data to file' )
+
 
     args = parser.parse_args()
 
@@ -130,13 +128,6 @@ if __name__ == '__main__':
     profiler = None
 
     try:
-        ## start code profiler
-        profiler_outfile = args.pfile
-        if args.profile is True or profiler_outfile is not None:
-            print "Starting profiler"
-            profiler = cProfile.Profile()
-            profiler.enable()
-
         ## run proper tests
         if args.untilfailure is True:
             counter = 1
@@ -158,21 +149,6 @@ if __name__ == '__main__':
             unittest.TextTestRunner().run(suite)
 
     finally:
-        ## stop profiler
-        if profiler is not None:
-            profiler.disable()
-            if profiler_outfile is None:
-                print "Generating profiler data"
-                profiler.print_stats(1)
-            else:
-                print "Storing profiler data to", profiler_outfile
-                profiler.dump_stats( profiler_outfile )
-
-            if profiler_outfile is not None:
-                ##pyprof2calltree -i $PROF_FILE -k
-                print "Launching: pyprof2calltree -i {} -k".format(profiler_outfile)
-                subprocess.call(["pyprof2calltree", "-i", profiler_outfile, "-k"])
-
         ## prepare coverage results
         if coverageData is not None:
             ## convert results to html

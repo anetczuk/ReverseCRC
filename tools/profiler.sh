@@ -16,6 +16,8 @@ out_file=$(mktemp ${tmpdir}/out.prof.${timestamp}.XXXXXX)
 echo "Starting profiler"
 
 
+echo "executing: python2 -m cProfile -o $out_file $@"
+
 python2 -m cProfile -o $out_file $@
 
 

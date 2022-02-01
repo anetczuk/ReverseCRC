@@ -25,7 +25,6 @@
 
 import os
 import sys
-import time
 import argparse
 import logging
 
@@ -43,7 +42,7 @@ from crc.solver.reverse import InputParams
 from crc.solver.backward import BackwardSolver
 
 
-logging.basicConfig(level=logging.DEBUG)
+_LOGGER = logging.getLogger(__name__)
 
 
 # return CRCProcessorFactory
@@ -111,45 +110,52 @@ def main():
     parser.add_argument('--reflect_bits', '-rb', action='store', default=None, help='Should reflect bits in each input byte? (for VERIFY mode)' )
     parser.add_argument('--binding', '-b', action='store', choices=['auto', 'ctypes', 'cffi', 'swigraw', 'swigoo'], default=None, help='Set fastcrc binding' )
     parser.add_argument('--print_progress', '-pp', action='store_const', const=True, default=False, help='Print progress' )
+    parser.add_argument('--silent', action='store_const', const=True, default=False, help='No output messages' )
 
 
     args = parser.parse_args()
 
 
-    print "Executed:", " ".join( sys.argv )
-    print "Starting:", args.alg, args.mode
+    silentMode = args.silent
+    if silentMode:
+        logging.basicConfig(level=logging.ERROR)
+    else:
+        logging.basicConfig(level=logging.DEBUG)
+    
+
+    _LOGGER.info( "Executed: %s", " ".join( sys.argv ) )
+    _LOGGER.info( "Starting: %s %s", args.alg, args.mode )
 
 
     if args.binding is not None:
         os.environ[ "FASTCRC_BINDING" ] = args.binding
 
-    starttime = time.time()
 
     dataParser = DataParser()
     ## return InputData
     data = dataParser.parseFile(args.infile)
 
     if data.empty():
-        print "no data found"
+        _LOGGER.error( "no data found" )
         return 1
     if data.ready() == False:
-        print "input data not ready"
+        _LOGGER.error( "input data not ready" )
         return 1
 
-    print "input data:", data.numbersList
-    print "List size: {} Data size: {} CRC size: {}".format( len(data.numbersList), data.dataSize, data.crcSize )
+    _LOGGER.info( "input data: %s", data.numbersList )
+    _LOGGER.info( "List size: {} Data size: {} CRC size: {}".format( len(data.numbersList), data.dataSize, data.crcSize ) )
 
     printProgress = args.print_progress
 
     processorFactory = create_alg_factory( args.alg )
     if processorFactory is None:
-        print "invalid algorithm:", args.alg
+        _LOGGER.error( "invalid algorithm: %s", args.alg )
         return 1
 
     ## type Reverse
     solver = create_solver( args.mode, printProgress )
     if solver is None:
-        print "invalid solver:", args.mode
+        _LOGGER.error( "invalid solver: %s", args.mode )
         return 1
     solver.setProcessorFactory( processorFactory )
 
@@ -186,13 +192,10 @@ def main():
         outname = "%s_%s_%s_p%s_i%s_x%s_ro%s_rb%s.txt" % ( filenameroot, args.alg, args.mode, args.poly, args.init_reg, args.xor_val, inputParams.isReverseOrder(), inputParams.isReflectBits() )
         outfile = os.path.join( outdir, outname )
 
-    print "input args, poly: %s init: %s, xor: %s crcsize: %s" % ( inputParams.poly, inputParams.initReg, inputParams.xorVal, inputParams.crcSize )
-    print "output path:", outfile
+    _LOGGER.info( "input args, poly: %s init: %s, xor: %s crcsize: %s" % ( inputParams.poly, inputParams.initReg, inputParams.xorVal, inputParams.crcSize ) )
+    _LOGGER.info( "output path: %s", outfile )
 
     solver.execute( inputParams, outfile )
-
-    timeDiff = (time.time()-starttime)
-    print "\nCalculation time: {:13.8f}s".format(timeDiff)
 
     return 0
 

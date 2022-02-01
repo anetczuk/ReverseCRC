@@ -4,18 +4,7 @@
 
 import ctypes
 
-from ..paths import FASTCRC_CLIB_LIB_PATH
-
-
-try:
-    c_fastcrc = ctypes.CDLL( FASTCRC_CLIB_LIB_PATH )
-
-except OSError as ex:
-    ## could not load module
-    raise ImportError( ex )
-
-
-## ========================================================================
+from fastcrc8 import c_fastcrc
 
 
 class CRC16Result(ctypes.Structure):

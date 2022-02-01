@@ -2,46 +2,7 @@
 ##
 ##
 
-import os
-import sys
-
-import imp
-
-
-BASE_DIR = os.path.dirname( __file__ )
-
-BUILD_DIR = os.path.join( BASE_DIR, 'build' )
-
-
-sys.path.append( BUILD_DIR )
-
-
-swig_fastcrc_path = os.path.join( BUILD_DIR, 'swigraw_fastcrc.py' )
-
-try:
-    swigraw_fastcrc = imp.load_source( 'fastcrc.swigraw_fastcrc', swig_fastcrc_path )
-
-except IOError as ex:
-    ## could not load module
-    raise ImportError( ex )
-
-
-# def convert_to_uint8array( bytesList ):
-#     arr_len  = len(bytesList)
-#     data_array = swigraw_fastcrc.Uint8Array( arr_len )
-#     for i in xrange( 0, arr_len ):
-#         data_array[i] = bytesList[i]
-#     return data_array
-
-def convert_to_uint8array( bytesList ):
-    arr_len  = len(bytesList)
-    data_array = swigraw_fastcrc.new_Uint8Array( arr_len )
-    for i in xrange( 0, arr_len ):
-        swigraw_fastcrc.Uint8Array_setitem( data_array, i, bytesList[i] )
-    return data_array
-
-
-## ========================================================================
+from fastcrc8 import swigraw_fastcrc, convert_to_uint8array
 
 
 def hw_crc16_calculate( bytesList, poly, intReg, xorVal ):

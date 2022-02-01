@@ -2,18 +2,9 @@
 ##
 ##
 
-import os
-import sys
-
 import cffi
 
-
-BASE_DIR = os.path.dirname( __file__ )
-
-sys.path.append( os.path.join( BASE_DIR, 'build') )
-
-
-import cffi_fastcrc.lib as cffi_fastcrc
+from fastcrc8 import cffi_fastcrc
 
 
 ffi = cffi.FFI()

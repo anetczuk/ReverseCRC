@@ -21,12 +21,17 @@
 # SOFTWARE.
 #
 
+import logging
+
 from crc.numbermask import NumberMask
 from crc.crcproc import PolyKey, CRCKey
 from crc.solver.reverse import Reverse,\
     InputMaskList, print_results, write_results
 from crc.flush import flush_percent, flush_string
 from collections import Counter
+
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class BackwardSolver(Reverse):
@@ -52,7 +57,7 @@ class BackwardSolver(Reverse):
             print "invalid case -- no data"
             return False
 
-        print "crc size: %s" % crcSize
+        _LOGGER.info( "crc size: %s" % crcSize )
 
 #         revOrd = inputParams.isReverseOrder()
 #         if revOrd:
@@ -72,20 +77,22 @@ class BackwardSolver(Reverse):
 
         subSpaceSize = xorListSize
         spaceSize    = numbersLen * polyListSize * subSpaceSize
-        print "search space size:", spaceSize, numbersLen, polyListSize, xorListSize
+        _LOGGER.info( "search space size: %s %s %s %s", spaceSize, numbersLen, polyListSize, xorListSize )
 
-        print "poly search range: %s %s" % ( polyListStart, polyListStop )
-        print " xor search range: %s %s" % ( xorListStart, xorListStop )
+        _LOGGER.info( "poly search range: %s %s" % ( polyListStart, polyListStop ) )
+        _LOGGER.info( " xor search range: %s %s" % ( xorListStart, xorListStop ) )
 
         spaceCounter = 0
 
         crc_forward  = self.procFactory.createForwardProcessor( crcSize )                 # CRCProc
         crc_backward = self.procFactory.createBackwardProcessor( crcSize )       # CRCBackwardProc
 
-        subInputList = inputList[1:]
-        crc_operator = crc_forward.createOperator( crcSize, subInputList )
-#         crc_operator = self.procFactory.createOperator( crcSize, subInputList )
-#         crc_operator = crc_forward.createStandardOperator( crcSize, subInputList )
+        crc_operator = None
+        if numbersLen > 1:
+            subInputList = inputList[1:]
+            crc_operator = crc_forward.createOperator( crcSize, subInputList )
+    #         crc_operator = self.procFactory.createOperator( crcSize, subInputList )
+    #         crc_operator = crc_forward.createStandardOperator( crcSize, subInputList )
 
         results = Counter()
 
@@ -112,7 +119,17 @@ class BackwardSolver(Reverse):
                 value = spaceCounter * 100.0 / spaceSize
                 flush_percent( value, 7 )
 
+            ## xorDict: List[ (xor, List[init]) ]
             xorDict = crc_backward.calculateInitRegRange( firstDataMask, firstCrc, polyMask, xorListStart, xorListStop )
+            
+            if crc_operator is None:
+                for xorOutPair in xorDict:
+                    xorOut      = xorOutPair[0]
+                    init_found  = xorOutPair[1]
+                    for init_reg in init_found:
+                        key = CRCKey( polyNum, init_reg, xorOut, 0, dataSize, revOrd=False, refBits=False )
+                        results[ key ] += 1
+                continue
 
             for xorOutPair in xorDict:
                 xorOut      = xorOutPair[0]
@@ -127,9 +144,10 @@ class BackwardSolver(Reverse):
                         key = CRCKey( polyNum, init_reg, xorOut, 0, dataSize, revOrd=False, refBits=False )
                         results[ key ] += 1
 
-        print "\n\nFound total results: ", len(results), "\n"
+        _LOGGER.info( "\n\nFound total results: %s", len(results) )
 
         if self.progress:
+            print ""
             print_results( results, 1, True )
 
         if outputFile is not None:

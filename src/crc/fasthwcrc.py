@@ -90,7 +90,10 @@ class Fast8HwCRC( HwCRC ):
         if dataList:
             return Forward8FastHwOperator( self, dataList )
 
-        print "unable to morph -- unsupported crc size: ", crcSize
+        if not inputData:
+            print "unable to morph to Forward8FastHwOperator -- empty input data"
+        else:
+            print "unable to morph -- unsupported crc size:", crcSize
         return CRCProc.createOperator(self, crcSize, inputData)
 
 ##
@@ -240,7 +243,10 @@ class Fast16HwCRC( HwCRC ):
         if dataList:
             return Forward16FastHwOperator( self, dataList )
 
-        print "unable to morph -- unsupported crc size: ", crcSize
+        if not inputData:
+            print "unable to morph to Forward16FastHwOperator -- empty input data"
+        else:
+            print "unable to morph -- unsupported crc size:", crcSize
         return CRCProc.createOperator(self, crcSize, inputData)
 
 

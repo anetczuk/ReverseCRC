@@ -21,6 +21,8 @@
 # SOFTWARE.
 #
 
+import logging
+
 from collections import Counter
 
 from crc.numbermask import NumberMask
@@ -28,6 +30,9 @@ from crc.solver.reverse import Reverse, print_results, write_results,\
     InputMaskList
 from crc.flush import flush_number, flush_percent
 from crc.crcproc import CRCKey
+
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class BruteForceSolver(Reverse):
@@ -39,16 +44,18 @@ class BruteForceSolver(Reverse):
     def execute( self, inputParams, outputFile ):
         retList = self.bruteForce( inputParams, self.minSearchData )
         if len(retList) < 1:
-            print "\nNo keys discovered"
+            _LOGGER.info( "\nNo keys discovered" )
             return
 
         data = inputParams.data
         dataSize = data.size()
 
-        print "\n\nFound total results: ", len(retList)
-        print_results( retList, dataSize )
+        _LOGGER.info( "\n\nFound total results: %s", len(retList) )
+        if self.progress:
+            print_results( retList, dataSize )
 
-        write_results( retList, dataSize, outputFile )
+        if outputFile is not None:
+            write_results( retList, dataSize, outputFile )
 
     ## inputParams -- InputParams
     def bruteForce(self, inputParams, searchRange = 0):
@@ -68,7 +75,7 @@ class BruteForceSolver(Reverse):
             print "invalid case -- no data"
             return []
 
-        print "crc size: %s" % crcSize
+        _LOGGER.info( "crc size: %s" % crcSize )
 
         if inputParams.isReverseOrder():
             inputMasks.reverseOrder()
@@ -89,11 +96,11 @@ class BruteForceSolver(Reverse):
 
         subSpaceSize = initListSize * xorListSize
         spaceSize    = polyListSize * subSpaceSize
-        print "search space size:", spaceSize, polyListSize, initListSize, xorListSize
+        _LOGGER.info( "search space size: %s %s %s %s", spaceSize, polyListSize, initListSize, xorListSize )
 
-        print "poly search range: %s %s" % ( polyListStart, polyListStop )
-        print "init search range: %s %s" % ( initListStart, initListStop )
-        print " xor search range: %s %s" % ( xorListStart, xorListStop )
+        _LOGGER.info( "poly search range: %s %s" % ( polyListStart, polyListStop ) )
+        _LOGGER.info( "init search range: %s %s" % ( initListStart, initListStop ) )
+        _LOGGER.info( " xor search range: %s %s" % ( xorListStart, xorListStop ) )
 
 
         crc_forward  = self.procFactory.createForwardProcessor( crcSize )

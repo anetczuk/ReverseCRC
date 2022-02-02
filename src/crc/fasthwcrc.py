@@ -22,7 +22,7 @@
 #
 
 from crc.numbermask import reverse_number
-from crc.crcproc import CRCProc, CRCOperator
+from crc.crcproc import CRCProcessor, CRCOperator
 from collections import Counter
 
 from crc.hwcrc import HwCRC
@@ -95,7 +95,8 @@ class Fast8HwCRC( HwCRC ):
             print "unable to morph to Forward8FastHwOperator -- empty input data"
         else:
             print "unable to morph -- unsupported crc size:", crcSize
-        return CRCProc.createOperator(self, crcSize, inputData)
+        return CRCProcessor.createOperator(self, crcSize, inputData)
+
 
 ##
 ##
@@ -104,7 +105,7 @@ class Forward8FastHwOperator( CRCOperator ):
 
     def __init__(self, crcProcessor, inputData):
         CRCOperator.__init__(self)
-        self.processor = crcProcessor               ## CRCProc
+        self.processor = crcProcessor               ## CRCProcessor
         self.data = []
         for item in inputData:
             self.data.append( Data8Operator( item[0], item[1] ) )
@@ -185,7 +186,7 @@ class Forward8FastHwOperator( CRCOperator ):
 class Fast16HwCRC( HwCRC ):
 
     def __init__(self):
-        CRCProc.__init__(self)
+        CRCProcessor.__init__(self)
 #         self.setReversed( False )
 
     ## override
@@ -242,7 +243,7 @@ class Fast16HwCRC( HwCRC ):
             print "unable to morph to Forward16FastHwOperator -- empty input data"
         else:
             print "unable to morph -- unsupported crc size:", crcSize
-        return CRCProc.createOperator(self, crcSize, inputData)
+        return CRCProcessor.createOperator(self, crcSize, inputData)
 
 
 ##
@@ -252,7 +253,7 @@ class Forward16FastHwOperator( CRCOperator ):
 
     def __init__(self, crcProcessor, inputData):
         CRCOperator.__init__(self)
-        self.processor = crcProcessor               ## CRCProc
+        self.processor = crcProcessor               ## CRCProcessor
         self.inputData = inputData
         self.data = []
         for item in inputData:

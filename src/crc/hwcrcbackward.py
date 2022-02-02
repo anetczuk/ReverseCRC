@@ -25,7 +25,7 @@ import os
 import copy
 import imp
 
-from crc.crcproc import CRCBackwardProc
+from crc.crcproc import CRCInvertProcessor
 
 from fastcrc.paths import FASTCRC_CLIB_SRC_DIR
 
@@ -255,10 +255,10 @@ class HwCRCBackwardState:
 ## ==========================================================
 
 
-class HwCRCBackward( CRCBackwardProc ):
+class HwCRCBackward( CRCInvertProcessor ):
 
     def __init__(self):
-        CRCBackwardProc.__init__(self)
+        CRCInvertProcessor.__init__(self)
         self._reverseMode = False
         self.setReversed( False )
 
@@ -421,6 +421,7 @@ class HwCRCBackward( CRCBackwardProc ):
 ## ==========================================================
 
 
+## returns CRCInvertProcessor
 def create_backward_processor(crcSize):
     if crcSize is None:
         return HwCRCBackward()

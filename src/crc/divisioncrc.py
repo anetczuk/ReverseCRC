@@ -21,7 +21,7 @@
 # SOFTWARE.
 #
 
-from crc.crcproc import CRCProc, CRCProcessorFactory
+from crc.crcproc import CRCProcessor, CRCProcessorFactory
 from crc.divisioncrcbackward import DivisionCRCBackward
 
 
@@ -31,13 +31,13 @@ from crc.divisioncrcbackward import DivisionCRCBackward
 class DivisionCRCProcessorFactory( CRCProcessorFactory ):
 
     # crcSize -- int, number of bits
-    # return CRCProc
+    # return CRCProcessor
     def createForwardProcessor(self, crcSize=None):
         return DivisionCRC()
 
     # crcSize -- int, number of bits
-    # return CRCBackwardProc
-    def createBackwardProcessor(self, crcSize=None):
+    # return CRCInvertProcessor
+    def createInvertProcessor(self, crcSize=None):
         return DivisionCRCBackward()
 
     # crcSize -- int, number of bits
@@ -50,9 +50,9 @@ class DivisionCRCProcessorFactory( CRCProcessorFactory ):
 ## ===================================================================
 
 
-class DivisionCRC(CRCProc):
+class DivisionCRC( CRCProcessor ):
     def __init__(self):
-        CRCProc.__init__(self)
+        CRCProcessor.__init__(self)
 
     def calculate3(self, dataMask, polyMask):
         if self._reversed == False:

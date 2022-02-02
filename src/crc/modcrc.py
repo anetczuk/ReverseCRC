@@ -22,7 +22,7 @@
 #
 
 
-from crc.crcproc import CRCProc, CRCProcessorFactory
+from crc.crcproc import CRCProcessor, CRCProcessorFactory
 import crcmod
 
 
@@ -58,13 +58,13 @@ CRCModCacheMap.instance = CRCModCacheMap()
 class ModCRCProcessorFactory( CRCProcessorFactory ):
 
     # crcSize -- int, number of bits
-    # return CRCProc
+    # return CRCProcessor
     def createForwardProcessor(self, crcSize=None):
         return ModCRC()
 
     # crcSize -- int, number of bits
-    # return CRCBackwardProc
-    def createBackwardProcessor(self, crcSize=None):
+    # return CRCInvertProcessor
+    def createInvertProcessor(self, crcSize=None):
         raise NotImplementedError( "ModCRC -- not implemented" )
 
     # crcSize -- int, number of bits
@@ -80,10 +80,10 @@ class ModCRCProcessorFactory( CRCProcessorFactory ):
 ##
 ## Compatible with crcmod library
 ##
-class ModCRC(CRCProc):
+class ModCRC( CRCProcessor ):
 
     def __init__(self):
-        CRCProc.__init__(self)
+        CRCProcessor.__init__(self)
 
 #     def setInitCRC(self, value, crcSize):
 #         self.registerInit = value ^ self.xorOut

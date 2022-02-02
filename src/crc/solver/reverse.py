@@ -229,7 +229,7 @@ class Reverse(object):
             self.progress = False
         else:
             self.progress = printProgress
-        self.procFactory = None
+        self.procFactory = None                 ## CRCProcessorFactory
 
         self.reverseOrder = None        ## bool, should bytes be read in reverse?
         self.reflectBits  = None        ## bool, should reflect bits in each input byte?

@@ -88,8 +88,8 @@ class BackwardSolver(Reverse):
 
         spaceCounter = 0
 
-        crc_forward  = self.procFactory.createForwardProcessor( crcSize )        # CRCProc
-        crc_backward = self.procFactory.createBackwardProcessor( crcSize )       # CRCBackwardProc
+        crc_forward  = self.procFactory.createForwardProcessor( crcSize )      # CRCProcessor
+        crc_backward = self.procFactory.createInvertProcessor( crcSize )       # CRCInvertProcessor
 
         crc_operator = None
         if numbersLen > 1:

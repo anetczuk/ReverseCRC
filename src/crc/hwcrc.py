@@ -21,7 +21,7 @@
 # SOFTWARE.
 #
 
-from crc.crcproc import CRCProc, CRCOperator, CRCProcessorFactory,\
+from crc.crcproc import CRCProcessor, CRCOperator, CRCProcessorFactory,\
     StandardCRCOperator
 
 from crc.numbermask import reverse_number
@@ -37,20 +37,21 @@ from fastcrc.utils import convert_to_msb_list, convert_to_lsb_list
 class HwCRCProcessorFactory( CRCProcessorFactory ):
 
     # crcSize -- int, number of bits
-    # return CRCProc
+    # return CRCProcessor
     def createForwardProcessor(self, crcSize=None):
         return create_processor(crcSize)
 
     # crcSize -- int, number of bits
-    # return CRCBackwardProc
-    def createBackwardProcessor(self, crcSize=None):
+    # return CRCInvertProcessor
+    def createInvertProcessor(self, crcSize=None):
         return create_backward_processor( crcSize )
 
     # crcSize -- int, number of bits
     # inputData: List[ (NumberMask, NumberMask) ]
     # return CRCOperator
     def createOperator(self, crcSize, inputData):
-        return HwCRC().createOperator( crcSize, inputData )
+        processor = create_processor(crcSize)
+        return processor.createOperator( crcSize, inputData )
 
 
 ## ===================================================================
@@ -58,14 +59,14 @@ class HwCRCProcessorFactory( CRCProcessorFactory ):
 
 ##
 ## standard implementation done in pure Python
-class HwCRC( CRCProc ):
+class HwCRC( CRCProcessor ):
 
     def __init__(self):
-        CRCProc.__init__(self)
+        CRCProcessor.__init__(self)
 
     ## override
     def setReversed(self, value = True):
-        CRCProc.setReversed(self, value)
+        CRCProcessor.setReversed(self, value)
         ## optimize execution time by reducing one level of function call
         if value is False:
             self.calculate3 = self.calculateMSBClassic
@@ -145,7 +146,7 @@ class HwCRC( CRCProc ):
     # inputData: List[ (NumberMask, NumberMask) ]
     # return CRCOperator
     def createOperator(self, crcSize, inputData):
-        return CRCProc.createOperator(self, crcSize, inputData)
+        return CRCProcessor.createOperator(self, crcSize, inputData)
 
     def morphData(self, inputData, crcSize):
         dataList = []
@@ -153,12 +154,12 @@ class HwCRC( CRCProc ):
             dataMask = data[0]
             if dataMask.dataSize % 8 != 0:
                 print "unable to morph data -- unsupported data size"
-                #return CRCProc.createOperator(self, crcSize, inputData)
+                #return CRCProcessor.createOperator(self, crcSize, inputData)
                 return []
             crcMask = data[1]
             if crcMask.dataSize != crcSize:
                 print "unable to morph data -- unsupported crc:", crcMask.dataSize
-                #return CRCProc.createOperator(self, crcSize, inputData)
+                #return CRCProcessor.createOperator(self, crcSize, inputData)
                 return []
 
 #             crcMask = data[1]
@@ -167,9 +168,6 @@ class HwCRC( CRCProc ):
             #rev_crc = reverse_number( crcMask.dataNum, crcSize )
             #dataList.append( (bytesList, rev_crc) )
         return dataList
-
-    def createBackwardProcessor(self, crcSize):
-        return create_backward_processor( crcSize )
 
 
 ## ==========================================================

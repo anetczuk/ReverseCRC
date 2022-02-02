@@ -141,8 +141,9 @@ def measure( data_bytes_list=[8, 16, 24, 32], data_rows=1, crc_index=0, mode="BF
 
     data_bytes = prepare_filename( str(data_bytes_list) ) 
     crc_size = ( crc_index + 1 ) * 8
-    timestr = time.strftime("%Y-%m-%d_%H-%M-%S")
-    plot_output_name = "%s_db%s_crc%s_dr%s_dg%s_sub_%s.png" % (mode, data_bytes, crc_size, data_rows, data_generator, timestr)
+    plot_output_name = "%s_db%s_crc%s_dr%s_dg%s_sub.png" % (mode, data_bytes, crc_size, data_rows, data_generator)
+#     timestr = time.strftime("%Y-%m-%d_%H-%M-%S")
+#     plot_output_name = "%s_db%s_crc%s_dr%s_dg%s_sub_%s.png" % (mode, data_bytes, crc_size, data_rows, data_generator, timestr)
     plot_output_path = os.path.join( out_dir, plot_output_name )
     
     print "Saving plot to:", plot_output_path

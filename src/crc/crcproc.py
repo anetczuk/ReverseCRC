@@ -159,13 +159,13 @@ class CRCProcessorFactory(object):
         pass
 
     # crcSize -- int, number of bits
-    # return CRCProc
+    # return CRCProcessor
     def createForwardProcessor(self, crcSize=None):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
 
     # crcSize -- int, number of bits
-    # return CRCBackwardProc
-    def createBackwardProcessor(self, crcSize=None):
+    # return CRCInvertProcessor
+    def createInvertProcessor(self, crcSize=None):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
 
     # crcSize -- int, number of bits
@@ -176,12 +176,11 @@ class CRCProcessorFactory(object):
 
 
 ## ===================================================================
+## ===================================================================
 
 
-class CRCProc(object):
-    '''
-    classdocs
-    '''
+class CRCProcessor(object):
+    ''' Calculate CRC '''
 
     def __init__(self):
         '''
@@ -218,6 +217,16 @@ class CRCProc(object):
         self.setReversed( crcKey.isReversedFully() )
         self.setXorOutValue( crcKey.xor )
         self.setRegisterInitValue( crcKey.init )
+        
+    ## ===========================================
+
+    def calculateCRC( self, data, dataSize, poly, crcSize, init=0, xorout=0, reverse=False ):
+        self.setReversed( reverse )
+        self.setRegisterInitValue( init )
+        self.setXorOutValue( xorout )
+        dataMask = NumberMask(data, dataSize)
+        polyMask = NumberMask(poly, crcSize)
+        return self.calculate3(dataMask, polyMask)
 
     ## 'poly' with leading '1'
     def calculate(self, data, poly):
@@ -232,12 +241,7 @@ class CRCProc(object):
     def calculate3(self, dataMask, polyMask):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
 
-    def calculateCRC( self, data, dataSize, poly, crcSize, init=0, xorout=0, reverse=False ):
-        self.setReversed( reverse )
-        self.setRegisterInitValue( init )
-        self.setXorOutValue( xorout )
-        crc = self.calculate2(data, dataSize, poly, crcSize)
-        return crc
+    ## ===========================================
 
     ## inputData: List[ (NumberMask, NumberMask) ]
     def createOperator(self, crcSize, inputData):
@@ -247,14 +251,12 @@ class CRCProc(object):
 #         print( "creating StandardCRCOperator" )
         return StandardCRCOperator( self, inputData )
 
-    def createBackwardProcessor(self, crcSize):
-        raise NotImplementedError( "%s not implemented abstract method" % type(self) )
-
 
 ## =================================================================
 
 
-class CRCBackwardProc( object ):
+## used in BackwardSolver
+class CRCInvertProcessor( object ):
 
     def __init__(self):
         pass
@@ -269,9 +271,6 @@ class CRCBackwardProc( object ):
         crc_raw = crc ^ xorOut
         return self.calculateInitRegBase( dataMask, polyMask, crc_raw )
 
-    def calculateInitRegBase(self, dataMask, polyMask, crc_raw):
-        raise NotImplementedError( "%s not implemented abstract method" % type(self) )
-
     def calculateInitRegRange(self, dataMask, crcNum, polyMask, xorStart, xorEnd):
         ## default (standard) implementation
         xorDict = list()
@@ -282,6 +281,9 @@ class CRCBackwardProc( object ):
                 #xorDict[ xorOut ] = init_found
                 xorDict.append( (xorOut, init_found) )
         return xorDict
+
+    def calculateInitRegBase(self, dataMask, polyMask, crc_raw):
+        raise NotImplementedError( "%s not implemented abstract method" % type(self) )
 
 
 ## =================================================================
@@ -308,6 +310,10 @@ class CRCOperator(object):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
 
 
+## ===================================================================
+## ===================================================================
+
+
 class ResultContainer( object ):
     def __init__(self):
         self.data = set()
@@ -331,7 +337,7 @@ class StandardCRCOperator( CRCOperator ):
 
     def __init__(self, crcProcessor, inputData):
         CRCOperator.__init__(self)
-        self.processor = crcProcessor               ## CRCProc
+        self.processor = crcProcessor               ## CRCProcessor
         self.data = inputData                       ## List[ (NumberMask, NumberMask) ]
 
     def calculate(self, polyMask):

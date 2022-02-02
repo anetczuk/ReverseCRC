@@ -24,15 +24,15 @@
 
 from crc.hwcrc import create_processor
 from crc.numbermask import NumberMask
-from crc.crcproc import CRCProc
+from crc.crcproc import CRCProcessor
 
 
 
 GlobalLookupTables = {}
 
-class LookupCRC(CRCProc):
+class LookupCRC( CRCProcessor ):
     def __init__(self, lookupSize):
-        CRCProc.__init__(self)
+        CRCProcessor.__init__(self)
         self.lookupSize = lookupSize
 
     def calculate3(self, dataMask, polyMask):

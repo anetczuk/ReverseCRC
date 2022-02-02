@@ -21,12 +21,17 @@
 # SOFTWARE.
 #
 
+import logging
+
 from crc.numbermask import NumberMask
 from crc.crcproc import PolyKey, CRCKey
 from crc.solver.reverse import Reverse,\
     InputMaskList, print_results, write_results
 from crc.flush import flush_percent, flush_string
 from collections import Counter
+
+
+_LOGGER = logging.getLogger(__name__)
 
 
 # class VerifyCRCCollector( CRCCollector ):
@@ -49,7 +54,7 @@ class VerifySolver(Reverse):
 
         crcSize = inputParams.getCRCSize()
         if crcSize is None:
-            print "\nUnable to determine CRC size: pass poly or crcsize as cmd argument"
+            _LOGGER.error( "Unable to determine CRC size: pass poly or crcsize as cmd argument" )
             return
 
         if inputData.crcSize != crcSize:
@@ -58,10 +63,10 @@ class VerifySolver(Reverse):
 
         inputMasks = InputMaskList( inputData )
         if inputMasks.empty():
-            print "invalid case -- no data"
+            _LOGGER.error( "invalid case -- no data" )
             return False
 
-        print "crc size: %s" % crcSize
+        _LOGGER.info( "crc size: %s" % crcSize )
 
         revOrd = inputParams.isReverseOrder()
         if revOrd:
@@ -84,11 +89,11 @@ class VerifySolver(Reverse):
 
         subSpaceSize = initListSize * xorListSize
         spaceSize    = polyListSize * subSpaceSize
-        print "search space size:", spaceSize, polyListSize, initListSize, xorListSize
+        _LOGGER.info( "search space size: %s %s %s %s", spaceSize, polyListSize, initListSize, xorListSize )
 
-        print "poly search range: %s %s" % ( polyListStart, polyListStop )
-        print "init search range: %s %s" % ( initListStart, initListStop )
-        print " xor search range: %s %s" % ( xorListStart, xorListStop )
+        _LOGGER.info( "poly search range: %s %s" % ( polyListStart, polyListStop ) )
+        _LOGGER.info( "init search range: %s %s" % ( initListStart, initListStop ) )
+        _LOGGER.info( " xor search range: %s %s" % ( xorListStart, xorListStop ) )
 
         spaceCounter = 0
 
@@ -116,7 +121,11 @@ class VerifySolver(Reverse):
                 key = CRCKey( polyMask.dataNum, initReg, xorVal, 0, inputData.dataSize, revOrd=revOrd, refBits=refBits )
                 results[ key ] += 1
 
-        print "\n\nFound total results: ", len(results)
-        print_results( results, 1 )
+        _LOGGER.info( "\n\nFound total results: %s", len(results) )
+        if self.progress:
+            print_results( results, 1 )
 
-        write_results( results, 1, outputFile )
+        if outputFile is not None:
+            write_results( results, 1, outputFile )
+
+        return results

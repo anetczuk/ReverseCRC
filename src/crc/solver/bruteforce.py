@@ -45,7 +45,7 @@ class BruteForceSolver(Reverse):
         retList = self.bruteForce( inputParams, self.minSearchData )
         if len(retList) < 1:
             _LOGGER.info( "\nNo keys discovered" )
-            return
+            return retList
 
         data = inputParams.data
         dataSize = data.size()
@@ -56,6 +56,8 @@ class BruteForceSolver(Reverse):
 
         if outputFile is not None:
             write_results( retList, dataSize, outputFile )
+            
+        return retList
 
     ## inputParams -- InputParams
     def bruteForce(self, inputParams, searchRange = 0):

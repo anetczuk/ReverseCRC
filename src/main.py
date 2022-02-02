@@ -183,6 +183,7 @@ def main():
 
     outfile = args.outfile
     if outfile is None and args.default_outfile:
+        ## prepare output file path
         filename = os.path.basename(args.infile)
         filenameroot = os.path.splitext( filename )[0]
         dirname = os.path.dirname(args.infile)

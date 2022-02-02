@@ -28,10 +28,9 @@ import random
 
 from crc.numbermask import intToASCII
 from crc.hwcrc import HwCRC
-
-
-__scriptdir__ = os.path.dirname(os.path.realpath(__file__))
-# logging.basicConfig(level=logging.INFO)
+from crc.input import InputData
+from crc.solver.reverse import InputParams
+from crc.crcproc import CRCKey
 
 
 class XorTest(unittest.TestCase):
@@ -107,6 +106,120 @@ class XorTest(unittest.TestCase):
 
         message = "poly:{:X} d1:{:X} c1:{:X} d2:{:X} c2:{:X} ri:{:X} xo:{:X} xor:{:X} {:X} != {:X}".format( inputPoly, data1, crc1, data2, crc2, regInit, xorOut, xdata, xcrc, xorcrc )
         self.assertEquals( xcrc, xorcrc, message )
+
+
+## ==================================================================
+
+
+class SolverTestParametrized(object):
+    
+    def generateInputData( self, dataSamplesNum, dataSize, crcSize, poly, initReg, xorVal ):
+        dataMask = 1 << dataSize - 1        ## mask, e.g. 0xFFFF
+        
+        testData  = set()
+        for _ in range(0, dataSamplesNum):
+            item = random.randint(0, dataMask) 
+            testData.add( item )
+
+        return self.prepareInputData( testData, dataSize, crcSize, poly, initReg, xorVal )
+    
+    def prepareInputData( self, dataSamplesList, dataSize, crcSize, poly, initReg, xorVal ):
+        inputData = InputData( [], dataSize, crcSize )
+        for item in dataSamplesList:
+            crc = self.crcProc.calculateCRC( item, dataSize, poly, crcSize, initReg, xorVal )
+            inputData.numbersList.append( (item, crc) )
+            
+        return inputData
+
+    def test_execute_8_sample(self):
+        poly     = 0x1D
+        initReg  = 0x00
+        xorVal   = 0x8F
+        dataSize = 56
+        crcSize  = 8
+        
+        dataList = [ (0x0D00C0F0FFFFFF, 0x90), (0x0000C0F0FFFFFF, 0x76) ]
+
+        inputParams = InputParams()
+        inputParams.data = InputData( dataList, dataSize, crcSize )
+        inputParams.crcSize = crcSize
+        inputParams.poly = poly
+        inputParams.xorVal = xorVal
+        
+        results = self.solver.execute( inputParams, None )
+
+#         print "result:", results, len(results)
+#         print "data:  ", inputParams.data.numbersList, len(inputParams.data.numbersList)
+#         print "result:", results.most_common(3), len(results)
+        
+        self.assertEqual( len(results), 1 )
+        self.assertIn( CRCKey( poly, initReg, xorVal, 0, dataSize, False, False ), results )
+
+    def test_execute_8_rand(self):
+        poly     = 0xCD
+        initReg  = 0x00
+        xorVal   = 0x02
+        dataSize = 16
+        crcSize  = 8
+        
+        inputParams = InputParams()
+        inputParams.data = self.generateInputData( 9, dataSize, crcSize, poly, initReg, xorVal )
+        inputParams.crcSize = crcSize
+        inputParams.poly = poly
+        inputParams.xorVal = xorVal
+        
+        results = self.solver.execute( inputParams, None )
+
+#         print "result:", results, len(results)
+#         print "data:  ", inputParams.data.numbersList, len(inputParams.data.numbersList)
+#         print "result:", results.most_common(3), len(results)
+        
+        self.assertEqual( len(results), 1 )
+        self.assertIn( CRCKey( poly, initReg, xorVal, 0, 16, False, False ), results )
+
+    def test_execute_16_sample(self):
+        poly     = 0x335D
+        initReg  = 0x00
+        xorVal   = 0x8F
+        dataSize = 16
+        crcSize  = 16
+        
+        inputParams = InputParams()
+        inputParams.data = self.prepareInputData( [ 0xFFFE, 0xFDFC ], dataSize, crcSize, poly, initReg, xorVal )
+        inputParams.crcSize = crcSize
+        inputParams.poly = poly
+        inputParams.xorVal = xorVal
+        
+        results = self.solver.execute( inputParams, None )
+
+#         print "result:", results, len(results)
+#         print "data:  ", inputParams.data.numbersList, len(inputParams.data.numbersList)
+#         print "result:", results.most_common(3), len(results)
+        
+        self.assertEqual( len(results), 1 )
+        self.assertIn( CRCKey( poly, initReg, xorVal, 0, dataSize, False, False ), results )
+
+    def test_execute_16_rand(self):
+        poly     = 0x335D
+        initReg  = 0x00
+        xorVal   = 0x02
+        dataSize = 32
+        crcSize  = 16
+        
+        inputParams = InputParams()
+        inputParams.data = self.generateInputData( 3, dataSize, crcSize, poly, initReg, xorVal )
+        inputParams.crcSize = crcSize
+        inputParams.poly = poly
+        inputParams.xorVal = xorVal
+        
+        results = self.solver.execute( inputParams, None )
+
+#         print "result:", results, len(results)
+#         print "data:  ", inputParams.data.numbersList, len(inputParams.data.numbersList)
+#         print "result:", results.most_common(3), len(results)
+        
+        self.assertEqual( len(results), 1 )
+        self.assertIn( CRCKey( poly, initReg, xorVal, 0, dataSize, False, False ), results )
 
 
 if __name__ == "__main__":

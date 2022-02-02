@@ -40,22 +40,26 @@ class BackwardSolver(Reverse):
         Reverse.__init__(self, printProgress)
 
     ## inputParams -- InputParams
+    ## returns Counter<CRCKey>
     def execute( self, inputParams, outputFile ):
         inputData = inputParams.data        # InputData
 
         crcSize = inputParams.getCRCSize()
         if crcSize is None:
             print "\nUnable to determine CRC size: pass poly or crcsize as cmd argument"
-            return
+            return None
 
         if inputData.crcSize != crcSize:
             ## deduced CRC size differs from input crc
             raise ValueError( "inconsistent crc size [%s] with input data crc[%s]" % ( crcSize, inputData.crcSize ) )
 
+        if crcSize < 1:
+            raise ValueError( "invalid crc size [%s]" % ( crcSize ) )
+
         inputMasks = InputMaskList( inputData )
         if inputMasks.empty():
             print "invalid case -- no data"
-            return False
+            return None
 
         _LOGGER.info( "crc size: %s" % crcSize )
 
@@ -84,7 +88,7 @@ class BackwardSolver(Reverse):
 
         spaceCounter = 0
 
-        crc_forward  = self.procFactory.createForwardProcessor( crcSize )                 # CRCProc
+        crc_forward  = self.procFactory.createForwardProcessor( crcSize )        # CRCProc
         crc_backward = self.procFactory.createBackwardProcessor( crcSize )       # CRCBackwardProc
 
         crc_operator = None
@@ -154,3 +158,5 @@ class BackwardSolver(Reverse):
             write_results( results, 1, outputFile, True )
 
 #         print "inits per item:", initSum, float(initSum) / (polyListSize*xorListSize*numbersLen)
+
+        return results

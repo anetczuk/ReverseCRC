@@ -36,7 +36,7 @@ class HwCRC_BackwardSolver_Test(unittest.TestCase, SolverTestParametrized):
         self.crcProc = HwCRC()
         self.solver = BackwardSolver()
         self.solver.setProcessorFactory( factory )
-        
+
     def tearDown(self):
         # Called after testfunction was executed
         pass
@@ -49,7 +49,7 @@ class HwCRC_BackwardSolver_Test(unittest.TestCase, SolverTestParametrized):
 #         self.crcProc = DivisionCRC()
 #         self.solver = BackwardSolver()
 #         self.solver.setProcessorFactory( factory )
-#  
+#
 #     def tearDown(self):
 #         # Called after testfunction was executed
 #         pass

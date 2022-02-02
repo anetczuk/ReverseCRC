@@ -121,7 +121,7 @@ def main():
         logging.basicConfig(level=logging.ERROR)
     else:
         logging.basicConfig(level=logging.DEBUG)
-    
+
 
     _LOGGER.info( "Executed: %s", " ".join( sys.argv ) )
     _LOGGER.info( "Starting: %s %s", args.alg, args.mode )

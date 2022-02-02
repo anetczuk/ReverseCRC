@@ -33,7 +33,7 @@ ffi = cffi.FFI()
 
 ##
 class Data16Operator( object ):
-    
+
     ## dataBytes: bytes list
     ## dataCRC: int
     def __init__(self, dataBytes, dataCRC):
@@ -44,13 +44,13 @@ class Data16Operator( object ):
 #     def __del__(self):
 #         ## do nothing -- data will be released automatically
 #         pass
-        
+
     def calculate(self, poly, intReg, xorVal):
         return cffi_fastcrc.hw_crc16_calculate( self.rawData, self.dataLen, poly, intReg, xorVal )
-        
+
     def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
         return cffi_fastcrc.hw_crc16_calculate_param( self.rawData, self.dataLen, poly, intReg, xorVal, reverseOrder, reflectBits )
-        
+
     def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
         ret_array = cffi_fastcrc.hw_crc16_calculate_range( self.rawData, self.dataLen, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
         return convert_CRC16ResultArray_to_list( ret_array )

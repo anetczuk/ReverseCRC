@@ -112,23 +112,23 @@ class XorTest(unittest.TestCase):
 
 
 class SolverTestParametrized(object):
-    
+
     def generateInputData( self, dataSamplesNum, dataSize, crcSize, poly, initReg, xorVal ):
         dataMask = 1 << dataSize - 1        ## mask, e.g. 0xFFFF
-        
+
         testData  = set()
         for _ in range(0, dataSamplesNum):
-            item = random.randint(0, dataMask) 
+            item = random.randint(0, dataMask)
             testData.add( item )
 
         return self.prepareInputData( testData, dataSize, crcSize, poly, initReg, xorVal )
-    
+
     def prepareInputData( self, dataSamplesList, dataSize, crcSize, poly, initReg, xorVal ):
         inputData = InputData( [], dataSize, crcSize )
         for item in dataSamplesList:
             crc = self.crcProc.calculateCRC( item, dataSize, poly, crcSize, initReg, xorVal )
             inputData.numbersList.append( (item, crc) )
-            
+
         return inputData
 
     def test_execute_8_sample(self):
@@ -137,7 +137,7 @@ class SolverTestParametrized(object):
         xorVal   = 0x8F
         dataSize = 56
         crcSize  = 8
-        
+
         dataList = [ (0x0D00C0F0FFFFFF, 0x90), (0x0000C0F0FFFFFF, 0x76) ]
 
         inputParams = InputParams()
@@ -145,13 +145,13 @@ class SolverTestParametrized(object):
         inputParams.crcSize = crcSize
         inputParams.poly = poly
         inputParams.xorVal = xorVal
-        
+
         results = self.solver.execute( inputParams, None )
 
 #         print "result:", results, len(results)
 #         print "data:  ", inputParams.data.numbersList, len(inputParams.data.numbersList)
 #         print "result:", results.most_common(3), len(results)
-        
+
         self.assertEqual( len(results), 1 )
         self.assertIn( CRCKey( poly, initReg, xorVal, 0, dataSize, False, False ), results )
 
@@ -161,19 +161,19 @@ class SolverTestParametrized(object):
         xorVal   = 0x02
         dataSize = 16
         crcSize  = 8
-        
+
         inputParams = InputParams()
         inputParams.data = self.generateInputData( 9, dataSize, crcSize, poly, initReg, xorVal )
         inputParams.crcSize = crcSize
         inputParams.poly = poly
         inputParams.xorVal = xorVal
-        
+
         results = self.solver.execute( inputParams, None )
 
 #         print "result:", results, len(results)
 #         print "data:  ", inputParams.data.numbersList, len(inputParams.data.numbersList)
 #         print "result:", results.most_common(3), len(results)
-        
+
         self.assertEqual( len(results), 1 )
         self.assertIn( CRCKey( poly, initReg, xorVal, 0, 16, False, False ), results )
 
@@ -183,19 +183,19 @@ class SolverTestParametrized(object):
         xorVal   = 0x8F
         dataSize = 16
         crcSize  = 16
-        
+
         inputParams = InputParams()
         inputParams.data = self.prepareInputData( [ 0xFFFE, 0xFDFC ], dataSize, crcSize, poly, initReg, xorVal )
         inputParams.crcSize = crcSize
         inputParams.poly = poly
         inputParams.xorVal = xorVal
-        
+
         results = self.solver.execute( inputParams, None )
 
 #         print "result:", results, len(results)
 #         print "data:  ", inputParams.data.numbersList, len(inputParams.data.numbersList)
 #         print "result:", results.most_common(3), len(results)
-        
+
         self.assertEqual( len(results), 1 )
         self.assertIn( CRCKey( poly, initReg, xorVal, 0, dataSize, False, False ), results )
 
@@ -205,19 +205,19 @@ class SolverTestParametrized(object):
         xorVal   = 0x02
         dataSize = 32
         crcSize  = 16
-        
+
         inputParams = InputParams()
         inputParams.data = self.generateInputData( 3, dataSize, crcSize, poly, initReg, xorVal )
         inputParams.crcSize = crcSize
         inputParams.poly = poly
         inputParams.xorVal = xorVal
-        
+
         results = self.solver.execute( inputParams, None )
 
 #         print "result:", results, len(results)
 #         print "data:  ", inputParams.data.numbersList, len(inputParams.data.numbersList)
 #         print "result:", results.most_common(3), len(results)
-        
+
         self.assertEqual( len(results), 1 )
         self.assertIn( CRCKey( poly, initReg, xorVal, 0, dataSize, False, False ), results )
 

@@ -10,7 +10,7 @@ from fastcrc8 import swigoo_fastcrc, convert_to_uint8array
 
 ##
 class Data16Operator( object ):
-    
+
     ## dataBytes: bytes list
     ## dataCRC: int
     def __init__(self, dataBytes, dataCRC):
@@ -21,13 +21,13 @@ class Data16Operator( object ):
 #     def __del__(self):
 #         ## do nothing -- data will be released automatically
 #         pass
-        
+
     def calculate(self, poly, intReg, xorVal):
         return swigoo_fastcrc.hw_crc16_calculate( self.rawData.cast(), self.dataLen, poly, intReg, xorVal )
-        
+
     def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
         return swigoo_fastcrc.hw_crc16_calculate_param( self.rawData.cast(), self.dataLen, poly, intReg, xorVal, reverseOrder, reflectBits )
-        
+
     def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
         ret_array = swigoo_fastcrc.hw_crc16_calculate_range( self.rawData.cast(), self.dataLen, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
         return convert_CRC16ResultArray_to_list( ret_array )

@@ -56,7 +56,7 @@ class BruteForceSolver(Reverse):
 
         if outputFile is not None:
             write_results( retList, dataSize, outputFile )
-            
+
         return retList
 
     ## inputParams -- InputParams

@@ -125,7 +125,7 @@ class BackwardSolver(Reverse):
 
             ## xorDict: List[ (xor, List[init]) ]
             xorDict = crc_backward.calculateInitRegRange( firstDataMask, firstCrc, polyMask, xorListStart, xorListStop )
-            
+
             if crc_operator is None:
                 for xorOutPair in xorDict:
                     xorOut      = xorOutPair[0]

@@ -31,7 +31,7 @@ except IOError as ex:
 
 ##
 class Data8Operator( object ):
-    
+
     ## dataBytes: bytes list
     ## dataCRC: int
     def __init__(self, dataBytes, dataCRC):
@@ -47,7 +47,7 @@ class Data8Operator( object ):
 
     def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
         return swigraw_fastcrc.hw_crc8_calculate_param( self.rawData, self.dataLen, poly & 0xFF, intReg, xorVal, reverseOrder, reflectBits )
-        
+
     def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
         ret_array = swigraw_fastcrc.hw_crc8_calculate_range( self.rawData, self.dataLen, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
         return convert_CRC8ResultArray_to_list( ret_array )

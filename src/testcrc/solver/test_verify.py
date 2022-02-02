@@ -36,7 +36,7 @@ class HwCRC_VerifySolver_Test(unittest.TestCase, SolverTestParametrized):
         self.crcProc = HwCRC()
         self.solver = VerifySolver()
         self.solver.setProcessorFactory( factory )
-        
+
     def tearDown(self):
         # Called after testfunction was executed
         pass
@@ -49,7 +49,7 @@ class DivisionCRC_VerifySolver_Test(unittest.TestCase, SolverTestParametrized):
         self.crcProc = DivisionCRC()
         self.solver = VerifySolver()
         self.solver.setProcessorFactory( factory )
- 
+
     def tearDown(self):
         # Called after testfunction was executed
         pass

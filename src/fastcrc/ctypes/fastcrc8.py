@@ -18,6 +18,51 @@ except OSError as ex:
 ## ========================================================================
 
 
+##
+class Data8Operator( object ):
+    
+    ## dataBytes: bytes list
+    ## dataCRC: int
+    def __init__(self, dataBytes, dataCRC):
+        arr_len  = len(dataBytes)
+        arr_type = ctypes.c_uint8 * arr_len
+        self.rawData = arr_type( *dataBytes )
+        self.dataLen = arr_len
+        self.dataCRC = dataCRC
+
+#     def __del__(self):
+#         ## do nothing -- data will be released automatically
+#         pass
+
+    def calculate(self, poly, intReg, xorVal):
+        return c_fastcrc.hw_crc8_calculate( self.rawData, self.dataLen, poly, intReg, xorVal )
+    
+
+    def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
+        return c_fastcrc.hw_crc8_calculate_param( self.rawData, self.dataLen, poly, intReg, xorVal, reverseOrder, reflectBits )
+        
+    def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
+        ret_array = c_fastcrc.hw_crc8_calculate_range( self.rawData, self.dataLen, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
+        return convert_CRC8ResultArray_to_list( ret_array )
+
+
+## ========================================================================
+
+
+def convert_CRC8ResultArray_to_list( result_array ):
+    data_content = result_array.contents
+    data_size = len( data_content )
+    retList = []
+    for i in xrange(0, data_size):
+        item = data_content[ i ]
+        retList.append( ( item.reginit, item.xorout ) )
+    c_fastcrc.CRC8ResultArray_free( result_array )
+    return retList
+
+
+## ========================================================================
+
+
 class CRC8Result(ctypes.Structure):
     """ creates a struct """
 
@@ -79,11 +124,5 @@ def hw_crc8_calculate_range( bytes_list, dataCRC, poly, intRegStart, intRegEnd, 
     arr_type = ctypes.c_uint8 * arr_len
     arr      = arr_type( *bytes_list )
     data_array = c_fastcrc.hw_crc8_calculate_range( arr, arr_len, dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
-    data_content = data_array.contents
-    data_size = len( data_content )
-    retList = []
-    for i in xrange(0, data_size):
-        item = data_content[ i ]
-        retList.append( ( item.reginit, item.xorout ) )
-    c_fastcrc.CRC8ResultArray_free( data_array )
-    return retList
+
+    return convert_CRC8ResultArray_to_list( data_array )

@@ -28,6 +28,7 @@ from collections import Counter
 from crc.hwcrc import HwCRC
 
 from fastcrc.utils import convert_to_msb_list, convert_to_lsb_list
+from fastcrc.binding import Data8Operator, Data16Operator
 from fastcrc.binding import hw_crc8_calculate, hw_crc8_calculate_range
 from fastcrc.binding import hw_crc16_calculate, hw_crc16_calculate_range
 
@@ -104,22 +105,21 @@ class Forward8FastHwOperator( CRCOperator ):
     def __init__(self, crcProcessor, inputData):
         CRCOperator.__init__(self)
         self.processor = crcProcessor               ## CRCProc
-        self.data = inputData                       ## List[ bytes_list ]
+        self.data = []
+        for item in inputData:
+            self.data.append( Data8Operator( item[0], item[1] ) )
 
     def calculate(self, polyMask):
         retList = []
-        for item in self.data:
-            bytes_list = item[0]
-            crc = hw_crc8_calculate( bytes_list, polyMask.dataNum, self.processor.registerInit, self.processor.xorOut )
+        for data_operator in self.data:
+            crc = data_operator.calculate( polyMask.dataNum, self.processor.registerInit, self.processor.xorOut )
             retList.append( crc )
         return retList
 
     def verify(self, polyMask):
-        for item in self.data:
-            bytes_list = item[0]
-            dataCRC    = item[1]
-            crc = hw_crc8_calculate( bytes_list, polyMask.dataNum, self.processor.registerInit, self.processor.xorOut )
-            if crc != dataCRC:
+        for data_operator in self.data:
+            crc = data_operator.calculate( polyMask.dataNum, self.processor.registerInit, self.processor.xorOut )
+            if crc != data_operator.dataCRC:
                 return False
 
         ## all CRC matches
@@ -131,10 +131,8 @@ class Forward8FastHwOperator( CRCOperator ):
 
         results = Counter()
 
-        for item in self.data:
-            bytes_list = item[0]
-            dataCRC    = item[1]
-            crc_match = hw_crc8_calculate_range( bytes_list, dataCRC, polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorEnd )
+        for data_operator in self.data:
+            crc_match = data_operator.calculateRange( polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorEnd )
             results.update( crc_match )
 
         return results
@@ -147,13 +145,11 @@ class Forward8FastHwOperator( CRCOperator ):
             return []
 
         ## first item -- standard iteration
-        item = self.data[0]
-        bytes_list = item[0]
-        dataCRC    = item[1]
+        data_operator = self.data[0]
 
         ## no results from previous data item -- standard iteration
         # List[ (int, int) ]
-        results = hw_crc8_calculate_range( bytes_list, dataCRC, polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorEnd )
+        results = data_operator.calculateRange( polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorEnd )
         if not results:
             ## no common result found -- return
             return []
@@ -161,16 +157,15 @@ class Forward8FastHwOperator( CRCOperator ):
         ##
         ## iterate over rest elements
         ##
-        for item in self.data[1:]:
-            bytes_list = item[0]
-            dataCRC    = item[1]
+        for data_operator in self.data[1:]:
+            dataCRC    = data_operator.dataCRC
 
             ## results from previous data item -- reuse
             crc_match = []
             for item in results:
                 initReg = item[0]
                 xorVal  = item[1]
-                crc = hw_crc8_calculate( bytes_list, polyMask.dataNum, initReg, xorVal )
+                crc = data_operator.calculate( polyMask.dataNum, initReg, xorVal )
                 if crc == dataCRC:
                     crc_match.append( ( initReg, xorVal ) )
 
@@ -258,23 +253,27 @@ class Forward16FastHwOperator( CRCOperator ):
     def __init__(self, crcProcessor, inputData):
         CRCOperator.__init__(self)
         self.processor = crcProcessor               ## CRCProc
-        self.data = inputData                       ## List[ bytes_list ]
+        self.inputData = inputData
+        self.data = []
+        for item in inputData:
+            data_operator = Data16Operator( item[0], item[1] )
+            data_operator.bytesList = item[0]
+            self.data.append( data_operator )
+#        self.data = inputData                       ## List[ bytes_list ]
 
     def calculate(self, polyMask):
         retList = []
-        for item in self.data:
-            bytes_list = item[0]
-            crc = hw_crc16_calculate( bytes_list, polyMask.dataNum, self.processor.registerInit, self.processor.xorOut )
+        for data_operator in self.data:
+            crc = data_operator.calculate( polyMask.dataNum, self.processor.registerInit, self.processor.xorOut )
             retList.append( crc )
         return retList
 
     ## return True if matches for all data
     def verify(self, polyMask):
-        for item in self.data:
-            bytes_list = item[0]
-            dataCRC    = item[1]
-            crc = hw_crc16_calculate( bytes_list, polyMask.dataNum, self.processor.registerInit, self.processor.xorOut )
-            if dataCRC != crc:
+        for data_operator in self.data:
+            dataCRC = data_operator.dataCRC
+            crc = data_operator.calculate( polyMask.dataNum, self.processor.registerInit, self.processor.xorOut )
+            if crc != dataCRC:
                 return False
 
         ## all CRC matches
@@ -286,10 +285,8 @@ class Forward16FastHwOperator( CRCOperator ):
 
         results = Counter()
 
-        for item in self.data:
-            bytes_list = item[0]
-            dataCRC    = item[1]
-            crc_match = hw_crc16_calculate_range( bytes_list, dataCRC, polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorEnd )
+        for data_operator in self.data:
+            crc_match = data_operator.calculateRange( polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorEnd )
             results.update( crc_match )
 
         return results
@@ -302,13 +299,11 @@ class Forward16FastHwOperator( CRCOperator ):
             return []
 
         ## first item -- standard iteration
-        item = self.data[0]
-        bytes_list = item[0]
-        dataCRC    = item[1]
+        data_operator = self.data[0]
 
         ## no results from previous data item -- standard iteration
         # List[ (int, int) ]
-        results = hw_crc16_calculate_range( bytes_list, dataCRC, polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorEnd )
+        results = data_operator.calculateRange( polyMask.dataNum, intRegStart, intRegEnd, xorStart, xorEnd )
         if not results:
             ## no common result found -- return
             return []
@@ -316,16 +311,15 @@ class Forward16FastHwOperator( CRCOperator ):
         ##
         ## iterate over rest elements
         ##
-        for item in self.data[1:]:
-            bytes_list = item[0]
-            dataCRC    = item[1]
+        for data_operator in self.data[1:]:
+            dataCRC    = data_operator.dataCRC
 
             ## results from previous data item -- reuse
             crc_match = []
             for item in results:
                 initReg = item[0]
                 xorVal  = item[1]
-                crc = hw_crc16_calculate( bytes_list, polyMask.dataNum, initReg, xorVal )
+                crc = data_operator.calculate( polyMask.dataNum, initReg, xorVal )
                 if crc == dataCRC:
                     crc_match.append( ( initReg, xorVal ) )
 

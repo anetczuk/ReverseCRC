@@ -22,6 +22,9 @@ if BINDING_FOUND is False and binding_type in ["auto", "cffi"]:
     ###
 
     try:
+        from .cffi.fastcrc8 import Data8Operator
+        from .cffi.fastcrc16 import Data16Operator
+
         from .cffi.fastcrc8 import hw_crc8_calculate, hw_crc8_calculate_param, hw_crc8_calculate_range
         from .cffi.fastcrc16 import hw_crc16_calculate, hw_crc16_calculate_param, hw_crc16_calculate_range
         from .cffi.fastcrc16 import hw_crc16_invert, hw_crc16_invert_range
@@ -41,6 +44,9 @@ if BINDING_FOUND is False and binding_type in ["auto", "ctypes"]:
     ###
 
     try:
+        from .ctypes.fastcrc8 import Data8Operator
+        from .ctypes.fastcrc16 import Data16Operator
+
         from .ctypes.fastcrc8 import hw_crc8_calculate, hw_crc8_calculate_param, hw_crc8_calculate_range
         from .ctypes.fastcrc16 import hw_crc16_calculate, hw_crc16_calculate_param, hw_crc16_calculate_range
         from .ctypes.fastcrc16 import hw_crc16_invert, hw_crc16_invert_range
@@ -62,6 +68,9 @@ if BINDING_FOUND is False and binding_type in ["auto", "swigraw"]:
 #     print "importing swig"
 
     try:
+        from .swigraw.fastcrc8 import Data8Operator
+        from .swigraw.fastcrc16 import Data16Operator
+
         from .swigraw.fastcrc8 import hw_crc8_calculate, hw_crc8_calculate_param, hw_crc8_calculate_range
         from .swigraw.fastcrc16 import hw_crc16_calculate, hw_crc16_calculate_param, hw_crc16_calculate_range
         from .swigraw.fastcrc16 import hw_crc16_invert, hw_crc16_invert_range
@@ -83,6 +92,9 @@ if BINDING_FOUND is False and binding_type in ["auto", "swigoo"]:
 #     print "importing swig"
 
     try:
+        from .swigoo.fastcrc8 import Data8Operator
+        from .swigoo.fastcrc16 import Data16Operator
+
         from .swigoo.fastcrc8 import hw_crc8_calculate, hw_crc8_calculate_param, hw_crc8_calculate_range
         from .swigoo.fastcrc16 import hw_crc16_calculate, hw_crc16_calculate_param, hw_crc16_calculate_range
         from .swigoo.fastcrc16 import hw_crc16_invert, hw_crc16_invert_range

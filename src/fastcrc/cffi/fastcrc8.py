@@ -37,6 +37,44 @@ ffi = cffi.FFI()
 #         return self.ptr.size > 0
 
 
+##
+class Data8Operator( object ):
+    
+    ## dataBytes: bytes list
+    ## dataCRC: int
+    def __init__(self, dataBytes, dataCRC):
+        self.rawData = dataBytes                    ## no need to convert data
+        self.dataLen = len( dataBytes )
+        self.dataCRC = dataCRC
+
+#     def __del__(self):
+#         ## do nothing -- data will be released automatically
+#         pass
+
+    def calculate(self, poly, intReg, xorVal):
+        return cffi_fastcrc.hw_crc8_calculate( self.rawData, self.dataLen, poly & 0xFF, intReg, xorVal )
+
+    def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
+        return cffi_fastcrc.hw_crc8_calculate_param( self.rawData, self.dataLen, poly & 0xFF, intReg, xorVal, reverseOrder, reflectBits )
+        
+    def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
+        ret_array = cffi_fastcrc.hw_crc8_calculate_range( self.rawData, self.dataLen, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
+        return convert_CRC8ResultArray_to_list( ret_array )
+
+
+## ========================================================================
+
+
+def convert_CRC8ResultArray_to_list( result_array ):
+    data_size = result_array.size
+    retList = []
+    for i in xrange(0, data_size):
+        item = result_array.data[ i ]
+        retList.append( ( item.reginit, item.xorout ) )
+    cffi_fastcrc.CRC8ResultArray_free( result_array )
+    return retList
+
+
 ## ========================================================================
 
 
@@ -59,12 +97,4 @@ def hw_crc8_calculate_range( bytesList, dataCRC, poly, intRegStart, intRegEnd, x
 
 #     data_array = ffi.gc(data_array, cffi_fastcrc.CRC8ResultArray_free)
 #     return CFFIArrayWrapper( data_array )
-
-    data_size = data_array.size
-    retList = []
-    for i in xrange(0, data_size):
-        item = data_array.data[ i ]
-        retList.append( ( item.reginit, item.xorout ) )
-
-    cffi_fastcrc.CRC8ResultArray_free( data_array )
-    return retList
+    return convert_CRC8ResultArray_to_list( data_array )

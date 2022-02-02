@@ -108,93 +108,97 @@ class DivisionCRCBackwardState:
 ##
 class DivisionCRCBackward( CRCBackwardProc ):
 
-    def __init__(self, dataMask, crc):
+    def __init__(self):
         CRCBackwardProc.__init__(self)
-        self.dataMask = ReverseNumberMask.from_NumberMask( dataMask )
-        self.crc = crc
         self.reversedMode = False
+
+#     def __init__(self, dataMask, crc):
+#         CRCBackwardProc.__init__(self)
+#         self.dataMask = ReverseNumberMask.from_NumberMask( dataMask )
+#         self.crc = crc
+#         self.reversedMode = False
 
     def setReversed(self, value = True):
         self.reversedMode = value
 
-    def calculate(self, polyMask, xorOut):
-        crcSize = polyMask.dataSize
-        collector = []
-        collector.append( DivisionCRCBackwardState( polyMask, self.crc^xorOut) )
-
-        ### shift crc zeros
-        collector = self._roundZeros(collector, crcSize)
-
-        initShift = min(crcSize, self.dataMask.dataSize)
-
-        ## divide
-        divideShifts = self.dataMask.dataSize - crcSize
-        collector = self._round(collector, divideShifts)
-
-        if len(collector) < 1:
-            return []
-
-        ## init shift register
-        self._initShift(collector, initShift)
-
-        return collector
-
-    def _roundZeros(self, collector, crcSize):
-        retList = []
-        if self.reversedMode == False:
-            self.dataMask.pushLSZeros(crcSize)
-            retList = self._round(collector, crcSize)
-            self.dataMask.popLSZeros(crcSize)
-            for c in retList:
-                c.popLSZeros(crcSize)
-        else:
-            self.dataMask.pushMSZeros(crcSize)
-            retList = self._round(collector, crcSize)
-            self.dataMask.popMSZeros(crcSize)
-            for c in retList:
-                c.popMSZeros(crcSize)
-#         print "collector:", retList
-        return retList
-
-    def _round(self, collector, num=1):
-        for _ in range(0, num):
-            receiver = []
-            for c in collector:
-                ##c1 = copy.deepcopy(c)
-                c1 = c
-                c2 = copy.deepcopy(c)
-
-                c1.shiftBit(False, self.reversedMode)
-                if self.isProper(c1):
-                    receiver.append(c1)
-                c2.shiftBit(True, self.reversedMode)
-                if self.isProper(c2):
-                    receiver.append(c2)
-    #             print "collection:", receiver
-            collector = receiver
-#             print "collector:", collector
-            if len(receiver) < 1:
-                return []
-        return collector
-
-    def _initShift(self, collector, shiftLength):
-#         initBits = self.dataMask.getMSB(shiftLength)
-#         for c in collector:
-#             c.initXor(initBits, shiftLength)
-
-        if self.reversedMode == False:
-            initBits = self.dataMask.getMSB(shiftLength)
-            for c in collector:
-                c.initXorMSB(initBits, shiftLength)
-        else:
-            initBits = self.dataMask.getLSB(shiftLength)
-            for c in collector:
-                c.initXorLSB(initBits, shiftLength)
-
-
-    def isProper(self, crcBack):
-        if self.reversedMode == False:
-            return self.dataMask.containsLSB( crcBack.dataMask )
-        else:
-            return self.dataMask.containsMSB( crcBack.dataMask )
+#     def calculate(self, polyMask, xorOut):
+#         crcSize = polyMask.dataSize
+#         collector = []
+#         collector.append( DivisionCRCBackwardState( polyMask, self.crc^xorOut) )
+# 
+#         ### shift crc zeros
+#         collector = self._roundZeros(collector, crcSize)
+# 
+#         initShift = min(crcSize, self.dataMask.dataSize)
+# 
+#         ## divide
+#         divideShifts = self.dataMask.dataSize - crcSize
+#         collector = self._round(collector, divideShifts)
+# 
+#         if len(collector) < 1:
+#             return []
+# 
+#         ## init shift register
+#         self._initShift(collector, initShift)
+# 
+#         return collector
+# 
+#     def _roundZeros(self, collector, crcSize):
+#         retList = []
+#         if self.reversedMode == False:
+#             self.dataMask.pushLSZeros(crcSize)
+#             retList = self._round(collector, crcSize)
+#             self.dataMask.popLSZeros(crcSize)
+#             for c in retList:
+#                 c.popLSZeros(crcSize)
+#         else:
+#             self.dataMask.pushMSZeros(crcSize)
+#             retList = self._round(collector, crcSize)
+#             self.dataMask.popMSZeros(crcSize)
+#             for c in retList:
+#                 c.popMSZeros(crcSize)
+# #         print "collector:", retList
+#         return retList
+# 
+#     def _round(self, collector, num=1):
+#         for _ in range(0, num):
+#             receiver = []
+#             for c in collector:
+#                 ##c1 = copy.deepcopy(c)
+#                 c1 = c
+#                 c2 = copy.deepcopy(c)
+# 
+#                 c1.shiftBit(False, self.reversedMode)
+#                 if self.isProper(c1):
+#                     receiver.append(c1)
+#                 c2.shiftBit(True, self.reversedMode)
+#                 if self.isProper(c2):
+#                     receiver.append(c2)
+#     #             print "collection:", receiver
+#             collector = receiver
+# #             print "collector:", collector
+#             if len(receiver) < 1:
+#                 return []
+#         return collector
+# 
+#     def _initShift(self, collector, shiftLength):
+# #         initBits = self.dataMask.getMSB(shiftLength)
+# #         for c in collector:
+# #             c.initXor(initBits, shiftLength)
+# 
+#         if self.reversedMode == False:
+#             initBits = self.dataMask.getMSB(shiftLength)
+#             for c in collector:
+#                 c.initXorMSB(initBits, shiftLength)
+#         else:
+#             initBits = self.dataMask.getLSB(shiftLength)
+#             for c in collector:
+#                 c.initXorLSB(initBits, shiftLength)
+# 
+# 
+#     def isProper(self, crcBack):
+#         if self.reversedMode == False:
+#             return self.dataMask.containsLSB( crcBack.dataMask )
+#         else:
+#             return self.dataMask.containsMSB( crcBack.dataMask )
 

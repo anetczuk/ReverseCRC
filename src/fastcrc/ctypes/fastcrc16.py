@@ -7,6 +7,90 @@ import ctypes
 from fastcrc8 import c_fastcrc
 
 
+## ========================================================================
+
+
+##
+class Data16Operator( object ):
+    
+    ## dataBytes: bytes list
+    ## dataCRC: int
+    def __init__(self, dataBytes, dataCRC):
+        arr_len  = len(dataBytes)
+        arr_type = ctypes.c_uint8 * arr_len
+        self.rawData = arr_type( *dataBytes )
+        self.dataLen = arr_len
+        self.dataCRC = dataCRC
+
+#     def __del__(self):
+#         ## do nothing -- data will be released automatically
+#         pass
+        
+    def calculate(self, poly, intReg, xorVal):
+        return c_fastcrc.hw_crc16_calculate( self.rawData, self.dataLen, poly, intReg, xorVal )
+        
+    def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
+        return c_fastcrc.hw_crc16_calculate_param( self.rawData, self.dataLen, poly, intReg, xorVal, reverseOrder, reflectBits )
+        
+    def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
+        ret_array = c_fastcrc.hw_crc16_calculate_range( self.rawData, self.dataLen, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
+        return convert_CRC16ResultArray_to_list( ret_array )
+
+    def invert(self, poly, regVal):
+        ret_array = c_fastcrc.hw_crc16_invert( self.rawData, self.dataLen, poly, regVal )
+        return convert_uint16_array_to_list( ret_array )
+
+    def invertRange(self, crcNum, poly, xorStart, xorEnd):
+        ret_array = c_fastcrc.hw_crc16_invert_range( self.rawData, self.dataLen, crcNum, poly, xorStart, xorEnd )
+        xorList = convert_CRC16ResultArray_to_dict( ret_array )
+        return xorList.items()                                          ## return list of pairs
+
+
+## ========================================================================
+
+
+def convert_CRC16ResultArray_to_list( result_array ):
+    data_content = result_array.contents
+    data_size = len( data_content )
+    retList = []
+    for i in xrange(0, data_size):
+        item = data_content[ i ]
+        retList.append( ( item.reginit, item.xorout ) )
+        
+    c_fastcrc.CRC16ResultArray_free( result_array )
+    return retList
+
+
+def convert_CRC16ResultArray_to_dict( result_array ):
+    data_content = result_array.contents
+    data_size = len( data_content )
+    xorList = dict()
+    for i in xrange(0, data_size):
+        item = data_content[ i ]
+        regList = xorList.get( item.xorout, None )
+        if regList is None:
+            regList = list()
+            xorList[ item.xorout ] = regList
+        regList.append( item.reginit )
+    c_fastcrc.CRC16ResultArray_free( result_array )
+    return xorList
+
+
+def convert_uint16_array_to_list( result_array ):
+    data_content = result_array.contents
+    retList = []
+    data_size = len( data_content )
+    for i in xrange(0, data_size):
+        item = data_content[ i ]
+        retList.append( item )
+#     retList = list( data_content )
+    c_fastcrc.uint16_array_free( result_array )
+    return retList
+
+
+## ========================================================================
+
+
 class CRC16Result(ctypes.Structure):
     """ creates a struct """
 
@@ -89,14 +173,8 @@ def hw_crc16_calculate_range( bytes_list, dataCRC, poly, intRegStart, intRegEnd,
     arr_type = ctypes.c_uint8 * arr_len
     arr      = arr_type( *bytes_list )
     data_array = c_fastcrc.hw_crc16_calculate_range( arr, arr_len, dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
-    data_content = data_array.contents
-    data_size = len( data_content )
-    retList = []
-    for i in xrange(0, data_size):
-        item = data_content[ i ]
-        retList.append( ( item.reginit, item.xorout ) )
-    c_fastcrc.CRC16ResultArray_free( data_array )
-    return retList
+
+    return convert_CRC16ResultArray_to_list( data_array )
 
 
 c_fastcrc.hw_crc16_invert.argtypes = [ ctypes.POINTER( ctypes.c_uint8 ), ctypes.c_size_t, ctypes.c_uint16, ctypes.c_uint16 ]
@@ -106,15 +184,8 @@ def hw_crc16_invert( bytes_list, poly, regVal ):
     arr_type = ctypes.c_uint8 * arr_len
     arr      = arr_type( *bytes_list )
     data_array = c_fastcrc.hw_crc16_invert( arr, arr_len, poly, regVal )
-    data_content = data_array.contents
-    retList = []
-    data_size = len( data_content )
-    for i in xrange(0, data_size):
-        item = data_content[ i ]
-        retList.append( item )
-#     retList = list( data_content )
-    c_fastcrc.uint16_array_free( data_array )
-    return retList
+
+    return convert_uint16_array_to_list( data_array )
 
 c_fastcrc.hw_crc16_invert_range.argtypes = [ ctypes.POINTER( ctypes.c_uint8 ), ctypes.c_size_t, ctypes.c_uint16, ctypes.c_uint16, ctypes.c_uint16, ctypes.c_uint16 ]
 c_fastcrc.hw_crc16_invert_range.restype = ctypes.POINTER( CRC16ResultArray )
@@ -124,15 +195,6 @@ def hw_crc16_invert_range( bytes_list, crcNum, poly, xorStart, xorEnd):
     arr      = arr_type( *bytes_list )
 
     data_array = c_fastcrc.hw_crc16_invert_range( arr, arr_len, crcNum, poly, xorStart, xorEnd )
-    data_content = data_array.contents
-    data_size = len( data_content )
-    xorList = dict()
-    for i in xrange(0, data_size):
-        item = data_content[ i ]
-        regList = xorList.get( item.xorout, None )
-        if regList is None:
-            regList = list()
-            xorList[ item.xorout ] = regList
-        regList.append( item.reginit )
-    c_fastcrc.CRC16ResultArray_free( data_array )
-    return xorList.items()
+
+    xorList = convert_CRC16ResultArray_to_dict( data_array )
+    return xorList.items()                                          ## return list of pairs

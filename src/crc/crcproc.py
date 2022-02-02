@@ -262,8 +262,8 @@ class CRCBackwardProc( object ):
     def setReversed(self, value = True):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
 
-    def calculate(self, polyMask, xorOut):
-        raise NotImplementedError( "%s not implemented abstract method" % type(self) )
+#     def calculate(self, polyMask, xorOut):
+#         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
 
     def calculateInitReg(self, dataMask, crc, polyMask, xorOut):
         crc_raw = crc ^ xorOut

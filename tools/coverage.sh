@@ -3,7 +3,9 @@
 set -eu
 
 
-## SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+SOURCE_DIR=$SCRIPT_DIR/../src
 
 
 timestamp=$(date +%s)
@@ -20,7 +22,7 @@ mkdir -p $htmlcov_dir
 echo "Starting coverage"
 
 
-coverage run --branch $@
+coverage run --source $SOURCE_DIR --omit */site-packages/* --branch $@
 
 # coverage report
 

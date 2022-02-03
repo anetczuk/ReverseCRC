@@ -38,7 +38,7 @@ ffi = cffi.FFI()
 
 
 ##
-class Data8Operator( object ):
+class CffiData8Operator( object ):
 
     ## dataBytes: bytes list
     ## dataCRC: int

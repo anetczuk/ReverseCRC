@@ -11,7 +11,7 @@ from fastcrc8 import c_fastcrc
 
 
 ##
-class Data16Operator( object ):
+class CTypesData16Operator( object ):
 
     ## dataBytes: bytes list
     ## dataCRC: int

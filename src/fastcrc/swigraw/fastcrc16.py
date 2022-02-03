@@ -9,7 +9,7 @@ from fastcrc8 import swigraw_fastcrc, convert_to_uint8array
 
 
 ##
-class Data16Operator( object ):
+class SwigRawData16Operator( object ):
 
     ## dataBytes: bytes list
     ## dataCRC: int

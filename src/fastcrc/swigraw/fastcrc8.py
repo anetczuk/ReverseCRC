@@ -30,7 +30,7 @@ except IOError as ex:
 
 
 ##
-class Data8Operator( object ):
+class SwigRawData8Operator( object ):
 
     ## dataBytes: bytes list
     ## dataCRC: int

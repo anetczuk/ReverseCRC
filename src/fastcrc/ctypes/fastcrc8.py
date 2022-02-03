@@ -19,7 +19,7 @@ except OSError as ex:
 
 
 ##
-class Data8Operator( object ):
+class CTypesData8Operator( object ):
 
     ## dataBytes: bytes list
     ## dataCRC: int

@@ -32,7 +32,7 @@ ffi = cffi.FFI()
 
 
 ##
-class Data16Operator( object ):
+class CffiData16Operator( object ):
 
     ## dataBytes: bytes list
     ## dataCRC: int

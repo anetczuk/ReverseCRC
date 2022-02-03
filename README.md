@@ -45,7 +45,8 @@ where first hex number in row is data and second number is calculated CRC.
 
 Note: currently C implementation is used only for *HW* algorithm in conjunction with *BF*, *VERIFY* or *BACKWARD*.
 
-#### C bindings
+
+#### Binding of *C* library
 
 Application comes with fast version of algorithms, that is implemented in C. 
 To use it it's needed to compile proper algorithms and then build Python bindings.
@@ -71,6 +72,31 @@ For testing, following oneliner might be very handy: `FASTCRC_BINDING=cffi ./src
 Note that, at the memoent, fast CRC is only implemented for *HW* algorithm.
 
 
+#### Comparison of bindings
+
+Following images show comparison of performance of implemented bindings.
+
+[![Performance against BF task](doc/BF_db[8_16_32_64_128]_crc8_dr8_dgFF_sub-small.png "Performance against BF task")](doc/BF_db[8_16_32_64_128]_crc8_dr8_dgFF_sub.png)
+[![Performance against BACKWARD task](doc/BACKWARD_db[8_16_32_64_128]_crc16_dr8_dgFF_sub-small.png "Performance against BACKWARD task")](doc/BACKWARD_db[8_16_32_64_128]_crc16_dr8_dgFF_sub.png)
+
+*BF* task input:
+- number of data rows: 8 (data frame and CRC pairs in input file)
+- CRC size: 8 bits
+- poly: each combination
+- operation mode: *BF*
+
+In this case there will be 256 * 8 calls to *C* library (independent of *data size*). Plot shows constant time differnce between bindings regardles of input size. Comparing to time needed to find CRC, the difference is negligibly small.
+
+
+*BACKWARD* task input:
+- number of data rows: 8 (data frame and CRC pairs in input file)
+- CRC size: 16 bits
+- poly: 0x1335D
+- operation mode: *BACKWARD*
+
+In this case there will be 65536 calls to *C* library. Three implementations perform almost equally, but *cffi* is significantly worse.
+
+ 
 ### Development
 
 Following techniques were used in the project:

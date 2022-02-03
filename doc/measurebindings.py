@@ -160,17 +160,23 @@ def main():
 # #     data_bytes = [ element * 2 * 8 for element in [1, 2, 3, 4] ]
 # #     data_bytes = [ 32, 64, 96, 128 ]
 
-    data_bytes = [ 8, 16, 32 ]
-    measure( data_bytes_list=data_bytes, data_rows=2, crc_index=0, mode="BF" )
+    data_bytes = [ 8, 16, 32, 64, 128 ]
     measure( data_bytes_list=data_bytes, data_rows=8, crc_index=0, mode="BF" )
-#     measure( data_bytes_list=data_bytes, data_rows=2, crc_index=1, mode="BF", poly=0x1335D )
-#     measure( data_bytes_list=data_bytes, data_rows=8, crc_index=1, mode="BF", poly=0x1335D )
 
-    data_bytes = [ 8, 16, 32 ]
-    measure( data_bytes_list=data_bytes, data_rows=2, crc_index=0, mode="BACKWARD" )
-    measure( data_bytes_list=data_bytes, data_rows=8, crc_index=0, mode="BACKWARD" )
-    measure( data_bytes_list=data_bytes, data_rows=2, crc_index=1, mode="BACKWARD", poly=0x1335D )
+    data_bytes = [ 8, 16, 32, 64, 128 ]
     measure( data_bytes_list=data_bytes, data_rows=8, crc_index=1, mode="BACKWARD", poly=0x1335D )
+
+#     data_bytes = [ 8, 16, 32 ]
+#     measure( data_bytes_list=data_bytes, data_rows=2, crc_index=0, mode="BF" )
+#     measure( data_bytes_list=data_bytes, data_rows=8, crc_index=0, mode="BF" )
+# #     measure( data_bytes_list=data_bytes, data_rows=2, crc_index=1, mode="BF", poly=0x1335D )
+# #     measure( data_bytes_list=data_bytes, data_rows=8, crc_index=1, mode="BF", poly=0x1335D )
+#  
+#     data_bytes = [ 8, 16, 32 ]
+#     measure( data_bytes_list=data_bytes, data_rows=2, crc_index=0, mode="BACKWARD" )
+#     measure( data_bytes_list=data_bytes, data_rows=8, crc_index=0, mode="BACKWARD" )
+#     measure( data_bytes_list=data_bytes, data_rows=2, crc_index=1, mode="BACKWARD", poly=0x1335D )
+#     measure( data_bytes_list=data_bytes, data_rows=8, crc_index=1, mode="BACKWARD", poly=0x1335D )
 
     timeDiff = time.time() - starttime
     print "\nTotal measurement time: {:13.8f}s".format(timeDiff)

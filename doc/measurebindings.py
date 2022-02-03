@@ -82,9 +82,12 @@ def sample():
 
 ## crc_size = ( crc_index + 1 ) * 8
 def measure( data_bytes_list=[8, 16, 24, 32], data_rows=1, crc_index=0, mode="BF", poly=None, data_generator="FF" ):
+    crc_size = ( crc_index + 1 ) * 8
+    
     print "data bytes list:", data_bytes_list
     print "data rows:", data_rows
     print "data generator:", data_generator
+    print "crc size:", crc_size
     
     crc_string  = "FF" * (crc_index + 1)
 #     poly_string = "0x1" + crc_string
@@ -128,19 +131,20 @@ def measure( data_bytes_list=[8, 16, 24, 32], data_rows=1, crc_index=0, mode="BF
 
     dataFrame = pandas.DataFrame( raw_data, index=bits_sizes_list )
 
+    plot_title = "performance of Python bindings in %s mode\ncrc size: %s data rows: %s" % (mode, crc_size, data_rows)
+
     if len( data_bytes_list ) > 1:
         ## lines: matplotlib.axes._subplots.AxesSubplot
-        lines = dataFrame.plot.line( title="performance of Python bindings in %s mode" % mode )
+        lines = dataFrame.plot.line( title=plot_title )
         lines.set_xlabel( "data size [B]" )
         lines.set_ylabel( "time [s]" )
     else:
         ## lines: matplotlib.axes._subplots.AxesSubplot
-        lines = dataFrame.plot.bar( title="performance of Python bindings in %s mode" % mode )
+        lines = dataFrame.plot.bar( title=plot_title )
         lines.set_xlabel( "data size [B]" )
         lines.set_ylabel( "time [s]" )
 
     data_bytes = prepare_filename( str(data_bytes_list) ) 
-    crc_size = ( crc_index + 1 ) * 8
     plot_output_name = "%s_db%s_crc%s_dr%s_dg%s_sub.png" % (mode, data_bytes, crc_size, data_rows, data_generator)
 #     timestr = time.strftime("%Y-%m-%d_%H-%M-%S")
 #     plot_output_name = "%s_db%s_crc%s_dr%s_dg%s_sub_%s.png" % (mode, data_bytes, crc_size, data_rows, data_generator, timestr)
@@ -156,13 +160,17 @@ def main():
 # #     data_bytes = [ element * 2 * 8 for element in [1, 2, 3, 4] ]
 # #     data_bytes = [ 32, 64, 96, 128 ]
 
-    data_bytes = [ 8, 16, 32, 64 ]
-    measure( data_bytes_list=data_bytes, data_rows= 2, mode="BF" )
-    measure( data_bytes_list=data_bytes, data_rows=16, mode="BF" )
+    data_bytes = [ 8, 16, 32 ]
+    measure( data_bytes_list=data_bytes, data_rows=2, crc_index=0, mode="BF" )
+    measure( data_bytes_list=data_bytes, data_rows=8, crc_index=0, mode="BF" )
+#     measure( data_bytes_list=data_bytes, data_rows=2, crc_index=1, mode="BF", poly=0x1335D )
+#     measure( data_bytes_list=data_bytes, data_rows=8, crc_index=1, mode="BF", poly=0x1335D )
 
-    data_bytes = [ 8, 16, 32, 64 ]
-    measure( data_bytes_list=data_bytes, data_rows= 2, crc_index=1, mode="BACKWARD", poly=0x1335D )
-    measure( data_bytes_list=data_bytes, data_rows=16, crc_index=1, mode="BACKWARD", poly=0x1335D )
+    data_bytes = [ 8, 16, 32 ]
+    measure( data_bytes_list=data_bytes, data_rows=2, crc_index=0, mode="BACKWARD" )
+    measure( data_bytes_list=data_bytes, data_rows=8, crc_index=0, mode="BACKWARD" )
+    measure( data_bytes_list=data_bytes, data_rows=2, crc_index=1, mode="BACKWARD", poly=0x1335D )
+    measure( data_bytes_list=data_bytes, data_rows=8, crc_index=1, mode="BACKWARD", poly=0x1335D )
 
     timeDiff = time.time() - starttime
     print "\nTotal measurement time: {:13.8f}s".format(timeDiff)

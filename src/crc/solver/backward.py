@@ -94,9 +94,7 @@ class BackwardSolver(Reverse):
         crc_operator = None
         if numbersLen > 1:
             subInputList = inputList[1:]
-            crc_operator = crc_forward.createOperator( crcSize, subInputList )
-    #         crc_operator = self.procFactory.createOperator( crcSize, subInputList )
-    #         crc_operator = crc_forward.createStandardOperator( crcSize, subInputList )
+            crc_operator = crc_forward.createDataOperator( crcSize, subInputList )
 
         results = Counter()
 
@@ -127,6 +125,7 @@ class BackwardSolver(Reverse):
             xorDict = crc_backward.calculateInitRegRange( firstDataMask, firstCrc, polyMask, xorListStart, xorListStop )
 
             if crc_operator is None:
+                ## there is only single data row
                 for xorOutPair in xorDict:
                     xorOut      = xorOutPair[0]
                     init_found  = xorOutPair[1]

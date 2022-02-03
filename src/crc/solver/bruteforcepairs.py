@@ -148,7 +148,7 @@ class BruteForcePairsSolver( XORReverse ):
         crcMask2  = dataCrc2.crcMask()
 
         inputData = [ (dataMask1, crcMask1), (dataMask2, crcMask2) ]
-        crc_operator = self.crcProc.createOperator( crcSize, inputData )
+        crc_operator = self.crcProc.createDataOperator( crcSize, inputData )
 
         crc_found = crc_operator.verifyRange( polyMask, initValStart, initValEnd, 0, paramMax )
 

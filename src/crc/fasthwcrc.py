@@ -22,15 +22,41 @@
 #
 
 from crc.numbermask import reverse_number
-from crc.crcproc import CRCProcessor, CRCOperator
+from crc.crcproc import CRCProcessor, CRCDataOperator
 from collections import Counter
 
 from crc.hwcrc import HwCRC
 
 from fastcrc.utils import convert_to_msb_list, convert_to_lsb_list
 from fastcrc.binding import Data8Operator, Data16Operator
-from fastcrc.binding import hw_crc8_calculate, hw_crc8_calculate_range
-from fastcrc.binding import hw_crc16_calculate, hw_crc16_calculate_range
+from fastcrc.binding import hw_crc8_calculate
+from fastcrc.binding import hw_crc16_calculate
+
+
+##====================================================
+
+
+def morph_data(inputData, crcSize):
+    dataList = []
+    for data in inputData:
+        dataMask = data[0]
+        if dataMask.dataSize % 8 != 0:
+            print "unable to morph data -- unsupported data size"
+            return []
+        crcMask = data[1]
+        if crcMask.dataSize != crcSize:
+            print "unable to morph data -- unsupported crc:", crcMask.dataSize
+            return []
+
+#             crcMask = data[1]
+        bytesList = convert_to_msb_list( dataMask.dataNum, dataMask.dataSize / 8 )
+        dataList.append( (bytesList, crcMask.dataNum) )
+        #rev_crc = reverse_number( crcMask.dataNum, crcSize )
+        #dataList.append( (bytesList, rev_crc) )
+    return dataList
+
+
+##====================================================
 
 
 ##
@@ -39,25 +65,15 @@ class Fast8HwCRC( HwCRC ):
 
     def __init__(self):
         HwCRC.__init__(self)
-#         self.setReversed( False )
 
     ## override
     def setReversed(self, value = True):
-        HwCRC.setReversed(self, value)
+        CRCProcessor.setReversed(self, value)
         ## optimize execution time by reducing one level of function call
         if value is False:
             self.calculate3 = self.calculateMSB
         else:
             self.calculate3 = self.calculateLSB
-
-    ## leave methon not overriden -- it will be changed during call to 'setReversed()'
-#     ## dataMask: NumberMask
-#     ## polyMask: NumberMask
-#     def calculate3(self, dataMask, polyMask):
-#         if self._reversed == False:
-#             return self.calculateMSB(dataMask, polyMask)
-#         else:
-#             return self.calculateLSBClassic(dataMask, polyMask)
 
     def calculateMSB(self, dataMask, polyMask):
 #         return self.calculateMSBClassic(dataMask, polyMask)
@@ -85,26 +101,26 @@ class Fast8HwCRC( HwCRC ):
         return reverse_number( calc_crc, polyMask.dataSize )
 
     # inputData: List[ (NumberMask, NumberMask) ]
-    # return CRCOperator
-    def createOperator(self, crcSize, inputData):
-        dataList = self.morphData( inputData, crcSize )
+    # return CRCDataOperator
+    def createDataOperator(self, crcSize, inputData):
+        dataList = morph_data( inputData, crcSize )
         if dataList:
-            return Forward8FastHwOperator( self, dataList )
+            return Fast8HwCRCDataOperator( self, dataList )
 
         if not inputData:
-            print "unable to morph to Forward8FastHwOperator -- empty input data"
+            print "unable to morph to Fast8HwCRCDataOperator -- empty input data"
         else:
             print "unable to morph -- unsupported crc size:", crcSize
-        return CRCProcessor.createOperator(self, crcSize, inputData)
+        return CRCProcessor.createDataOperator(self, crcSize, inputData)
 
 
 ##
 ##
 ##
-class Forward8FastHwOperator( CRCOperator ):
+class Fast8HwCRCDataOperator( CRCDataOperator ):
 
     def __init__(self, crcProcessor, inputData):
-        CRCOperator.__init__(self)
+        CRCDataOperator.__init__(self)
         self.processor = crcProcessor               ## CRCProcessor
         self.data = []
         for item in inputData:
@@ -187,7 +203,6 @@ class Fast16HwCRC( HwCRC ):
 
     def __init__(self):
         CRCProcessor.__init__(self)
-#         self.setReversed( False )
 
     ## override
     def setReversed(self, value = True):
@@ -197,15 +212,6 @@ class Fast16HwCRC( HwCRC ):
             self.calculate3 = self.calculateMSB
         else:
             self.calculate3 = self.calculateLSB
-
-    ## leave methon not overriden -- it will be changed during call to 'setReversed()'
-#     ## dataMask: NumberMask
-#     ## polyMask: NumberMask
-#     def calculate3(self, dataMask, polyMask):
-#         if self._reversed == False:
-#             return self.calculateMSB(dataMask, polyMask)
-#         else:
-#             return self.calculateLSBClassic(dataMask, polyMask)
 
     def calculateMSB(self, dataMask, polyMask):
 #         return self.calculateMSBClassic(dataMask, polyMask)
@@ -233,26 +239,26 @@ class Fast16HwCRC( HwCRC ):
         return reverse_number( calc_crc, polyMask.dataSize )
 
     # inputData: List[ (NumberMask, NumberMask) ]
-    # return CRCOperator
-    def createOperator(self, crcSize, inputData):
-        dataList = self.morphData( inputData, crcSize )
+    # return CRCDataOperator
+    def createDataOperator(self, crcSize, inputData):
+        dataList = morph_data( inputData, crcSize )
         if dataList:
-            return Forward16FastHwOperator( self, dataList )
+            return Fast16HwCRCDataOperator( self, dataList )
 
         if not inputData:
-            print "unable to morph to Forward16FastHwOperator -- empty input data"
+            print "unable to morph to Fast16HwCRCDataOperator -- empty input data"
         else:
             print "unable to morph -- unsupported crc size:", crcSize
-        return CRCProcessor.createOperator(self, crcSize, inputData)
+        return CRCProcessor.createDataOperator(self, crcSize, inputData)
 
 
 ##
 ##
 ##
-class Forward16FastHwOperator( CRCOperator ):
+class Fast16HwCRCDataOperator( CRCDataOperator ):
 
     def __init__(self, crcProcessor, inputData):
-        CRCOperator.__init__(self)
+        CRCDataOperator.__init__(self)
         self.processor = crcProcessor               ## CRCProcessor
         self.inputData = inputData
         self.data = []

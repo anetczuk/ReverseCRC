@@ -78,7 +78,7 @@ class LookupCRCTest(unittest.TestCase):
         crc = 89
 
         crcProc = LookupCRC(4)
-        lookupCrc = crcProc.calculate(data, poly)
+        lookupCrc = crcProc.calculate1(data, poly)
         self.assertEqual( lookupCrc, crc )
 
 

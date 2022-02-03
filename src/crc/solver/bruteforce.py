@@ -106,7 +106,7 @@ class BruteForceSolver(Reverse):
 
 
         crc_forward  = self.procFactory.createForwardProcessor( crcSize )
-        crc_operator = crc_forward.createOperator( crcSize, inputList )
+        crc_operator = crc_forward.createDataOperator( crcSize, inputList )
 
         retList = Counter()
 

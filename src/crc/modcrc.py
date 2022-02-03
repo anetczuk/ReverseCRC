@@ -69,8 +69,8 @@ class ModCRCProcessorFactory( CRCProcessorFactory ):
 
     # crcSize -- int, number of bits
     # inputData: List[ (NumberMask, NumberMask) ]
-    # return CRCOperator
-    def createOperator(self, crcSize, inputData):
+    # return CRCDataOperator
+    def createDataOperator(self, crcSize, inputData):
         raise NotImplementedError( "ModCRC -- not implemented" )
 
 

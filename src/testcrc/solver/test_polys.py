@@ -52,8 +52,8 @@ class PolysSolverBaseTest(object):
         self.crcProc.setRegisterInitValue(regInit)
         self.crcProc.setXorOutValue(xorOut)
 
-        crc = self.crcProc.calculate(data, inputPoly)
-        crc2 = self.crcProc.calculate(data2, inputPoly)
+        crc = self.crcProc.calculate1(data, inputPoly)
+        crc2 = self.crcProc.calculate1(data2, inputPoly)
 #         print "crc: {:X} {:X}".format( crc, crc2 )
 
         polyList = self.crcFinder.findPolysXOR( data, crc, data2, crc2, 24, crcSize)

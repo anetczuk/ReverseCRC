@@ -21,14 +21,10 @@
 # SOFTWARE.
 #
 
-from crc.crcproc import CRCProcessor, CRCOperator, CRCProcessorFactory,\
-    StandardCRCOperator
+from crc.crcproc import CRCProcessor, CRCProcessorFactory
 
 from crc.numbermask import reverse_number
-from collections import Counter
 from crc.hwcrcbackward import create_backward_processor
-
-from fastcrc.utils import convert_to_msb_list, convert_to_lsb_list
 
 
 ## ===================================================================
@@ -48,10 +44,10 @@ class HwCRCProcessorFactory( CRCProcessorFactory ):
 
     # crcSize -- int, number of bits
     # inputData: List[ (NumberMask, NumberMask) ]
-    # return CRCOperator
-    def createOperator(self, crcSize, inputData):
+    # return CRCDataOperator
+    def createDataOperator(self, crcSize, inputData):
         processor = create_processor(crcSize)
-        return processor.createOperator( crcSize, inputData )
+        return processor.createDataOperator( crcSize, inputData )
 
 
 ## ===================================================================
@@ -72,15 +68,6 @@ class HwCRC( CRCProcessor ):
             self.calculate3 = self.calculateMSBClassic
         else:
             self.calculate3 = self.calculateLSBClassic
-
-    ## leave methon not overriden -- it will be changed during call to 'setReversed()'
-#     ## dataMask: NumberMask
-#     ## polyMask: NumberMask
-#     def calculate3(self, dataMask, polyMask):
-#         if self._reversed == False:
-#             return self.calculateMSB(dataMask, polyMask)
-#         else:
-#             return self.calculateLSBClassic(dataMask, polyMask)
 
     ## 'poly' without leading '1'
     def calculateMSBClassic(self, dataMask, polyMask):
@@ -142,32 +129,6 @@ class HwCRC( CRCProcessor ):
         self.xorOut       = oldXor
 
         return reverse_number( calc_crc, polyMask.dataSize )
-
-    # inputData: List[ (NumberMask, NumberMask) ]
-    # return CRCOperator
-    def createOperator(self, crcSize, inputData):
-        return CRCProcessor.createOperator(self, crcSize, inputData)
-
-    def morphData(self, inputData, crcSize):
-        dataList = []
-        for data in inputData:
-            dataMask = data[0]
-            if dataMask.dataSize % 8 != 0:
-                print "unable to morph data -- unsupported data size"
-                #return CRCProcessor.createOperator(self, crcSize, inputData)
-                return []
-            crcMask = data[1]
-            if crcMask.dataSize != crcSize:
-                print "unable to morph data -- unsupported crc:", crcMask.dataSize
-                #return CRCProcessor.createOperator(self, crcSize, inputData)
-                return []
-
-#             crcMask = data[1]
-            bytesList = convert_to_msb_list( dataMask.dataNum, dataMask.dataSize / 8 )
-            dataList.append( (bytesList, crcMask.dataNum) )
-            #rev_crc = reverse_number( crcMask.dataNum, crcSize )
-            #dataList.append( (bytesList, rev_crc) )
-        return dataList
 
 
 ## ==========================================================

@@ -145,39 +145,39 @@ class HwCRCTest(unittest.TestCase):
 
     def test_calculate_leading(self):
         crcProc = HwCRC()
-        crc1 = crcProc.calculate(     0b11010011101100, 0b1011)
-        crc2 = crcProc.calculate(0b0000011010011101100, 0b1011)
+        crc1 = crcProc.calculate1(     0b11010011101100, 0b1011)
+        crc2 = crcProc.calculate1(0b0000011010011101100, 0b1011)
         self.assertEqual( crc1, crc2 )
 
     def test_calculate_8(self):
         ## taken from http://www.sunshine2k.de/articles/coding/crc/understanding_crc.html#ch3
         crcProc = HwCRC()
-        crc = crcProc.calculate(0x112233, 0x107)
+        crc = crcProc.calculate1(0x112233, 0x107)
         self.assertEqual( crc, 0xD4 )
 
-        crc = crcProc.calculate(0b11000010, 0b100011101)    ## 0xC2 0x11D
+        crc = crcProc.calculate1(0b11000010, 0b100011101)    ## 0xC2 0x11D
         self.assertEqual( crc, 0x0F )
 
-        crc = crcProc.calculate(0xA53937C7, 0b100011101)    ## 0x011D
+        crc = crcProc.calculate1(0xA53937C7, 0b100011101)    ## 0x011D
         self.assertEqual( crc, 0b01011001 )
-        crc = crcProc.calculate(0xA53937CF, 0b100011101)    ## 0x011D
+        crc = crcProc.calculate1(0xA53937CF, 0b100011101)    ## 0x011D
         self.assertEqual( crc, 0xB1 )
-        crc = crcProc.calculate(0xA53937CB, 0b100011101)    ## 0x011D
+        crc = crcProc.calculate1(0xA53937CB, 0b100011101)    ## 0x011D
         self.assertEqual( crc, 0b11000101 )
-        crc = crcProc.calculate(0xA53937CE, 0b100011101)    ## 0x011D
+        crc = crcProc.calculate1(0xA53937CE, 0b100011101)    ## 0x011D
         self.assertEqual( crc, 0b10101100 )                 ## 0xAC
 
     def test_calculate_8_regInit(self):
         crcProc = HwCRC()
         crcProc.setRegisterInitValue(0xA5)                  ## 0b10100101
 
-        crc = crcProc.calculate(0xA53937CF, 0x11D)
+        crc = crcProc.calculate1(0xA53937CF, 0x11D)
         self.assertEqual( crc, 0x1D )
 
     def test_calculate_8_xorOut(self):
         crcProc = HwCRC()
         crcProc.setXorOutValue(0xA5)
-        crc = crcProc.calculate(0xA53937CF, 0x11D)
+        crc = crcProc.calculate1(0xA53937CF, 0x11D)
         self.assertEqual( crc, 0x14 )
         self.assertEqual( crc ^ 0xA5, 0xB1 )
 

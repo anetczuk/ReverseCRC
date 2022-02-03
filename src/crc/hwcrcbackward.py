@@ -271,6 +271,17 @@ class HwCRCBackward( CRCInvertProcessor ):
         else:
             self.calculateInitRegBase = self.calculateInitRegBaseLSB
 
+    def calculateInitRegRange(self, dataMask, crcNum, polyMask, xorStart, xorEnd):
+        ## default (standard) implementation
+        xorDict = list()
+        for xorOut in xrange(xorStart, xorEnd + 1):
+            crc_raw = crcNum ^ xorOut
+            init_found = self.calculateInitRegBase( dataMask, polyMask, crc_raw )
+            if init_found:
+                #xorDict[ xorOut ] = init_found
+                xorDict.append( (xorOut, init_found) )
+        return xorDict
+
     ## polyMask -- NumberMask
     ## dataMask -- NumberMask
     def calculateTabularMSB(self, dataMask, polyMask, crc_raw):
@@ -451,19 +462,22 @@ def create_backward_processor(crcSize):
             self.fast16Data = dict()
 
         def calculateInitRegRange(self, dataMask, crcNum, polyMask, xorStart, xorEnd):
-            if self._reverseMode is False:
-                ## use fast implementation
-                if dataMask.dataSize % 8 == 0:
-                    full_bytes = int( dataMask.dataSize / 8 )
-                    dataNum = dataMask.dataNum
-                    bytes_list = self.fast16Data.get( dataNum )
-                    if bytes_list is None:
-                        bytes_list = convert_to_list( dataNum, full_bytes  )
-                        self.fast16Data[ dataNum ] = bytes_list
-                    return hw_crc16_invert_range( bytes_list, crcNum, polyMask.dataNum, xorStart, xorEnd )
-
-            ## use standard implementation
-            return HwCRCBackward.calculateInitRegRange(self, dataMask, crcNum, polyMask, xorStart, xorEnd)
+            if self._reverseMode is True:
+                ## use standard implementation
+                return HwCRCBackward.calculateInitRegRange(self, dataMask, crcNum, polyMask, xorStart, xorEnd)
+                            
+            if dataMask.dataSize % 8 != 0:
+                ## use standard implementation
+                return HwCRCBackward.calculateInitRegRange(self, dataMask, crcNum, polyMask, xorStart, xorEnd)
+                
+            ## use fast implementation
+            full_bytes = int( dataMask.dataSize / 8 )
+            dataNum = dataMask.dataNum
+            bytes_list = self.fast16Data.get( dataNum )
+            if bytes_list is None:
+                bytes_list = convert_to_list( dataNum, full_bytes  )
+                self.fast16Data[ dataNum ] = bytes_list
+            return hw_crc16_invert_range( bytes_list, crcNum, polyMask.dataNum, xorStart, xorEnd )
 
         ## polyMask -- NumberMask
         ## dataMask -- NumberMask

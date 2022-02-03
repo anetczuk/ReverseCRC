@@ -155,9 +155,6 @@ class CRCKey:
 
 class CRCProcessorFactory(object):
 
-    def __init__(self):
-        pass
-
     # crcSize -- int, number of bits
     # return CRCProcessor
     def createForwardProcessor(self, crcSize=None):
@@ -170,8 +167,8 @@ class CRCProcessorFactory(object):
 
     # crcSize -- int, number of bits
     # inputData: List[ (NumberMask, NumberMask) ]
-    # return CRCOperator
-    def createOperator(self, crcSize, inputData):
+    # return CRCDataOperator
+    def createDataOperator(self, crcSize, inputData):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
 
 
@@ -229,7 +226,7 @@ class CRCProcessor(object):
         return self.calculate3(dataMask, polyMask)
 
     ## 'poly' with leading '1'
-    def calculate(self, data, poly):
+    def calculate1(self, data, poly):
         return self.calculate2(data, data.bit_length(), poly, poly.bit_length()-1)
 
     def calculate2(self, data, dataSize, poly, crcSize):
@@ -244,12 +241,12 @@ class CRCProcessor(object):
     ## ===========================================
 
     ## inputData: List[ (NumberMask, NumberMask) ]
-    def createOperator(self, crcSize, inputData):
+    def createDataOperator(self, crcSize, inputData):
         return self.createStandardOperator( crcSize, inputData )
 
     def createStandardOperator(self, crcSize, inputData):
-#         print( "creating StandardCRCOperator" )
-        return StandardCRCOperator( self, inputData )
+#         print( "creating StandardCRCDataOperator" )
+        return StandardCRCDataOperator( self, inputData )
 
 
 ## =================================================================
@@ -264,33 +261,24 @@ class CRCInvertProcessor( object ):
     def setReversed(self, value = True):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
 
-#     def calculate(self, polyMask, xorOut):
-#         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
-
+    ## return list of initReg values
     def calculateInitReg(self, dataMask, crc, polyMask, xorOut):
-        crc_raw = crc ^ xorOut
-        return self.calculateInitRegBase( dataMask, polyMask, crc_raw )
+        retList = self.calculateInitRegRange( dataMask, crc, polyMask, xorOut, xorOut )
+        if len( retList ) != 1:
+            return []
+        return retList[0][1]
 
+    ## return list of pairs (xorVal, initReg)
     def calculateInitRegRange(self, dataMask, crcNum, polyMask, xorStart, xorEnd):
-        ## default (standard) implementation
-        xorDict = list()
-        for xorOut in xrange(xorStart, xorEnd + 1):
-            crc_raw = crcNum ^ xorOut
-            init_found = self.calculateInitRegBase( dataMask, polyMask, crc_raw )
-            if init_found:
-                #xorDict[ xorOut ] = init_found
-                xorDict.append( (xorOut, init_found) )
-        return xorDict
-
-    def calculateInitRegBase(self, dataMask, polyMask, crc_raw):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
 
 
 ## =================================================================
 
 
-##
-class CRCOperator(object):
+## bonds CRCProcessor with data (often morphs data to inner representation)
+## used across all solvers
+class CRCDataOperator(object):
 
     def __init__(self):
         pass
@@ -333,10 +321,10 @@ class ResultContainer( object ):
         return len( self.data ) > 0
 
 
-class StandardCRCOperator( CRCOperator ):
+class StandardCRCDataOperator( CRCDataOperator ):
 
     def __init__(self, crcProcessor, inputData):
-        CRCOperator.__init__(self)
+        CRCDataOperator.__init__(self)
         self.processor = crcProcessor               ## CRCProcessor
         self.data = inputData                       ## List[ (NumberMask, NumberMask) ]
 

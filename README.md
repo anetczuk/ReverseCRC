@@ -94,7 +94,8 @@ In this case there will be 256 * 8 calls to *C* library (independent of *data si
 - poly: 0x1335D
 - operation mode: *BACKWARD*
 
-In this case there will be 65536 calls to *C* library. Three implementations perform almost equally, but *cffi* is significantly worse.
+In this case there will be 65536 calls to *C* library. Three implementations perform almost equally, but *cffi* is significantly worse. Performance penalty of *cffi* is because of ability of the binding to 
+automatic conversions of *Python* list structure to *C* raw arrays. For other binding it has to be done manually, thus can be precalculated and cached for repetitive use (as in this case).
 
  
 ### Development

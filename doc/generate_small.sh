@@ -37,11 +37,11 @@ convert_files() {
 }
 
 
-### convert $input_name -resize 320 $output_name
+### convert $input_name -resize 360 $output_name
 ### convert $input_name -resize 200x100 $output_name
 ## $1 -- file extension
 convert_images() {
-    local cmd="convert %s -resize 320 %s"
+    local cmd="convert %s -resize 360 %s"
     local file_ext="$1"
     convert_files "$cmd" ".$file_ext" "-small.$file_ext"
 }

@@ -214,7 +214,7 @@ class CRCProcessor(object):
         self.setReversed( crcKey.isReversedFully() )
         self.setXorOutValue( crcKey.xor )
         self.setRegisterInitValue( crcKey.init )
-        
+
     ## ===========================================
 
     def calculateCRC( self, data, dataSize, poly, crcSize, init=0, xorout=0, reverse=False ):

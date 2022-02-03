@@ -465,11 +465,11 @@ def create_backward_processor(crcSize):
             if self._reverseMode is True:
                 ## use standard implementation
                 return HwCRCBackward.calculateInitRegRange(self, dataMask, crcNum, polyMask, xorStart, xorEnd)
-                            
+
             if dataMask.dataSize % 8 != 0:
                 ## use standard implementation
                 return HwCRCBackward.calculateInitRegRange(self, dataMask, crcNum, polyMask, xorStart, xorEnd)
-                
+
             ## use fast implementation
             full_bytes = int( dataMask.dataSize / 8 )
             dataNum = dataMask.dataNum

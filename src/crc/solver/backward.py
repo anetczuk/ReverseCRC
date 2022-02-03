@@ -135,7 +135,7 @@ class BackwardSolver(Reverse):
                 continue
 
 #             callsCounter = 0
-            
+
             for xorOutPair in xorDict:
                 xorOut      = xorOutPair[0]
                 init_found  = xorOutPair[1]
@@ -150,7 +150,7 @@ class BackwardSolver(Reverse):
                     if valid:
                         key = CRCKey( polyNum, init_reg, xorOut, 0, dataSize, revOrd=False, refBits=False )
                         results[ key ] += 1
-                        
+
 #             print "verify call count:", callsCounter
 
         _LOGGER.info( "\n\nFound total results: %s", len(results) )

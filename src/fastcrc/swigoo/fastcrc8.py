@@ -31,43 +31,43 @@ except IOError as ex:
 
 # ## old implementation
 # class SwigOOData8Operator( object ):
-# 
+#
 #     ## dataBytes: bytes list
 #     ## dataCRC: int
 #     def __init__(self, dataBytes, dataCRC):
 #         self.dataBytes = dataBytes
 #         self.dataCRC = dataCRC
-# 
+#
 #     def calculate(self, poly, intReg, xorVal):
 #         return hw_crc8_calculate( self.dataBytes, poly & 0xFF, intReg, xorVal )
-# 
+#
 #     def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
 #         return hw_crc8_calculate_param( self.dataBytes, poly & 0xFF, intReg, xorVal, reverseOrder, reflectBits )
-# 
+#
 #     def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
 #         return hw_crc8_calculate_range( self.dataBytes, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
-    
-    
+
+
 ##
 class SwigOOData8Operator( object ):
- 
+
     ## dataBytes: bytes list
     ## dataCRC: int
     def __init__(self, dataBytes, dataCRC):
         self.rawData = convert_to_uint8array( dataBytes )
         self.dataLen = len( dataBytes )
         self.dataCRC = dataCRC
- 
+
 #     def __del__(self):
 #         ## do nothing -- data will be released automatically
 #         pass
- 
+
     def calculate(self, poly, intReg, xorVal):
         return swigoo_fastcrc.hw_crc8_calculate( self.rawData.cast(), self.dataLen, poly & 0xFF, intReg, xorVal )
- 
+
     def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
         return swigoo_fastcrc.hw_crc8_calculate_param( self.rawData.cast(), self.dataLen, poly & 0xFF, intReg, xorVal, reverseOrder, reflectBits )
- 
+
     def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
         ret_array = swigoo_fastcrc.hw_crc8_calculate_range( self.rawData.cast(), self.dataLen, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
         return convert_CRC8ResultArray_to_list( ret_array )

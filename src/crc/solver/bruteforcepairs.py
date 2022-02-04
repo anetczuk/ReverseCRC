@@ -34,7 +34,7 @@ from crc.solver.reverse import Reverse, print_results, write_results,\
 
 class BruteForcePairsSolver( XORReverse ):
 
-    def __init__(self, printProgress = None):
+    def __init__(self, printProgress=None):
         XORReverse.__init__(self, printProgress)
 
     ## inputParams -- InputParams
@@ -54,10 +54,10 @@ class BruteForcePairsSolver( XORReverse ):
         write_results( retList, dataSize, outputFile )
 
     # return Counter[ CRCKey ]
-    def bruteForcePairs(self, inputData, searchRange = 0):
+    def bruteForcePairs(self, inputData, searchRange=0):
         if inputData.empty():
             return []
-        if inputData.ready() == False:
+        if inputData.ready() is False:
             return []
 
         numbersList = inputData.numbersList
@@ -116,7 +116,6 @@ class BruteForcePairsSolver( XORReverse ):
 
             #TODO: what is initReg and xorVal for self.crcProc???
             self.crcProc.setRegisterInitValue( 0xFF )
-
 
         return Counter( retList )
 

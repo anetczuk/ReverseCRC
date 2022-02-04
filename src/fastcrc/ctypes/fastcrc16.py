@@ -117,7 +117,6 @@ def convert_uint16_array_to_list( result_array ):
 
 
 class CRC16Result(ctypes.Structure):
-    """ creates a struct """
 
     _fields_ = [('reginit', ctypes.c_uint16 ),
                 ('xorout', ctypes.c_uint16)]
@@ -127,7 +126,6 @@ class CRC16Result(ctypes.Structure):
 
 
 class CRC16ResultArray(ctypes.Structure):
-    """ creates a struct """
 
     _fields_ = [('size', ctypes.c_size_t),
                 ('capacity', ctypes.c_size_t),
@@ -150,7 +148,6 @@ c_fastcrc.CRC16ResultArray_free.argtypes = [ ctypes.POINTER( CRC16ResultArray ) 
 
 
 class uint16_array(ctypes.Structure):
-    """ creates a struct """
 
     _fields_ = [('size', ctypes.c_size_t),
                 ('capacity', ctypes.c_size_t),
@@ -176,6 +173,8 @@ c_fastcrc.uint16_array_free.argtypes = [ ctypes.POINTER( uint16_array ) ]
 
 
 c_fastcrc.hw_crc16_calculate.restype = ctypes.c_uint16
+
+
 def hw_crc16_calculate( bytesList, poly, intReg, xorVal ):
     arr_len  = len(bytesList)
     arr_type = ctypes.c_uint8 * arr_len
@@ -184,6 +183,8 @@ def hw_crc16_calculate( bytesList, poly, intReg, xorVal ):
 
 
 c_fastcrc.hw_crc16_calculate_param.restype = ctypes.c_uint16
+
+
 def hw_crc16_calculate_param( bytesList, poly, intReg, xorVal, reverseOrder, reflectBits ):
     arr_len  = len(bytesList)
     arr_type = ctypes.c_uint8 * arr_len
@@ -193,6 +194,8 @@ def hw_crc16_calculate_param( bytesList, poly, intReg, xorVal, reverseOrder, ref
 
 c_fastcrc.hw_crc16_calculate_range.argtypes = [ ctypes.POINTER( ctypes.c_uint8 ), ctypes.c_size_t, ctypes.c_uint16, ctypes.c_uint16, ctypes.c_uint16, ctypes.c_uint16, ctypes.c_uint16 ]
 c_fastcrc.hw_crc16_calculate_range.restype = ctypes.POINTER( CRC16ResultArray )
+
+
 def hw_crc16_calculate_range( bytes_list, dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd ):
     arr_len  = len(bytes_list)
     arr_type = ctypes.c_uint8 * arr_len
@@ -204,6 +207,8 @@ def hw_crc16_calculate_range( bytes_list, dataCRC, poly, intRegStart, intRegEnd,
 
 c_fastcrc.hw_crc16_invert.argtypes = [ ctypes.POINTER( ctypes.c_uint8 ), ctypes.c_size_t, ctypes.c_uint16, ctypes.c_uint16 ]
 c_fastcrc.hw_crc16_invert.restype = ctypes.POINTER( uint16_array )
+
+
 def hw_crc16_invert( bytes_list, poly, regVal ):
     arr_len  = len(bytes_list)
     arr_type = ctypes.c_uint8 * arr_len
@@ -212,8 +217,11 @@ def hw_crc16_invert( bytes_list, poly, regVal ):
 
     return convert_uint16_array_to_list( data_array )
 
+
 c_fastcrc.hw_crc16_invert_range.argtypes = [ ctypes.POINTER( ctypes.c_uint8 ), ctypes.c_size_t, ctypes.c_uint16, ctypes.c_uint16, ctypes.c_uint16, ctypes.c_uint16 ]
 c_fastcrc.hw_crc16_invert_range.restype = ctypes.POINTER( CRC16ResultArray )
+
+
 def hw_crc16_invert_range( bytes_list, crcNum, poly, xorStart, xorEnd):
     arr_len  = len(bytes_list)
     arr_type = ctypes.c_uint8 * arr_len

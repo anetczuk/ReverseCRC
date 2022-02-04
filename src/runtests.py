@@ -90,9 +90,7 @@ if __name__ == '__main__':
     parser.add_argument('-ut', '--untilfailure', action="store_true", help='Run tests in loop until failure' )
     parser.add_argument('-v', '--verbose', action="store_true", help='Verbose output' )
 
-
     args = parser.parse_args()
-
 
     if args.run_test:
         ## not empty

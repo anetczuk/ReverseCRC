@@ -23,7 +23,6 @@
 # SOFTWARE.
 #
 
-
 import sys
 import argparse
 import logging
@@ -33,13 +32,11 @@ import random
 from crc.numbermask import NumberMask
 
 
-
 def randomHexString(length):
     retString = ""
     for _ in xrange(length):
         retString += random.choice('0123456789ABCDEF')
     return retString
-
 
 
 ## ============================= main section ===================================
@@ -80,15 +77,15 @@ try:
     crc_func = crcmod.mkCrcFun(poly, rev=rev, initCrc=initCrc, xorOut=xor)
 
     preambleFormat = "{}"
-    dataFormat = "{:0" + str(dataSize/4) + "X}"
-    polyFormat = "{:0" + str(polySize/4) + "X}"
+    dataFormat = "{:0" + str(dataSize / 4) + "X}"
+    polyFormat = "{:0" + str(polySize / 4) + "X}"
     messageFormat = preambleFormat + dataFormat + " " + polyFormat
 
     for _ in xrange(0, samples):
         preamble = randomHexString(preSize)
         data = randomHexString(dataSize)
         messageNum = int(data, 16)
-        messageMask = NumberMask( messageNum, dataSize*4 )
+        messageMask = NumberMask( messageNum, dataSize * 4 )
         polyCRC  = crc_func( messageMask.toASCII() )
         print messageFormat.format(preamble, messageMask.dataNum, polyCRC)
 

@@ -161,6 +161,7 @@ class HwCRC_BruteForcePairsSolver_Test(unittest.TestCase, BruteForcePairsSolverB
         self.crcProc = factory.createForwardProcessor()
         self.crcFinder = BruteForcePairsSolver()
         self.crcFinder.setProcessorFactory( factory )
+
     def tearDown(self):
         # Called after testfunction was executed
         pass
@@ -173,6 +174,7 @@ class DivisionCRC_BruteForcePairsSolver_Test(unittest.TestCase, BruteForcePairsS
         self.crcProc = factory.createForwardProcessor()
         self.crcFinder = BruteForcePairsSolver()
         self.crcFinder.setProcessorFactory( factory )
+
     def tearDown(self):
         # Called after testfunction was executed
         pass

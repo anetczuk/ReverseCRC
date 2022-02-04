@@ -15,7 +15,7 @@ fastcrc_paths_path = os.path.join( SCRIPT_DIR, os.pardir, "paths.py" )
 
 fastcrc_paths = imp.load_source( 'fastcrc_paths', fastcrc_paths_path )
 
-FASTCRC_INCLUDE_DIR = os.path.join( fastcrc_paths.FASTCRC_CLIB_SRC_DIR, "crchw" )
+FASTCRC_INCLUDE_DIR = os.path.join( fastcrc_paths.FASTCRC_CLIB_SRC_DIR, "crchw" )           # type: ignore
 
 CFFI_BUILD_DIR  = os.path.join( SCRIPT_DIR, "build" )
 
@@ -38,8 +38,8 @@ ffibuilder.set_source(
     include_dirs=[ FASTCRC_INCLUDE_DIR ],
 
     libraries=["fastcrc"],
-    library_dirs=[ fastcrc_paths.FASTCRC_CLIB_BIN_DIR ],
-    extra_link_args=[ '-Wl,-rpath=' + fastcrc_paths.FASTCRC_CLIB_BIN_DIR ]
+    library_dirs=[ fastcrc_paths.FASTCRC_CLIB_BIN_DIR ],                               # type: ignore
+    extra_link_args=[ '-Wl,-rpath=' + fastcrc_paths.FASTCRC_CLIB_BIN_DIR ]             # type: ignore
 )
 
 

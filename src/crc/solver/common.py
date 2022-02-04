@@ -30,7 +30,7 @@ from crc.solver.reverse import Reverse, print_results, write_results
 
 class CommonSolver(Reverse):
 
-    def __init__(self, printProgress = None):
+    def __init__(self, printProgress=None):
         Reverse.__init__(self, printProgress)
 
     ## inputParams -- InputParams
@@ -49,13 +49,13 @@ class CommonSolver(Reverse):
         print "\nFound results: ", len(retList)
         write_results( retList, dataSize, outputFile )
 
-    def findCommonInput(self, inputData, searchRange = -1):
+    def findCommonInput(self, inputData, searchRange=-1):
         if inputData.empty():
             return []
-        if inputData.ready() == False:
+        if inputData.ready() is False:
             return []
         if searchRange < 0:
-            searchRange = inputData.dataSize-1
+            searchRange = inputData.dataSize - 1
 
         if (self.progress):
             print "List size: {} Data size: {} CRC size: {}".format(len(inputData.numbersList), inputData.dataSize, inputData.crcSize)
@@ -63,7 +63,7 @@ class CommonSolver(Reverse):
         return self.findCommon(inputData.numbersList, inputData.dataSize, inputData.crcSize, searchRange)
 
     ## searchRange=0 means exact length (no subvalues)
-    def findCommon(self, dataList, dataSize, crcSize, searchRange = 0):
+    def findCommon(self, dataList, dataSize, crcSize, searchRange=0):
         retList = Counter()
 
         if len(dataList) < 1:
@@ -175,7 +175,7 @@ class CommonSolver(Reverse):
             ## we assume that if key was found then testing on reversed input will fail
             return
 
-        if crcKey.isReversedFully() == False:
+        if crcKey.isReversedFully() is False:
             return
 
         #TODO: try to achieve compatibility without reversing

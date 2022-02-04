@@ -21,7 +21,6 @@
 # SOFTWARE.
 #
 
-
 import unittest
 import os
 # import logging
@@ -31,7 +30,6 @@ from crc.input import DataParser, InputData
 
 __scriptdir__ = os.path.dirname(os.path.realpath(__file__))
 # logging.basicConfig(level=logging.INFO)
-
 
 
 class InputDataTest(unittest.TestCase):
@@ -52,7 +50,6 @@ class InputDataTest(unittest.TestCase):
         self.assertEqual( parser.dataSize, 152 )
         self.assertEqual( parser.crcSize, 20 )
         self.assertIn( (5042640062004119076411731879610313259117034559L, 666378), parser.numbersList )
-
 
 
 class DataParserTest(unittest.TestCase):

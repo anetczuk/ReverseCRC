@@ -81,7 +81,6 @@ class CRCKeyTest(unittest.TestCase):
 ## =============================================================
 
 
-
 class CRCBackwardTestParametrized(object):
     def setUp(self):
         # Called before testfunction is executed
@@ -105,7 +104,7 @@ class CRCBackwardTestParametrized(object):
 
     def test_calculateInitReg_2(self):
         dataSize = 2
-        data =  NumberMask(0x01, dataSize)
+        data = NumberMask(0x01, dataSize)
         crcSize = 2
         inputPoly = NumberMask(0b101, crcSize)
         regInit = 0x00
@@ -120,7 +119,7 @@ class CRCBackwardTestParametrized(object):
 
     def test_calculateInitReg_2rev(self):
         dataSize = 2
-        data =  NumberMask(0x02, dataSize)
+        data = NumberMask(0x02, dataSize)
         crcSize = 2
         inputPoly = NumberMask(0b101, crcSize)
         regInit = 0x00
@@ -138,7 +137,7 @@ class CRCBackwardTestParametrized(object):
 
     def test_calculateInitReg_4rev(self):
         dataSize = 4
-        data =  NumberMask(0x08, dataSize)
+        data = NumberMask(0x08, dataSize)
         crcSize = 4
         inputPoly = NumberMask(0x12, crcSize)
         regInit = 0x00
@@ -173,7 +172,7 @@ class CRCBackwardTestParametrized(object):
 
     def test_calculateInitReg_8_002(self):
         dataSize = 8
-        data =  NumberMask(0xC6, dataSize)
+        data = NumberMask(0xC6, dataSize)
         crcSize = 8
         inputPoly = NumberMask(0b100011101, crcSize)
         regInit = 0x00
@@ -189,8 +188,8 @@ class CRCBackwardTestParametrized(object):
     def test_calculateInitReg_round_c8d8_init_random(self):
         dataSize = 8
         crcSize = 8
-        data = NumberMask(random.randint(1, 2**dataSize-1), dataSize)
-        crcMax = 2**crcSize-1
+        data = NumberMask(random.randint(1, 2 ** dataSize - 1), dataSize)
+        crcMax = 2 ** crcSize - 1
         inputPoly = NumberMask(random.randint(1, crcMax), crcSize)
         regInit = random.randint(1, crcMax)
         xorOut = 0x0
@@ -207,10 +206,10 @@ class CRCBackwardTestParametrized(object):
 
     def test_calculateInitReg_round_xor_random(self):
         dataPower = random.randint(1, 8)
-        dataSize = dataPower*8
-        data = NumberMask(random.randint(1, 2**dataSize-1), dataSize)
-        crcSize = random.randint(1, dataPower)*8
-        crcMax = 2**crcSize-1
+        dataSize = dataPower * 8
+        data = NumberMask(random.randint(1, 2 ** dataSize - 1), dataSize)
+        crcSize = random.randint(1, dataPower) * 8
+        crcMax = 2 ** crcSize - 1
         inputPoly = NumberMask(random.randint(1, crcMax), crcSize)
 
         regInit = 0x0
@@ -228,10 +227,10 @@ class CRCBackwardTestParametrized(object):
 
     def test_calculateInitRe_ground_init_random(self):
         dataPower = random.randint(1, 8)
-        dataSize = dataPower*8
-        data = NumberMask(random.randint(1, 2**dataSize-1), dataSize)
-        crcSize = random.randint(1, dataPower)*8
-        crcMax = 2**crcSize-1
+        dataSize = dataPower * 8
+        data = NumberMask(random.randint(1, 2 ** dataSize - 1), dataSize)
+        crcSize = random.randint(1, dataPower) * 8
+        crcMax = 2 ** crcSize - 1
         inputPoly = NumberMask(random.randint(1, crcMax), crcSize)
 
         regInit = random.randint(1, crcMax)
@@ -249,10 +248,10 @@ class CRCBackwardTestParametrized(object):
 
     def test_calculateInitReg_round_DCRC_init_random(self):
         dataPower = random.randint(1, 8)
-        dataSize = dataPower*8
-        data = NumberMask(random.randint(1, 2**dataSize-1), dataSize)
-        crcSize = random.randint(1, dataPower)*8
-        crcMax = 2**crcSize-1
+        dataSize = dataPower * 8
+        data = NumberMask(random.randint(1, 2 ** dataSize - 1), dataSize)
+        crcSize = random.randint(1, dataPower) * 8
+        crcMax = 2 ** crcSize - 1
         inputPoly = NumberMask(random.randint(1, crcMax), crcSize)
 
         regInit = random.randint(1, crcMax)
@@ -271,8 +270,8 @@ class CRCBackwardTestParametrized(object):
     def test_calculateInitReg_c16d16_random(self):
         dataSize = 16
         crcSize = 16
-        data = NumberMask(random.randint(1, 2**dataSize-1), dataSize)
-        crcMax = 2**crcSize-1
+        data = NumberMask(random.randint(1, 2 ** dataSize - 1), dataSize)
+        crcMax = 2 ** crcSize - 1
         inputPoly = NumberMask(random.randint(1, crcMax), crcSize)
         regInit = random.randint(1, crcMax)
         xorOut = 0x0

@@ -50,7 +50,7 @@ class CommonSolverBaseTest(object):
         self.assertEqual( len(foundCRC), 0 )
 
     def test_findCommon_c8d16_one(self):
-        dataList = [(2,1)]
+        dataList = [(2, 1)]
         foundCRC = self.crcFinder.findCommon(dataList, 16, 16, 0)
         self.assertEqual( len(foundCRC), 0 )
 
@@ -100,13 +100,13 @@ class CommonSolverBaseTest(object):
 
         data1 = 0xABCD
         crc1  = self.crcProc.calculate2(data1, dataSize, inputPoly, crcSize)
-        dataList.append( (preamble|data1, crc1) )
+        dataList.append( (preamble | data1, crc1) )
 
         data2 = data1 ^ 0x0010
         crc2  = self.crcProc.calculate2(data2, dataSize, inputPoly, crcSize)
-        dataList.append( (preamble|data2, crc2) )
+        dataList.append( (preamble | data2, crc2) )
 
-        foundCRC = self.crcFinder.findCommon(dataList, preSize+dataSize, crcSize, 12)
+        foundCRC = self.crcFinder.findCommon(dataList, preSize + dataSize, crcSize, 12)
 
 #         print "found data:", foundCRC
         self.assertIn( CRCKey(inputPoly, regInit, 0, 0, dataSize, rev=reverse ), foundCRC )
@@ -269,6 +269,7 @@ class HwCRC_CommonSolver_Test(unittest.TestCase, CommonSolverBaseTest):
         self.crcProc = factory.createForwardProcessor()
         self.crcFinder = CommonSolver()
         self.crcFinder.setProcessorFactory( factory )
+
     def tearDown(self):
         # Called after testfunction was executed
         pass
@@ -281,6 +282,7 @@ class DivisionCRC_CommonSolver_Test(unittest.TestCase, CommonSolverBaseTest):
         self.crcProc = factory.createForwardProcessor()
         self.crcFinder = CommonSolver()
         self.crcFinder.setProcessorFactory( factory )
+
     def tearDown(self):
         # Called after testfunction was executed
         pass

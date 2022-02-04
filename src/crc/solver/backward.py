@@ -36,7 +36,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class BackwardSolver(Reverse):
 
-    def __init__(self, printProgress = None):
+    def __init__(self, printProgress=None):
         Reverse.__init__(self, printProgress)
 
     ## inputParams -- InputParams
@@ -109,7 +109,7 @@ class BackwardSolver(Reverse):
 
         polyMask = NumberMask( 0, crcSize )
         for polyNum in xrange(polyListStart, polyListStop + 1):
-            if polyNum is 0x0:
+            if polyNum == 0x0:
                 ## value does not make sense and it's heavily computable
                 spaceCounter += numbersLen * subSpaceSize
                 continue

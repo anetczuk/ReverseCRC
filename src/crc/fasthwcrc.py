@@ -67,7 +67,7 @@ class Fast8HwCRC( HwCRC ):
         HwCRC.__init__(self)
 
     ## override
-    def setReversed(self, value = True):
+    def setReversed(self, value=True):
         CRCProcessor.setReversed(self, value)
         ## optimize execution time by reducing one level of function call
         if value is False:
@@ -205,7 +205,7 @@ class Fast16HwCRC( HwCRC ):
         CRCProcessor.__init__(self)
 
     ## override
-    def setReversed(self, value = True):
+    def setReversed(self, value=True):
         HwCRC.setReversed(self, value)
         ## optimize execution time by reducing one level of function call
         if value is False:

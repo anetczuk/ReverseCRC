@@ -21,10 +21,8 @@
 # SOFTWARE.
 #
 
-
 import unittest
 from crc.lookupcrc import LookupCRC
-
 
 
 class LookupCRCTest(unittest.TestCase):
@@ -80,7 +78,6 @@ class LookupCRCTest(unittest.TestCase):
         crcProc = LookupCRC(4)
         lookupCrc = crcProc.calculate1(data, poly)
         self.assertEqual( lookupCrc, crc )
-
 
 
 if __name__ == "__main__":

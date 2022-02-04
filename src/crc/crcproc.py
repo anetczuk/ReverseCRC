@@ -62,7 +62,7 @@ class PolyKey:
         return True
 
     def __ne__(self, other):
-        return ((self == other) == False)
+        return ((self == other) is False)
 
     def __hash__(self):
         return hash( str(self.poly) + str(self.revOrd) + str(self.refBits) )
@@ -128,7 +128,7 @@ class CRCKey:
         return True
 
     def __ne__(self, other):
-        return ((self == other) == False)
+        return ((self == other) is False)
 
     def __hash__(self):
 #         return hash(str(self.poly) + str(self.init) + str(self.xor))
@@ -177,12 +177,9 @@ class CRCProcessorFactory(object):
 
 
 class CRCProcessor(object):
-    ''' Calculate CRC '''
+    """Calculate CRC."""
 
     def __init__(self):
-        '''
-        Constructor
-        '''
         self.reset()
 
     def reset(self):
@@ -203,10 +200,10 @@ class CRCProcessor(object):
 
     def setInitCRC(self, value, crcSize):
         self.registerInit = value ^ self.xorOut
-        if self._reversed == True:
+        if self._reversed is True:
             self.registerInit = reverse_number(self.registerInit, crcSize)
 
-    def setReversed(self, value = True):
+    def setReversed(self, value=True):
         self._reversed = value
 
     # crcKey -- CRCKey
@@ -227,7 +224,7 @@ class CRCProcessor(object):
 
     ## 'poly' with leading '1'
     def calculate1(self, data, poly):
-        return self.calculate2(data, data.bit_length(), poly, poly.bit_length()-1)
+        return self.calculate2(data, data.bit_length(), poly, poly.bit_length() - 1)
 
     def calculate2(self, data, dataSize, poly, crcSize):
         dataMask = NumberMask(data, dataSize)
@@ -258,7 +255,7 @@ class CRCInvertProcessor( object ):
     def __init__(self):
         pass
 
-    def setReversed(self, value = True):
+    def setReversed(self, value=True):
         raise NotImplementedError( "%s not implemented abstract method" % type(self) )
 
     ## return list of initReg values

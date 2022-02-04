@@ -124,14 +124,14 @@ INVERSE_CACHE16 = InvertCache( 0x10000 )
 
 class HwCRCBackwardState:
 
-    def __init__(self, reg = 0x0):
+    def __init__(self, reg=0x0):
         self.register = reg
 
     def copy(self):
         return copy.copy(self)
 
-    def shiftBit(self, regBit, dataBit, revMode = False):
-        if revMode == False:
+    def shiftBit(self, regBit, dataBit, revMode=False):
+        if revMode is False:
             self.shiftMSB(regBit, dataBit)
         else:
             self.shiftLSB(regBit, dataBit)
@@ -222,7 +222,7 @@ class HwCRCBackwardState:
     ## 'regBit' says what bit add to register
     def shiftLSB(self, regBit, dataBit, polyMask):
         ## reversing LSB mode
-        if regBit == True:
+        if regBit is True:
             self.register ^= polyMask.dataNum
             self.register <<= 1
             self.register |= 1
@@ -236,7 +236,6 @@ class HwCRCBackwardState:
             self.register ^= 1
         return True
 
-
     def __repr__(self):
         return "<HwCRCBState cs:{} r:0x{:X}>".format( self.crcSize, self.register )
 
@@ -246,7 +245,7 @@ class HwCRCBackwardState:
         return True
 
     def __ne__(self, other):
-        return ((self == other) == False)
+        return ((self == other) is False)
 
     def __hash__(self):
         return hash( self.register )
@@ -262,7 +261,7 @@ class HwCRCBackward( CRCInvertProcessor ):
         self._reverseMode = False
         self.setReversed( False )
 
-    def setReversed(self, value = True):
+    def setReversed(self, value=True):
         self._reverseMode = value
 
         ## optimize execution time by reducing one level of function call
@@ -441,7 +440,6 @@ def create_backward_processor(crcSize):
 
 #     return HwCRCBackward()
 
-
     try:
         from fastcrc.utils import convert_to_list
         from fastcrc.binding import hw_crc16_invert, hw_crc16_invert_range
@@ -453,9 +451,8 @@ def create_backward_processor(crcSize):
 #         print "WARNING: fast CRC is disabled!!!"
         return HwCRCBackward()
 
-
-    ## assuming that CRC is 16 bit
     class Fast16HwCRCBackward( HwCRCBackward ):
+        ## assuming that CRC is 16 bit
 
         def __init__(self):
             HwCRCBackward.__init__(self)

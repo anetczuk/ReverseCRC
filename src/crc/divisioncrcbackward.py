@@ -21,24 +21,22 @@
 # SOFTWARE.
 #
 
-
 import copy
 from crc.numbermask import NumberMask, ReverseNumberMask
 from crc.crcproc import CRCInvertProcessor
-
 
 
 class DivisionCRCBackwardState:
 
     ## polyMask -- NumberMask
     ## dataMask -- NumberMask
-    def __init__(self, polyMask, reg = 0x0, dataMask = NumberMask(0, 0)):
+    def __init__(self, polyMask, reg=0x0, dataMask=NumberMask(0, 0)):
         self.polyMask = ReverseNumberMask.from_NumberMask( polyMask )
         self.dataMask = ReverseNumberMask.from_NumberMask( dataMask )
         self.register = reg
 
-    def shiftBit(self, one, revMode = False):
-        if revMode == False:
+    def shiftBit(self, one, revMode=False):
+        if revMode is False:
             self.shiftMSB(one)
         else:
             self.shiftLSB(one)
@@ -97,7 +95,7 @@ class DivisionCRCBackwardState:
         return True
 
     def __ne__(self, other):
-        return ((self == other) == False)
+        return ((self == other) is False)
 
     def __hash__(self):
         return hash(str(self.dataMask) + str(self.polyMask) + str(self.register))
@@ -118,7 +116,7 @@ class DivisionCRCBackward( CRCInvertProcessor ):
 #         self.crc = crc
 #         self.reversedMode = False
 
-    def setReversed(self, value = True):
+    def setReversed(self, value=True):
         self.reversedMode = value
 
 #     def calculate(self, polyMask, xorOut):

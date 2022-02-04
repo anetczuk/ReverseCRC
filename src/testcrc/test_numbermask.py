@@ -21,12 +21,10 @@
 # SOFTWARE.
 #
 
-
 import unittest
 from crc.numbermask import intToASCII, reverse_number, NumberMask,\
     generateSubstrings, SubNumber, generateSubstringsReverse, asciiToInt,\
     ReverseNumberMask
-
 
 
 class GlobalTest(unittest.TestCase):
@@ -78,25 +76,24 @@ class GlobalTest(unittest.TestCase):
         self.assertEqual( val, 0x8222 )
 
     def test_generateSubstrings_empty(self):
-        subList= generateSubstrings( "" )
+        subList = generateSubstrings( "" )
         self.assertEqual( subList, set() )
 
     def test_generateSubstrings_one(self):
-        subList= generateSubstrings( "A" )
+        subList = generateSubstrings( "A" )
         self.assertEqual( subList, set([ SubNumber("A", 1, 0) ]) )
 
     def test_generateSubstrings_two(self):
-        subList= generateSubstrings( "AB" )
+        subList = generateSubstrings( "AB" )
         self.assertEqual( subList, set([ SubNumber("A", 1, 0), SubNumber("B", 1, 1), SubNumber("AB", 2, 0) ]) )
 
     def test_generateSubstrings_repeated(self):
-        subList= generateSubstrings( "AA" )
+        subList = generateSubstrings( "AA" )
         self.assertEqual( subList, set([ SubNumber("A", 1, 0), SubNumber("AA", 2, 0) ]) )
 
     def test_generateSubstringsReverse_two(self):
-        subList= generateSubstringsReverse( "AB", 0 )
+        subList = generateSubstringsReverse( "AB", 0 )
         self.assertEqual( subList, set([ SubNumber("B", 1, 0), SubNumber("AB", 2, 0) ]) )
-
 
 
 class SubNumberTest(unittest.TestCase):
@@ -104,15 +101,12 @@ class SubNumberTest(unittest.TestCase):
     def setUp(self):
         pass
 
-
     def tearDown(self):
         pass
-
 
     def test_repr(self):
         data = SubNumber(1, 2, 3)
         self.assertEqual(data.__repr__(), "<SubNumber 0x1/1 2 3>")
-
 
 
 class NumberMaskTest(unittest.TestCase):
@@ -218,7 +212,7 @@ class NumberMaskTest(unittest.TestCase):
 
     def test_generateSubnumbers_2pos(self):
         data = NumberMask(0x9, 4)
-        subList = data.generateSubnumbers(maxPos = 0)
+        subList = data.generateSubnumbers(maxPos=0)
 #         print "ret list:", subList
         self.assertEqual(subList, set([ SubNumber(0x1, 1, 0), SubNumber(0x1, 2, 0), SubNumber(0x1, 3, 0),
                                         SubNumber(0x9, 4, 0) ]) )

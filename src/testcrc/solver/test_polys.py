@@ -94,13 +94,13 @@ class PolysSolverBaseTest(object):
 
     def test_findPolysXOR_xorout(self):
         xorOut = 0xAB
-        polyList = self.crcFinder.findPolysXOR(0x1234, 0xF1^xorOut, 0x1235, 0xF6^xorOut, 16, 8)
+        polyList = self.crcFinder.findPolysXOR(0x1234, 0xF1 ^ xorOut, 0x1235, 0xF6 ^ xorOut, 16, 8)
         self.assertTrue( PolyKey(0x107, 0, 16, rev=False) in polyList )
 
     def test_findPolysXOR_c8_init_xorOut(self):
         dataSize = 42                           ## data size does not matter
         inputPoly = 0x1D5
-        inputVal =  0xA53937CF
+        inputVal  = 0xA53937CF
         inputVal2 = inputVal ^ 0b100101000      ## data diff does not matter
 
         self.crcProc.setRegisterInitValue(0xA5)
@@ -112,7 +112,7 @@ class PolysSolverBaseTest(object):
         self.assertTrue( PolyKey(inputPoly, 0, dataSize, rev=False) in poly )
 
     def test_findPolysXOR_crcmod_8A(self):
-        data =  0xF90AD50F
+        data  = 0xF90AD50F
         data2 = 0xF90AD50D
         inputPoly = 0x10A
         regInit = 0x00
@@ -131,7 +131,7 @@ class PolysSolverBaseTest(object):
 
     def test_findPolysXOR_crcmod_8Arev_d32(self):
         data  = 0xF90AD5FD
-        data2 =  data | 0xF
+        data2 = data | 0xF
         dataSize = 32
         inputPoly = 0x10A
         regInit = 0x00
@@ -151,11 +151,11 @@ class PolysSolverBaseTest(object):
         self.assertIn( PolyKey(inputPoly, 0, dataSize, rev=True), polyList )
 
     def test_findPolysXOR_crcmod_8_random(self):
-        data =  0xF90AD50D769553D3110A4535D37
+        data  = 0xF90AD50D769553D3110A4535D37
         data2 = 0xF90AD50D769553D311024535537
 #         inputPoly = 0x1B7
-        inputPoly = 0x100 | int(random.random()*0xFF + 1)
-        regInit = int(random.random()*0xFF + 1)
+        inputPoly = 0x100 | int(random.random() * 0xFF + 1)
+        regInit = int(random.random() * 0xFF + 1)
         xorOut = 0x0
         crcSize = 8
 
@@ -170,12 +170,12 @@ class PolysSolverBaseTest(object):
         self.assertTrue( PolyKey(inputPoly, 0, 108, rev=False) in polyList )
 
     def test_findPolysXOR_crcmod_8_random2(self):
-        data =  0xF90AD50D769553D31102453553F
+        data  = 0xF90AD50D769553D31102453553F
         data2 = 0xF90AD50D769553D313624535537
 #         inputPoly = 0x1B7
-        inputPoly = 0x100 | int(random.random()*0xFF + 1)
-        regInit = int(random.random()*0xFF + 1)
-        xorOut = int(random.random()*0xFF + 1)
+        inputPoly = 0x100 | int(random.random() * 0xFF + 1)
+        regInit = int(random.random() * 0xFF + 1)
+        xorOut  = int(random.random() * 0xFF + 1)
         crcSize = 8
 
         crc_func = crcmod.mkCrcFun(inputPoly, rev=False, initCrc=regInit, xorOut=xorOut)
@@ -190,12 +190,12 @@ class PolysSolverBaseTest(object):
 
     def test_findPolysXOR_crcmod_8_random3(self):
         dataSize = 64
-        data =  int(random.random()*0xFFFFFFFFFFFFFFFF + 1)
-        data2 = int(random.random()*0xFFFFFFFFFFFFFFFF + 1)
+        data  = int(random.random() * 0xFFFFFFFFFFFFFFFF + 1)
+        data2 = int(random.random() * 0xFFFFFFFFFFFFFFFF + 1)
 #         inputPoly = 0x1B7
-        inputPoly = 0x100 | int(random.random()*0xFF + 1)
-        regInit = int(random.random()*0xFF + 1)
-        xorOut = int(random.random()*0xFF + 1)
+        inputPoly = 0x100 | int(random.random() * 0xFF + 1)
+        regInit = int(random.random() * 0xFF + 1)
+        xorOut  = int(random.random() * 0xFF + 1)
         crcSize = 8
 
         crc_func = crcmod.mkCrcFun(inputPoly, rev=False, initCrc=regInit, xorOut=xorOut)
@@ -269,6 +269,7 @@ class HwCRC_PolysSolver_Test(unittest.TestCase, PolysSolverBaseTest):
         self.crcProc = factory.createForwardProcessor()
         self.crcFinder = PolysSolver()
         self.crcFinder.setProcessorFactory( factory )
+
     def tearDown(self):
         # Called after testfunction was executed
         pass
@@ -281,6 +282,7 @@ class DivisionCRC_PolysSolver_Test(unittest.TestCase, PolysSolverBaseTest):
         self.crcProc = factory.createForwardProcessor()
         self.crcFinder = PolysSolver()
         self.crcFinder.setProcessorFactory( factory )
+
     def tearDown(self):
         # Called after testfunction was executed
         pass

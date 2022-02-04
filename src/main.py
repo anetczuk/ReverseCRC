@@ -112,9 +112,7 @@ def main():
     parser.add_argument('--print_progress', '-pp', action='store_const', const=True, default=False, help='Print progress' )
     parser.add_argument('--silent', action='store_const', const=True, default=False, help='No output messages' )
 
-
     args = parser.parse_args()
-
 
     silentMode = args.silent
     if silentMode:
@@ -122,14 +120,11 @@ def main():
     else:
         logging.basicConfig(level=logging.DEBUG)
 
-
     _LOGGER.info( "Executed: %s", " ".join( sys.argv ) )
     _LOGGER.info( "Starting: %s %s", args.alg, args.mode )
 
-
     if args.binding is not None:
         os.environ[ "FASTCRC_BINDING" ] = args.binding
-
 
     dataParser = DataParser()
     ## return InputData
@@ -138,7 +133,7 @@ def main():
     if data.empty():
         _LOGGER.error( "no data found" )
         return 1
-    if data.ready() == False:
+    if data.ready() is False:
         _LOGGER.error( "input data not ready" )
         return 1
 

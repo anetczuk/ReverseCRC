@@ -45,7 +45,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class VerifySolver(Reverse):
 
-    def __init__(self, printProgress = None):
+    def __init__(self, printProgress=None):
         Reverse.__init__(self, printProgress)
 
     ## inputParams -- InputParams

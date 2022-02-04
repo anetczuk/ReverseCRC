@@ -21,7 +21,6 @@
 # SOFTWARE.
 #
 
-
 import unittest
 import os
 # import logging
@@ -125,22 +124,22 @@ class HwCRCTest(unittest.TestCase):
     def test_calculate_3(self):
         ## taken from https://en.wikipedia.org/wiki/Cyclic_redundancy_check
         crcProc = HwCRC()
-        crc = crcProc.calculate2(0b11010011101100, 16, 0b011, 3) ## 0x34EC 0xB
+        crc = crcProc.calculate2(0b11010011101100, 16, 0b011, 3)    ## 0x34EC 0xB
         self.assertEqual( crc, 0b100 )
-        crc = crcProc.calculate2(0b11010011101101, 16, 0b011, 3) ## 0x34ED 0xB
+        crc = crcProc.calculate2(0b11010011101101, 16, 0b011, 3)    ## 0x34ED 0xB
         self.assertEqual( crc, 0b111 )
-        crc = crcProc.calculate2(0b11010011101110, 16, 0b011, 3) ## 0x34EE 0xB
+        crc = crcProc.calculate2(0b11010011101110, 16, 0b011, 3)    ## 0x34EE 0xB
         self.assertEqual( crc, 0b010 )
-        crc = crcProc.calculate2(0b11010011101111, 16, 0b011, 3) ## 0x34EF 0xB
+        crc = crcProc.calculate2(0b11010011101111, 16, 0b011, 3)    ## 0x34EF 0xB
         self.assertEqual( crc, 0b001 )
 
-        crc = crcProc.calculate2(0b11010011101111, 16, 0b011, 3) ## 0x34EF 0xB
+        crc = crcProc.calculate2(0b11010011101111, 16, 0b011, 3)    ## 0x34EF 0xB
         self.assertEqual( crc, 0b001 )
-        crc = crcProc.calculate2(0b11010111101111, 16, 0b011, 3) ## 0x35EF 0xB
+        crc = crcProc.calculate2(0b11010111101111, 16, 0b011, 3)    ## 0x35EF 0xB
         self.assertEqual( crc, 0b111 )
-        crc = crcProc.calculate2(0b11011011101111, 16, 0b011, 3) ## 0x36EF 0xB
+        crc = crcProc.calculate2(0b11011011101111, 16, 0b011, 3)    ## 0x36EF 0xB
         self.assertEqual( crc, 0b110 )
-        crc = crcProc.calculate2(0b11011111101111, 16, 0b011, 3) ## 0x37EF 0xB
+        crc = crcProc.calculate2(0b11011111101111, 16, 0b011, 3)    ## 0x37EF 0xB
         self.assertEqual( crc, 0b000 )
 
     def test_calculate_leading(self):
@@ -243,7 +242,7 @@ class HwCRCTest(unittest.TestCase):
     def test_MSB_LSB(self):
         data = NumberMask(random.randint(1, 0xFF), 8)
         crcSize = 8
-        crcMax = 2**crcSize-1
+        crcMax = 2 ** crcSize - 1
         inputPoly = NumberMask(random.randint(1, crcMax), crcSize)
         regInit = random.randint(0, crcMax)
         xorOut = random.randint(0, crcMax)
@@ -368,7 +367,7 @@ class HwCRCTest(unittest.TestCase):
     def test_crcmod_c8d64_random(self):
         data = NumberMask(random.randint(1, 0xFFFFFFFFFFFFFFFF), 64)
         crcSize = 8
-        crcMax = 2**crcSize-1
+        crcMax = 2 ** crcSize - 1
         inputPoly = NumberMask((0x1 << crcSize) | random.randint(1, crcMax), crcSize)
 #         regInit = random.randint(0, crcMax)
 #         xorOut = random.randint(0, crcMax)
@@ -387,10 +386,10 @@ class HwCRCTest(unittest.TestCase):
         if reverse:
             data.reorderBytes()
             inputPoly.reverse()
-            crcInit = reverse_number(regInit^xorOut, crcSize)
+            crcInit = reverse_number(regInit ^ xorOut, crcSize)
             crcProc.setRegisterInitValue( crcInit )
         else:
-            crcInit = regInit^xorOut
+            crcInit = regInit ^ xorOut
             crcProc.setRegisterInitValue( crcInit )
 
         crc = crcProc.calculate3(data, inputPoly)
@@ -398,11 +397,10 @@ class HwCRCTest(unittest.TestCase):
 #         print "values: {} poly:{:X} init:{:X} xorOut:{:08b} rev:{} crc:{:08b} crcmod:{:08b} crcxor:{:08b}".format( data, inputPoly, regInit, xorOut, reverse, crc, crcLib, crc^crcLib )
         self.assertEqual( crc, crcLib )
 
-
     def test_crcmod_c16d64_random(self):
         data = NumberMask(random.randint(1, 0xFFFFFFFFFFFFFFFF), 64)
         crcSize = 16
-        crcMax = 2**crcSize-1
+        crcMax = 2 ** crcSize - 1
         inputPoly = NumberMask((0x1 << crcSize) | random.randint(1, crcMax), crcSize)
 #         regInit = random.randint(0, crcMax)
 #         xorOut = random.randint(0, crcMax)
@@ -421,10 +419,10 @@ class HwCRCTest(unittest.TestCase):
         if reverse:
             data.reorderBytes()
             inputPoly.reverse()
-            crcInit = reverse_number(regInit^xorOut, crcSize)
+            crcInit = reverse_number(regInit ^ xorOut, crcSize)
             crcProc.setRegisterInitValue( crcInit )
         else:
-            crcInit = regInit^xorOut
+            crcInit = regInit ^ xorOut
             crcProc.setRegisterInitValue( crcInit )
 
         crc = crcProc.calculate3(data, inputPoly)

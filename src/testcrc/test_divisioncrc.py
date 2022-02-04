@@ -21,7 +21,6 @@
 # SOFTWARE.
 #
 
-
 import unittest
 import os
 from crc.hwcrc import HwCRC
@@ -33,10 +32,8 @@ from crc.numbermask import NumberMask, reverse_number
 # import logging
 
 
-
 __scriptdir__ = os.path.dirname(os.path.realpath(__file__))
 # logging.basicConfig(level=logging.INFO)
-
 
 
 class DivisionCRCTest(unittest.TestCase):
@@ -148,7 +145,7 @@ class DivisionCRCTest(unittest.TestCase):
     def test_MSB_LSB(self):
         data = NumberMask(random.randint(1, 0xFF), 8)
         crcSize = 8
-        crcMax = 2**crcSize-1
+        crcMax = 2 ** crcSize - 1
         inputPoly = NumberMask(random.randint(1, crcMax), crcSize)
         regInit = random.randint(0, crcMax)
         xorOut = random.randint(0, crcMax)
@@ -202,7 +199,7 @@ class DivisionCRCTest(unittest.TestCase):
     def test_CRC_random(self):
         data = NumberMask(random.randint(1, 0xFFFFFFFFFFFFFFFF), 64)
         crcSize = 8
-        crcMax = 2**8-1
+        crcMax = 2 ** 8 - 1
         inputPoly = NumberMask(0x100 | random.randint(1, crcMax), crcSize)
         regInit = random.randint(0, crcMax)
         xorOut = random.randint(0, crcMax)
@@ -274,9 +271,9 @@ class DivisionCRCTest(unittest.TestCase):
         self.assertEqual( crc, crcLib )
 
     def test_crcmod_c8d64_zero(self):
-        data = NumberMask(0x00, 8*random.randint(1, 8))
+        data = NumberMask(0x00, 8 * random.randint(1, 8))
         crcSize = 8
-        crcMax = 2**8-1
+        crcMax = 2 ** 8 - 1
         inputPoly = NumberMask(0x100 | random.randint(1, crcMax), crcSize)
         reverse = bool(random.randint(0, 1))
         regInit = 0x0
@@ -302,7 +299,7 @@ class DivisionCRCTest(unittest.TestCase):
     def test_crcmod_c8d64_random(self):
         data = NumberMask(random.randint(1, 0xFFFFFFFFFFFFFFFF), 64)
         crcSize = 8
-        crcMax = 2**8-1
+        crcMax = 2 ** 8 - 1
         inputPoly = NumberMask(0x100 | random.randint(1, crcMax), crcSize)
         ## 'regInit' and 'xorOut' are not incompatible
         regInit = 0x0
@@ -327,7 +324,6 @@ class DivisionCRCTest(unittest.TestCase):
 
 #         print "values: {} poly:{:X} init:{:X} xorOut:{:08b} rev:{} crc:{:08b} crcmod:{:08b} crcxor:{:08b}".format( data, inputPoly, regInit, xorOut, reverse, crc, crcLib, crc^crcLib )
         self.assertEqual( crc, crcLib )
-
 
 
 if __name__ == "__main__":

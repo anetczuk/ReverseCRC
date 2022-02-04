@@ -21,14 +21,10 @@
 # SOFTWARE.
 #
 
-
 from crc.hwcrc import create_processor
 from crc.numbermask import NumberMask
 from crc.crcproc import CRCProcessor
 
-
-
-GlobalLookupTables = {}
 
 class LookupCRC( CRCProcessor ):
     def __init__(self, lookupSize):
@@ -52,7 +48,7 @@ class LookupCRC( CRCProcessor ):
 
         inputData = dataMask.dataNum
         for i in range(0, rep):
-            val = (inputData & valMask) >> self.lookupSize*(rep-i-1)
+            val = (inputData & valMask) >> self.lookupSize * (rep - i - 1)
             valMask >>= self.lookupSize
 #             print "val: {1:X} {1:04b}".format(valMask, val)
             index = (register & indexMask) >> indexShift

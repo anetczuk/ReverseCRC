@@ -21,15 +21,13 @@
 # SOFTWARE.
 #
 
-
 import logging
 import os.path
 import re
 
 
-
 class InputData:
-    def __init__(self, numbersList = [], dataSize = 0, crcSize = 0):
+    def __init__(self, numbersList=[], dataSize=0, crcSize=0):
         self.numbersList = numbersList      ## List[ (int, int) ] -- list of pairs (data, crc)
         self.dataSize = dataSize
         self.crcSize  = crcSize
@@ -41,7 +39,7 @@ class InputData:
         return len(self.numbersList)
 
     def ready(self):
-        return ((self.dataSize>0) and (self.crcSize>0))
+        return ((self.dataSize > 0) and (self.crcSize > 0))
 
     def convert(self, stringList):
         self.numbersList = []
@@ -96,7 +94,6 @@ class DataParser:
         retObj.convert(self.data)
         return retObj
 
-
     def parse(self, msg):
         trimmed = msg.strip()
         if len(trimmed) < 1:
@@ -107,7 +104,7 @@ class DataParser:
         if trimmed.startswith( '//' ):
             ## comment
             return
-        retList = re.findall('(\S+)\s+(\S+)\s*', trimmed)
+        retList = re.findall(r'(\S+)\s+(\S+)\s*', trimmed)
         for pair in retList:
             data = pair[0]
             crc = pair[1]

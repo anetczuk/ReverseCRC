@@ -213,11 +213,9 @@ class InputParams(object):
 
 
 class Reverse(object):
-    '''
-    Base class for reverse algorithms
-    '''
+    """Base class for reverse algorithms."""
 
-    def __init__(self, printProgress = None):
+    def __init__(self, printProgress=None):
         self.poly    = None
         self.initVal = None
         self.xorVal  = None
@@ -225,7 +223,7 @@ class Reverse(object):
         self.minSearchData = None
 
         self.returnFirst = False
-        if printProgress == None:
+        if printProgress is None:
             self.progress = False
         else:
             self.progress = printProgress
@@ -272,7 +270,7 @@ class Reverse(object):
 
 class XORReverse( Reverse ):
 
-    def __init__(self, printProgress = None):
+    def __init__(self, printProgress=None):
         Reverse.__init__(self, printProgress)
         self.crcProc = None
 
@@ -286,7 +284,7 @@ class XORReverse( Reverse ):
         self.crcProc = crcProcessor
 
     # return List[ PolyKey ]
-    def findPolysXOR(self, data1, crc1, data2, crc2, dataSize, crcSize, searchRange = 0):
+    def findPolysXOR(self, data1, crc1, data2, crc2, dataSize, crcSize, searchRange=0):
         xorData = data1 ^ data2
         xorCRC  = crc1  ^ crc2
         if self.progress:
@@ -372,7 +370,7 @@ class XORReverse( Reverse ):
 
     #TODO: try to achieve compatibility without reversing
     ## check reversed input and poly (crcmod compatibility)
-    def _findBruteForcePolyReverse(self, dataMask, crcMask, searchRange = 0):
+    def _findBruteForcePolyReverse(self, dataMask, crcMask, searchRange=0):
         dataMask.reorderBytes()
         self.crcProc.setReversed(True)
         crc = crcMask.dataNum

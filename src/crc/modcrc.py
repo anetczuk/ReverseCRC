@@ -21,25 +21,15 @@
 # SOFTWARE.
 #
 
-
 from crc.crcproc import CRCProcessor, CRCProcessorFactory
 import crcmod
 
 
-
 class CRCModCacheMap(object):
-    '''
-    Caching results of 'crcmod.mkCrcFun()' gives huge performance boost.
-    '''
-
-    instance = None
+    """Caching results of 'crcmod.mkCrcFun()' gives huge performance boost."""
 
     def __init__(self):
-        '''
-        Constructor
-        '''
         self.map = dict()
-
 
     def getFunction(self, crcKey):
         if crcKey in self.map:
@@ -48,8 +38,6 @@ class CRCModCacheMap(object):
         crc_func = crcmod.mkCrcFun(crcKey.poly, rev=crcKey.rev, initCrc=crcKey.init, xorOut=crcKey.xor)
         self.map.update( [(crcKey, crc_func)] )
         return crc_func
-
-CRCModCacheMap.instance = CRCModCacheMap()
 
 
 ## ===================================================================

@@ -55,7 +55,7 @@ class DivisionCRC( CRCProcessor ):
         CRCProcessor.__init__(self)
 
     def calculate3(self, dataMask, polyMask):
-        if self._reversed == False:
+        if self._reversed is False:
             return self.calculateMSB(dataMask, polyMask)
         else:
             return self.calculateLSB(dataMask, polyMask)
@@ -73,7 +73,7 @@ class DivisionCRC( CRCProcessor ):
         ## init shift register
         initShift = min(polyMask.dataSize, dataMask.dataSize)
         register = dataMask.getMSB(initShift) ^ self.registerInit
-        dataBit = (dataMask.masterBit >> (initShift+1))
+        dataBit = (dataMask.masterBit >> (initShift + 1))
 
         ## divide
         for _ in xrange(initShift, dataMask.dataSize):

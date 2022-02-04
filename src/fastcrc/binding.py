@@ -2,6 +2,10 @@
 ##
 ##
 
+
+# flake8: noqa: F811
+
+
 import os
 
 
@@ -44,8 +48,8 @@ if BINDING_FOUND is False and binding_type in ["auto", "ctypes"]:
     ###
 
     try:
-        from .ctypes.fastcrc8  import CTypesData8Operator  as Data8Operator
-        from .ctypes.fastcrc16 import CTypesData16Operator as Data16Operator
+        from .ctypes.fastcrc8  import CTypesData8Operator  as Data8Operator         # type: ignore
+        from .ctypes.fastcrc16 import CTypesData16Operator as Data16Operator        # type: ignore
 
         from .ctypes.fastcrc8 import hw_crc8_calculate, hw_crc8_calculate_param, hw_crc8_calculate_range
         from .ctypes.fastcrc16 import hw_crc16_calculate, hw_crc16_calculate_param, hw_crc16_calculate_range
@@ -68,8 +72,8 @@ if BINDING_FOUND is False and binding_type in ["auto", "swigraw"]:
 #     print "importing swig"
 
     try:
-        from .swigraw.fastcrc8  import SwigRawData8Operator  as Data8Operator
-        from .swigraw.fastcrc16 import SwigRawData16Operator as Data16Operator
+        from .swigraw.fastcrc8  import SwigRawData8Operator  as Data8Operator           # type: ignore
+        from .swigraw.fastcrc16 import SwigRawData16Operator as Data16Operator          # type: ignore
 
         from .swigraw.fastcrc8 import hw_crc8_calculate, hw_crc8_calculate_param, hw_crc8_calculate_range
         from .swigraw.fastcrc16 import hw_crc16_calculate, hw_crc16_calculate_param, hw_crc16_calculate_range
@@ -92,8 +96,8 @@ if BINDING_FOUND is False and binding_type in ["auto", "swigoo"]:
 #     print "importing swig"
 
     try:
-        from .swigoo.fastcrc8  import SwigOOData8Operator  as Data8Operator
-        from .swigoo.fastcrc16 import SwigOOData16Operator as Data16Operator
+        from .swigoo.fastcrc8  import SwigOOData8Operator  as Data8Operator             # type: ignore
+        from .swigoo.fastcrc16 import SwigOOData16Operator as Data16Operator            # type: ignore
 
         from .swigoo.fastcrc8 import hw_crc8_calculate, hw_crc8_calculate_param, hw_crc8_calculate_range
         from .swigoo.fastcrc16 import hw_crc16_calculate, hw_crc16_calculate_param, hw_crc16_calculate_range

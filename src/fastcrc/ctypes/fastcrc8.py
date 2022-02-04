@@ -56,7 +56,6 @@ class CTypesData8Operator( object ):
     def calculate(self, poly, intReg, xorVal):
         return c_fastcrc.hw_crc8_calculate( self.rawData, self.dataLen, poly, intReg, xorVal )
 
-
     def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
         return c_fastcrc.hw_crc8_calculate_param( self.rawData, self.dataLen, poly, intReg, xorVal, reverseOrder, reflectBits )
 
@@ -83,7 +82,6 @@ def convert_CRC8ResultArray_to_list( result_array ):
 
 
 class CRC8Result(ctypes.Structure):
-    """ creates a struct """
 
     _fields_ = [('reginit', ctypes.c_uint8),
                 ('xorout', ctypes.c_uint8)]
@@ -93,7 +91,6 @@ class CRC8Result(ctypes.Structure):
 
 
 class CRC8ResultArray(ctypes.Structure):
-    """ creates a struct """
 
     _fields_ = [('size', ctypes.c_size_t),
                 ('capacity', ctypes.c_size_t),
@@ -119,6 +116,8 @@ c_fastcrc.CRC8ResultArray_free.argtypes = [ ctypes.POINTER( CRC8ResultArray ) ]
 
 
 c_fastcrc.hw_crc8_calculate.restype = ctypes.c_uint8
+
+
 def hw_crc8_calculate( bytesList, poly, intReg, xorVal ):
     arr_len  = len(bytesList)
     arr_type = ctypes.c_uint8 * arr_len
@@ -127,6 +126,8 @@ def hw_crc8_calculate( bytesList, poly, intReg, xorVal ):
 
 
 c_fastcrc.hw_crc8_calculate_param.restype = ctypes.c_uint8
+
+
 def hw_crc8_calculate_param( bytesList, poly, intReg, xorVal, reverseOrder, reflectBits ):
     arr_len  = len(bytesList)
     arr_type = ctypes.c_uint8 * arr_len
@@ -136,6 +137,8 @@ def hw_crc8_calculate_param( bytesList, poly, intReg, xorVal, reverseOrder, refl
 
 c_fastcrc.hw_crc8_calculate_range.argtypes = [ ctypes.POINTER( ctypes.c_uint8 ), ctypes.c_size_t, ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint8 ]
 c_fastcrc.hw_crc8_calculate_range.restype = ctypes.POINTER( CRC8ResultArray )
+
+
 def hw_crc8_calculate_range( bytes_list, dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd ):
 #     print "verify input: 0x%X 0x%X 0x%X 0x%X 0x%X" % ( poly, intRegStart, intRegEnd, xorStart, xorEnd )
 

@@ -21,12 +21,11 @@
 # SOFTWARE.
 #
 
-
 import math
 import copy
 
 
-def intToASCII(number, dataSize = -1):
+def intToASCII(number, dataSize=-1):
     if dataSize < 0:
         dataSize = number.bit_length()
     ret = ""
@@ -55,7 +54,7 @@ def divide_ceil( number, divider ):
 
 
 ## reverse whole number
-def reverse_number(num, sizeBits = -1):
+def reverse_number(num, sizeBits=-1):
     if sizeBits < 0:
         sizeBits = num.bit_length()
     ret = 0
@@ -70,7 +69,7 @@ def reverse_number(num, sizeBits = -1):
 
 
 ## change (reverse) order of bytes in number
-def reorder_bytes(num, sizeBytes = -1):
+def reorder_bytes(num, sizeBytes=-1):
     if sizeBytes < 0:
         sizeBytes = divide_ceil( num.bit_length(), 8 )
     ret = 0
@@ -121,40 +120,41 @@ class SubNumber(object):
         return True
 
     def __ne__(self, other):
-        return ((self == other) == False)
+        return ((self == other) is False)
 
     def __hash__(self):
         return hash( (self.data, self.size, self.pos) )
 
 
-def generateSubstrings(dataString, maxPos = -1):
+def generateSubstrings(dataString, maxPos=-1):
     valSet = set()
     retSet = set()
     length = len(dataString)
     if maxPos < 0:
-        maxPos = length-1
-    for x in xrange(maxPos+1):
-        for y in xrange(x,length):
-            substr = dataString[x:y+1]
-            if (substr in valSet) == False:
+        maxPos = length - 1
+    for x in xrange(maxPos + 1):
+        for y in xrange(x, length):
+            substr = dataString[x:y + 1]
+            if (substr in valSet) is False:
                 valSet.add(substr)
                 retSet.add( SubNumber(substr, len(substr), x) )
     return retSet
 
-def generateSubstringsReverse(dataString, maxPos = -1):
+
+def generateSubstringsReverse(dataString, maxPos=-1):
     valSet = set()
     retSet = set()
     length = len(dataString)
     if maxPos < 0:
-        maxPos = length-1
+        maxPos = length - 1
     for x in xrange(length):
-        ypos = max(x, length-maxPos-1)
-        for y in xrange(ypos,length):
-            substr = dataString[x:y+1]
-            if (substr in valSet) == False:
+        ypos = max(x, length - maxPos - 1)
+        for y in xrange(ypos, length):
+            substr = dataString[x:y + 1]
+            if (substr in valSet) is False:
                 valSet.add(substr)
                 subLen = len(substr)
-                retSet.add( SubNumber(substr, subLen, length-subLen-x) )
+                retSet.add( SubNumber(substr, subLen, length - subLen - x) )
     return retSet
 
 
@@ -183,7 +183,7 @@ class NumberMask:
         return True
 
     def __ne__(self, other):
-        return ((self == other) == False)
+        return ((self == other) is False)
 
     def __hash__(self):
         return hash( (self.dataSize, self.dataNum) )
@@ -197,7 +197,7 @@ class NumberMask:
 
     def calculateCache(self):
         self.masterBit = 0b1 << self.dataSize
-        self.dataMask = self.masterBit-1
+        self.dataMask = self.masterBit - 1
 
     def masterData(self):
         return self.dataNum | self.masterBit
@@ -233,7 +233,7 @@ class NumberMask:
 
     def getMSB(self, length):
         retVal = 0
-        retBit = 1 << (length-1)
+        retBit = 1 << (length - 1)
         dataBit = (self.masterBit >> 1)
         for _ in xrange(0, length):
             if (self.dataNum & dataBit) > 0:
@@ -243,23 +243,23 @@ class NumberMask:
         return retVal
 
     def getLSB(self, length):
-        bitsMask = (1 << length) -1
+        bitsMask = (1 << length) - 1
         return (self.dataNum & bitsMask)
 
-    def generateSubnumbers(self, minLen = -1, maxPos = -1):
+    def generateSubnumbers(self, minLen=-1, maxPos=-1):
         valSet = set()
         retSet = set()
         if maxPos < 0:
-            maxPos = self.dataSize-1
+            maxPos = self.dataSize - 1
         if minLen < 1:
             minLen = 1
         lenMask = (1 << minLen) - 1
-        for valLen in xrange(minLen, self.dataSize+1):
-            xpos = min(self.dataSize-valLen, maxPos)
-            for x in xrange(xpos+1):
+        for valLen in xrange(minLen, self.dataSize + 1):
+            xpos = min(self.dataSize - valLen, maxPos)
+            for x in xrange(xpos + 1):
                 val = (self.dataNum >> x) & lenMask
                 t = (val, valLen)
-                if (t in valSet) == False:
+                if (t in valSet) is False:
                     valSet.add( t )
                     retSet.add( SubNumber(val, valLen, x) )
             lenMask = (lenMask << 1) | 0x1
@@ -271,7 +271,7 @@ class NumberMask:
 
     ## 0b 11  1100 0011  1111 1111 -> 0b 0000 0011  1100 0011  1111 1111 -> 0b 1111 1111  1100 0011  0000 0011
     def _calcReorderBytes(self):
-        if self.revDataBytes != None:
+        if self.revDataBytes is not None:
             return
 #         if self.dataSize % 8 != 0:
 #             raise ValueError( "bytes reordering is valid only for bits number be multiple of 8, current size is %s" % self.dataSize )
@@ -281,7 +281,7 @@ class NumberMask:
 
 class ReverseNumberMask( NumberMask ):
 
-    def __init__(self, data = 0, dataSize = 0):
+    def __init__(self, data=0, dataSize=0):
         NumberMask.__init__( self, data, dataSize )
 
     @classmethod

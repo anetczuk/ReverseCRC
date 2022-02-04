@@ -29,7 +29,7 @@ from crc.solver.reverse import Reverse, print_results, write_results, XORReverse
 
 class PolysSolver( XORReverse ):
 
-    def __init__(self, printProgress = None):
+    def __init__(self, printProgress=None):
         XORReverse.__init__(self, printProgress)
 
     ## inputParams -- InputParams
@@ -49,10 +49,10 @@ class PolysSolver( XORReverse ):
         write_results( retList, dataSize, outputFile )
 
     # return Counter[ PolyKey ]
-    def findPolys(self, inputData, searchRange = 0):
+    def findPolys(self, inputData, searchRange=0):
         if inputData.empty():
             return []
-        if inputData.ready() == False:
+        if inputData.ready() is False:
             return []
 
         numbersList = inputData.numbersList

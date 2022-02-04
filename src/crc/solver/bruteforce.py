@@ -37,7 +37,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class BruteForceSolver(Reverse):
 
-    def __init__(self, printProgress = None):
+    def __init__(self, printProgress=None):
         Reverse.__init__(self, printProgress)
 
     ## inputParams -- InputParams
@@ -60,7 +60,7 @@ class BruteForceSolver(Reverse):
         return retList
 
     ## inputParams -- InputParams
-    def bruteForce(self, inputParams, searchRange = 0):
+    def bruteForce(self, inputParams, searchRange=0):
         inputData = inputParams.data    # InputData
 
         crcSize = inputParams.getCRCSize()
@@ -103,7 +103,6 @@ class BruteForceSolver(Reverse):
         _LOGGER.info( "poly search range: %s %s" % ( polyListStart, polyListStop ) )
         _LOGGER.info( "init search range: %s %s" % ( initListStart, initListStop ) )
         _LOGGER.info( " xor search range: %s %s" % ( xorListStart, xorListStop ) )
-
 
         crc_forward  = self.procFactory.createForwardProcessor( crcSize )
         crc_operator = crc_forward.createDataOperator( crcSize, inputList )

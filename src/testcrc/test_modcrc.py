@@ -21,7 +21,6 @@
 # SOFTWARE.
 #
 
-
 import unittest
 import os
 from crc.modcrc import ModCRC
@@ -30,10 +29,8 @@ import random
 from crc.numbermask import intToASCII, NumberMask
 
 
-
 __scriptdir__ = os.path.dirname(os.path.realpath(__file__))
 # logging.basicConfig(level=logging.INFO)
-
 
 
 class ModCRCTest(unittest.TestCase):
@@ -48,7 +45,7 @@ class ModCRCTest(unittest.TestCase):
 
     def test_calculateCRC_8_a(self):
         ## http://www.sunshine2k.de/coding/javascript/crc/crc_js.html
-        dataSize = 4*8
+        dataSize = 4 * 8
         inputPoly = 0x1D
         crcSize = 8
 
@@ -95,7 +92,7 @@ class ModCRCTest(unittest.TestCase):
         self.assertEqual( crc, crcLib )
 
     def test_crcmod_8_init(self):
-        data =  0xFF
+        data = 0xFF
         dataSize = 8
         inputPoly = 0x10F
         crcSize = 8
@@ -114,7 +111,7 @@ class ModCRCTest(unittest.TestCase):
         self.assertEqual( crc, crcLib )
 
     def test_crcmod_8_xorOut(self):
-        data =  0xF0
+        data = 0xF0
         dataSize = 8
         inputPoly = 0x100
         crcSize = 8
@@ -269,7 +266,7 @@ class ModCRCTest(unittest.TestCase):
         self.assertEqual( crc, crcLib )
 
     def test_crcmod_32(self):
-        data =  0x414243
+        data = 0x414243
         dataSize = 24
         inputPoly = 0x104c11db7
         regInit = 0x0
@@ -296,7 +293,7 @@ class ModCRCTest(unittest.TestCase):
     def test_crcmod_8_random(self):
         data = NumberMask(random.randint(1, 0xFFFFFFFFFFFFFFFF), 64)
         crcSize = 8
-        crcMax = 2**crcSize-1
+        crcMax = 2 ** crcSize - 1
         inputPoly = NumberMask( (0x1 << crcSize) | random.randint(1, crcMax), crcSize)
 #         regInit = random.randint(0, crcMax)
 #         xorOut = random.randint(0, crcMax)
@@ -316,7 +313,6 @@ class ModCRCTest(unittest.TestCase):
         crc = crcProc.calculate3(data, inputPoly)
 
         self.assertEqual( crc, crcLib )
-
 
 
 if __name__ == "__main__":

@@ -126,6 +126,12 @@ def measure( data_bytes_list=[8, 16, 24, 32], data_rows=1, crc_index=0, mode="BF
                 sublist = cmd_line.split( " " )
                   
                 measurements = benchmarking_module.measure( sublist, 0, 5, silent=True, method="sub" )
+                listSize = len(measurements)
+                if listSize > 2:
+                    ## remove worst measurement
+                    measurements.sort()
+                    dropItems = int( float(listSize) * 0.2 ) + 1
+                    measurements = measurements[ :-dropItems ]
                 times_avg = avg( measurements )
                 binding_data.append( times_avg )
 

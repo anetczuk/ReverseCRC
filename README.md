@@ -72,7 +72,7 @@ For testing, following oneliner might be very handy: `FASTCRC_BINDING=cffi ./src
 Note that, at the memoent, fast CRC is only implemented for *HW* algorithm.
 
 
-#### Comparison of bindings
+#### Performance of bindings
 
 Following images show comparison of performance of implemented bindings.
 
@@ -94,8 +94,7 @@ In this case there will be 256 * 8 calls to *C* library (independent of *data si
 - poly: 0x1335D
 - operation mode: *BACKWARD*
 
-In this case there will be 65536 calls to *C* library. Three implementations perform almost equally, but *cffi* is significantly worse. Performance penalty of *cffi* is because of ability of the binding to 
-automatic conversions of *Python* list structure to *C* raw arrays. For other binding it has to be done manually, thus can be precalculated and cached for repetitive use (as in this case).
+In this case there will be 65536 calls to *C* library. Plot shows that all bindings perform in similar way and there is constant difference between them. It can be seen that *cffi* is fastest among presented implementations.
 
  
 ### Development

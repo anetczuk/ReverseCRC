@@ -62,8 +62,16 @@ class CffiData16Operator( object ):
     ## dataBytes: bytes list
     ## dataCRC: int
     def __init__(self, dataBytes, dataCRC):
-        self.rawData = dataBytes                    ## no need to convert data
+#         self.rawData = dataBytes                    ## no need to convert data
+
+        # self.rawData = dataBytes                    ## no need to convert data
+
         self.dataLen = len( dataBytes )
+        
+        self.rawData = ffi.new( "uint8_t[]", self.dataLen )         ## released automatically
+        for i in range( self.dataLen ):
+            self.rawData[i] = dataBytes[i]
+
         self.dataCRC = dataCRC
 
 #     def __del__(self):

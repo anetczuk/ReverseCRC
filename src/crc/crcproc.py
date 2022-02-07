@@ -238,6 +238,7 @@ class CRCProcessor(object):
     ## ===========================================
 
     ## inputData: List[ (NumberMask, NumberMask) ]
+    ## returns CRCDataOperator
     def createDataOperator(self, crcSize, inputData):
         return self.createStandardOperator( crcSize, inputData )
 

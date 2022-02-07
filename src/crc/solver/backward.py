@@ -94,6 +94,7 @@ class BackwardSolver(Reverse):
         crc_operator = None
         if numbersLen > 1:
             subInputList = inputList[1:]
+            ## CRCDataOperator
             crc_operator = crc_forward.createDataOperator( crcSize, subInputList )
 
         results = Counter()

@@ -56,10 +56,10 @@ else:
             self.dataCRC = dataCRC
     
         def calculate(self, poly, intReg, xorVal):
-            return hw_crc16_calculate( self.dataBytes, poly & 0xFF, intReg, xorVal )
+            return hw_crc16_calculate( self.dataBytes, poly, intReg, xorVal )
     
         def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
-            return hw_crc16_calculate_param( self.dataBytes, poly & 0xFF, intReg, xorVal, reverseOrder, reflectBits )
+            return hw_crc16_calculate_param( self.dataBytes, poly, intReg, xorVal, reverseOrder, reflectBits )
     
         def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
             return hw_crc16_calculate_range( self.dataBytes, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )

@@ -66,6 +66,8 @@ def prepare_filename( params ):
     fileName = fileName.replace( ": ", "-" )
     fileName = fileName.replace( ":", "-" )
     fileName = fileName.replace( " ", "_" )
+    fileName = fileName.replace( "[", "-" )
+    fileName = fileName.replace( "]", "-" )
     return fileName
 
 
@@ -159,6 +161,12 @@ def measure( data_bytes_list=[8, 16, 24, 32], data_rows=1, crc_index=0, mode="BF
     print "Saving plot to:", plot_output_path
     plt.savefig( plot_output_path )
 
+    ## save text data
+    print "Measurements:"
+    print dataFrame
+    with open(plot_output_path + ".txt", "w") as text_file:
+        text_file.write( str(dataFrame) )
+
 
 def main():
     starttime = time.time()
@@ -166,22 +174,15 @@ def main():
 # #     data_bytes = [ element * 2 * 8 for element in [1, 2, 3, 4] ]
 # #     data_bytes = [ 32, 64, 96, 128 ]
 
-    data_bytes = [ 8, 16, 32, 64, 128 ]
-    measure( data_bytes_list=data_bytes, data_rows=8, crc_index=0, mode="BF" )
-
-    data_bytes = [ 8, 16, 32, 64, 128 ]
-    measure( data_bytes_list=data_bytes, data_rows=8, crc_index=1, mode="BACKWARD", poly=0x1335D )
-
-#     data_bytes = [ 8, 16, 32 ]
+    data_bytes = [ 8, 16, 24, 32 ]
 #     measure( data_bytes_list=data_bytes, data_rows=2, crc_index=0, mode="BF" )
-#     measure( data_bytes_list=data_bytes, data_rows=8, crc_index=0, mode="BF" )
-# #     measure( data_bytes_list=data_bytes, data_rows=2, crc_index=1, mode="BF", poly=0x1335D )
-# #     measure( data_bytes_list=data_bytes, data_rows=8, crc_index=1, mode="BF", poly=0x1335D )
-#  
-#     data_bytes = [ 8, 16, 32 ]
-#     measure( data_bytes_list=data_bytes, data_rows=2, crc_index=0, mode="BACKWARD" )
-#     measure( data_bytes_list=data_bytes, data_rows=8, crc_index=0, mode="BACKWARD" )
-#     measure( data_bytes_list=data_bytes, data_rows=2, crc_index=1, mode="BACKWARD", poly=0x1335D )
+    measure( data_bytes_list=data_bytes, data_rows=8, crc_index=0, mode="BF" )
+  
+# #     data_bytes = [ 8, 16, 24, 32 ]
+#     data_bytes = [ 8, 16, 24, 32 ]
+# #     measure( data_bytes_list=data_bytes, data_rows=2, crc_index=0, mode="BACKWARD" )
+# #     measure( data_bytes_list=data_bytes, data_rows=8, crc_index=0, mode="BACKWARD" )
+# #     measure( data_bytes_list=data_bytes, data_rows=2, crc_index=1, mode="BACKWARD", poly=0x1335D )
 #     measure( data_bytes_list=data_bytes, data_rows=8, crc_index=1, mode="BACKWARD", poly=0x1335D )
 
     timeDiff = time.time() - starttime

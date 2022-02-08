@@ -7,8 +7,6 @@ import sys
 
 import imp
 
-from . import USE_CACHED_OPERATORS
-
 
 BASE_DIR = os.path.dirname( __file__ )
 
@@ -31,50 +29,60 @@ except IOError as ex:
 ## ========================================================================
 
 
-if USE_CACHED_OPERATORS:
+def get_operator_class():
+    from . import USE_CACHED_OPERATORS
 
-    ##
-    class SwigRawData8Operator( object ):
+    if USE_CACHED_OPERATORS:
 
-        ## dataBytes: bytes list
-        ## dataCRC: int
-        def __init__(self, dataBytes, dataCRC):
-            self.rawData = convert_to_uint8array( dataBytes )
-            self.dataLen = len( dataBytes )
-            self.dataCRC = dataCRC
+        ##
+        class SwigRawData8Operator( object ):
 
-        def __del__(self):
-            swigraw_fastcrc.delete_Uint8Array( self.rawData )
+            ## dataBytes: bytes list
+            ## dataCRC: int
+            def __init__(self, dataBytes, dataCRC):
+                self.rawData = convert_to_uint8array( dataBytes )
+                self.dataLen = len( dataBytes )
+                self.dataCRC = dataCRC
 
-        def calculate(self, poly, intReg, xorVal):
-            return swigraw_fastcrc.hw_crc8_calculate( self.rawData, self.dataLen, poly & 0xFF, intReg, xorVal )
+            def __del__(self):
+                swigraw_fastcrc.delete_Uint8Array( self.rawData )
 
-        def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
-            return swigraw_fastcrc.hw_crc8_calculate_param( self.rawData, self.dataLen, poly & 0xFF, intReg, xorVal, reverseOrder, reflectBits )
+            def calculate(self, poly, intReg, xorVal):
+                return swigraw_fastcrc.hw_crc8_calculate( self.rawData, self.dataLen, poly & 0xFF, intReg, xorVal )
 
-        def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
-            ret_array = swigraw_fastcrc.hw_crc8_calculate_range( self.rawData, self.dataLen, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
-            return convert_CRC8ResultArray_to_list( ret_array )
+            def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
+                return swigraw_fastcrc.hw_crc8_calculate_param( self.rawData, self.dataLen, poly & 0xFF, intReg, xorVal, reverseOrder, reflectBits )
 
-else:
+            def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
+                ret_array = swigraw_fastcrc.hw_crc8_calculate_range( self.rawData, self.dataLen, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
+                return convert_CRC8ResultArray_to_list( ret_array )
 
-    ## old implementation
-    class SwigRawData8Operator( object ):
+        return SwigRawData8Operator
 
-        ## dataBytes: bytes list
-        ## dataCRC: int
-        def __init__(self, dataBytes, dataCRC):
-            self.dataBytes = dataBytes
-            self.dataCRC = dataCRC
+    else:
 
-        def calculate(self, poly, intReg, xorVal):
-            return hw_crc8_calculate( self.dataBytes, poly & 0xFF, intReg, xorVal )
+        ## old implementation
+        class SwigRawData8Operator( object ):
 
-        def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
-            return hw_crc8_calculate_param( self.dataBytes, poly & 0xFF, intReg, xorVal, reverseOrder, reflectBits )
+            ## dataBytes: bytes list
+            ## dataCRC: int
+            def __init__(self, dataBytes, dataCRC):
+                self.dataBytes = dataBytes
+                self.dataCRC = dataCRC
 
-        def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
-            return hw_crc8_calculate_range( self.dataBytes, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
+            def calculate(self, poly, intReg, xorVal):
+                return hw_crc8_calculate( self.dataBytes, poly & 0xFF, intReg, xorVal )
+
+            def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
+                return hw_crc8_calculate_param( self.dataBytes, poly & 0xFF, intReg, xorVal, reverseOrder, reflectBits )
+
+            def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
+                return hw_crc8_calculate_range( self.dataBytes, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
+
+        return SwigRawData8Operator
+
+
+SwigRawData8Operator = get_operator_class()
 
 
 ## ========================================================================

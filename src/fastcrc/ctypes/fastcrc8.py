@@ -6,8 +6,6 @@ import ctypes
 
 from ..paths import FASTCRC_CLIB_LIB_PATH
 
-from . import USE_CACHED_OPERATORS
-
 
 try:
     c_fastcrc = ctypes.CDLL( FASTCRC_CLIB_LIB_PATH )
@@ -20,53 +18,63 @@ except OSError as ex:
 ## ========================================================================
 
 
-if USE_CACHED_OPERATORS:
+def get_operator_class():
+    from . import USE_CACHED_OPERATORS
 
-    ##
-    class CTypesData8Operator( object ):
+    if USE_CACHED_OPERATORS:
 
-        ## dataBytes: bytes list
-        ## dataCRC: int
-        def __init__(self, dataBytes, dataCRC):
-            arr_len  = len(dataBytes)
-            arr_type = ctypes.c_uint8 * arr_len
-            self.rawData = arr_type( *dataBytes )
-            self.dataLen = arr_len
-            self.dataCRC = dataCRC
+        ##
+        class CTypesData8Operator( object ):
 
-    #     def __del__(self):
-    #         ## do nothing -- data will be released automatically
-    #         pass
+            ## dataBytes: bytes list
+            ## dataCRC: int
+            def __init__(self, dataBytes, dataCRC):
+                arr_len  = len(dataBytes)
+                arr_type = ctypes.c_uint8 * arr_len
+                self.rawData = arr_type( *dataBytes )
+                self.dataLen = arr_len
+                self.dataCRC = dataCRC
 
-        def calculate(self, poly, intReg, xorVal):
-            return c_fastcrc.hw_crc8_calculate( self.rawData, self.dataLen, poly, intReg, xorVal )
+        #     def __del__(self):
+        #         ## do nothing -- data will be released automatically
+        #         pass
 
-        def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
-            return c_fastcrc.hw_crc8_calculate_param( self.rawData, self.dataLen, poly, intReg, xorVal, reverseOrder, reflectBits )
+            def calculate(self, poly, intReg, xorVal):
+                return c_fastcrc.hw_crc8_calculate( self.rawData, self.dataLen, poly, intReg, xorVal )
 
-        def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
-            ret_array = c_fastcrc.hw_crc8_calculate_range( self.rawData, self.dataLen, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
-            return convert_CRC8ResultArray_to_list( ret_array )
+            def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
+                return c_fastcrc.hw_crc8_calculate_param( self.rawData, self.dataLen, poly, intReg, xorVal, reverseOrder, reflectBits )
 
-else:
+            def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
+                ret_array = c_fastcrc.hw_crc8_calculate_range( self.rawData, self.dataLen, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
+                return convert_CRC8ResultArray_to_list( ret_array )
 
-    ## old implementation
-    class CTypesData8Operator( object ):
+        return CTypesData8Operator
 
-        ## dataBytes: bytes list
-        ## dataCRC: int
-        def __init__(self, dataBytes, dataCRC):
-            self.dataBytes = dataBytes
-            self.dataCRC = dataCRC
+    else:
 
-        def calculate(self, poly, intReg, xorVal):
-            return hw_crc8_calculate( self.dataBytes, poly & 0xFF, intReg, xorVal )
+        ## old implementation
+        class CTypesData8Operator( object ):
 
-        def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
-            return hw_crc8_calculate_param( self.dataBytes, poly & 0xFF, intReg, xorVal, reverseOrder, reflectBits )
+            ## dataBytes: bytes list
+            ## dataCRC: int
+            def __init__(self, dataBytes, dataCRC):
+                self.dataBytes = dataBytes
+                self.dataCRC = dataCRC
 
-        def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
-            return hw_crc8_calculate_range( self.dataBytes, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
+            def calculate(self, poly, intReg, xorVal):
+                return hw_crc8_calculate( self.dataBytes, poly & 0xFF, intReg, xorVal )
+
+            def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
+                return hw_crc8_calculate_param( self.dataBytes, poly & 0xFF, intReg, xorVal, reverseOrder, reflectBits )
+
+            def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
+                return hw_crc8_calculate_range( self.dataBytes, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
+
+        return CTypesData8Operator
+
+
+CTypesData8Operator = get_operator_class()
 
 
 ## ========================================================================

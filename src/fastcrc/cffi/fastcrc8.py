@@ -7,8 +7,6 @@ import sys
 
 import cffi
 
-from . import USE_CACHED_OPERATORS
-
 
 BASE_DIR = os.path.dirname( __file__ )
 
@@ -39,57 +37,67 @@ ffi = cffi.FFI()
 #         return self.ptr.size > 0
 
 
-if USE_CACHED_OPERATORS:
+def get_operator_class():
+    from . import USE_CACHED_OPERATORS
 
-    ##
-    class CffiData8Operator( object ):
+    if USE_CACHED_OPERATORS:
 
-        ## dataBytes: bytes list
-        ## dataCRC: int
-        def __init__(self, dataBytes, dataCRC):
-            # self.rawData = dataBytes                    ## no need to convert data
+        ##
+        class CffiData8Operator( object ):
 
-            self.dataLen = len( dataBytes )
+            ## dataBytes: bytes list
+            ## dataCRC: int
+            def __init__(self, dataBytes, dataCRC):
+                # self.rawData = dataBytes                    ## no need to convert data
 
-            self.rawData = ffi.new( "uint8_t[]", self.dataLen )         ## released automatically
-            for i in range( self.dataLen ):
-                self.rawData[i] = dataBytes[i]
+                self.dataLen = len( dataBytes )
 
-            self.dataCRC = dataCRC
+                self.rawData = ffi.new( "uint8_t[]", self.dataLen )         ## released automatically
+                for i in range( self.dataLen ):
+                    self.rawData[i] = dataBytes[i]
 
-    #     def __del__(self):
-    #         ## do nothing -- data will be released automatically
-    #         pass
+                self.dataCRC = dataCRC
 
-        def calculate(self, poly, intReg, xorVal):
-            return cffi_fastcrc.hw_crc8_calculate( self.rawData, self.dataLen, poly & 0xFF, intReg, xorVal )
+        #     def __del__(self):
+        #         ## do nothing -- data will be released automatically
+        #         pass
 
-        def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
-            return cffi_fastcrc.hw_crc8_calculate_param( self.rawData, self.dataLen, poly & 0xFF, intReg, xorVal, reverseOrder, reflectBits )
+            def calculate(self, poly, intReg, xorVal):
+                return cffi_fastcrc.hw_crc8_calculate( self.rawData, self.dataLen, poly & 0xFF, intReg, xorVal )
 
-        def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
-            ret_array = cffi_fastcrc.hw_crc8_calculate_range( self.rawData, self.dataLen, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
-            return convert_CRC8ResultArray_to_list( ret_array )
+            def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
+                return cffi_fastcrc.hw_crc8_calculate_param( self.rawData, self.dataLen, poly & 0xFF, intReg, xorVal, reverseOrder, reflectBits )
 
-else:
+            def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
+                ret_array = cffi_fastcrc.hw_crc8_calculate_range( self.rawData, self.dataLen, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
+                return convert_CRC8ResultArray_to_list( ret_array )
 
-    ## old implementation
-    class CffiData8Operator( object ):
+        return CffiData8Operator
 
-        ## dataBytes: bytes list
-        ## dataCRC: int
-        def __init__(self, dataBytes, dataCRC):
-            self.dataBytes = dataBytes
-            self.dataCRC = dataCRC
+    else:
 
-        def calculate(self, poly, intReg, xorVal):
-            return hw_crc8_calculate( self.dataBytes, poly & 0xFF, intReg, xorVal )
+        ## old implementation
+        class CffiData8Operator( object ):
 
-        def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
-            return hw_crc8_calculate_param( self.dataBytes, poly & 0xFF, intReg, xorVal, reverseOrder, reflectBits )
+            ## dataBytes: bytes list
+            ## dataCRC: int
+            def __init__(self, dataBytes, dataCRC):
+                self.dataBytes = dataBytes
+                self.dataCRC = dataCRC
 
-        def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
-            return hw_crc8_calculate_range( self.dataBytes, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
+            def calculate(self, poly, intReg, xorVal):
+                return hw_crc8_calculate( self.dataBytes, poly & 0xFF, intReg, xorVal )
+
+            def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
+                return hw_crc8_calculate_param( self.dataBytes, poly & 0xFF, intReg, xorVal, reverseOrder, reflectBits )
+
+            def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
+                return hw_crc8_calculate_range( self.dataBytes, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
+
+        return CffiData8Operator
+
+
+CffiData8Operator = get_operator_class()
 
 
 ## ========================================================================

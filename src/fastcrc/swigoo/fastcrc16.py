@@ -4,72 +4,80 @@
 
 from fastcrc8 import swigoo_fastcrc, convert_to_uint8array
 
-from . import USE_CACHED_OPERATORS
-
 
 ## ========================================================================
 
 
-if USE_CACHED_OPERATORS:
+def get_operator_class():
+    from . import USE_CACHED_OPERATORS
 
-    ##
-    class SwigOOData16Operator( object ):
+    if USE_CACHED_OPERATORS:
 
-        ## dataBytes: bytes list
-        ## dataCRC: int
-        def __init__(self, dataBytes, dataCRC):
-            self.rawData = convert_to_uint8array( dataBytes )
-            self.dataLen = len( dataBytes )
-            self.dataCRC = dataCRC
+        ##
+        class SwigOOData16Operator( object ):
 
-    #     def __del__(self):
-    #         ## do nothing -- data will be released automatically
-    #         pass
+            ## dataBytes: bytes list
+            ## dataCRC: int
+            def __init__(self, dataBytes, dataCRC):
+                self.rawData = convert_to_uint8array( dataBytes )
+                self.dataLen = len( dataBytes )
+                self.dataCRC = dataCRC
 
-        def calculate(self, poly, intReg, xorVal):
-            return swigoo_fastcrc.hw_crc16_calculate( self.rawData.cast(), self.dataLen, poly, intReg, xorVal )
+        #     def __del__(self):
+        #         ## do nothing -- data will be released automatically
+        #         pass
 
-        def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
-            return swigoo_fastcrc.hw_crc16_calculate_param( self.rawData.cast(), self.dataLen, poly, intReg, xorVal, reverseOrder, reflectBits )
+            def calculate(self, poly, intReg, xorVal):
+                return swigoo_fastcrc.hw_crc16_calculate( self.rawData.cast(), self.dataLen, poly, intReg, xorVal )
 
-        def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
-            ret_array = swigoo_fastcrc.hw_crc16_calculate_range( self.rawData.cast(), self.dataLen, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
-            return convert_CRC16ResultArray_to_list( ret_array )
+            def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
+                return swigoo_fastcrc.hw_crc16_calculate_param( self.rawData.cast(), self.dataLen, poly, intReg, xorVal, reverseOrder, reflectBits )
 
-        def invert(self, poly, regVal):
-            ret_array = swigoo_fastcrc.hw_crc16_invert( self.rawData.cast(), self.dataLen, poly, regVal )
-            return convert_uint16_array_to_list( ret_array )
+            def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
+                ret_array = swigoo_fastcrc.hw_crc16_calculate_range( self.rawData.cast(), self.dataLen, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
+                return convert_CRC16ResultArray_to_list( ret_array )
 
-        def invertRange(self, crcNum, poly, xorStart, xorEnd):
-            ret_array = swigoo_fastcrc.hw_crc16_invert_range( self.rawData.cast(), self.dataLen, crcNum, poly, xorStart, xorEnd )
-            xorList = convert_CRC16ResultArray_to_dict( ret_array )
-            return xorList.items()                                          ## return list of pairs
+            def invert(self, poly, regVal):
+                ret_array = swigoo_fastcrc.hw_crc16_invert( self.rawData.cast(), self.dataLen, poly, regVal )
+                return convert_uint16_array_to_list( ret_array )
 
-else:
+            def invertRange(self, crcNum, poly, xorStart, xorEnd):
+                ret_array = swigoo_fastcrc.hw_crc16_invert_range( self.rawData.cast(), self.dataLen, crcNum, poly, xorStart, xorEnd )
+                xorList = convert_CRC16ResultArray_to_dict( ret_array )
+                return xorList.items()                                          ## return list of pairs
 
-    ## old implementation
-    class SwigOOData16Operator( object ):
+        return SwigOOData16Operator
 
-        ## dataBytes: bytes list
-        ## dataCRC: int
-        def __init__(self, dataBytes, dataCRC):
-            self.dataBytes = dataBytes
-            self.dataCRC = dataCRC
+    else:
 
-        def calculate(self, poly, intReg, xorVal):
-            return hw_crc16_calculate( self.dataBytes, poly, intReg, xorVal )
+        ## old implementation
+        class SwigOOData16Operator( object ):
 
-        def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
-            return hw_crc16_calculate_param( self.dataBytes, poly, intReg, xorVal, reverseOrder, reflectBits )
+            ## dataBytes: bytes list
+            ## dataCRC: int
+            def __init__(self, dataBytes, dataCRC):
+                self.dataBytes = dataBytes
+                self.dataCRC = dataCRC
 
-        def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
-            return hw_crc16_calculate_range( self.dataBytes, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
+            def calculate(self, poly, intReg, xorVal):
+                return hw_crc16_calculate( self.dataBytes, poly, intReg, xorVal )
 
-        def invert(self, poly, regVal):
-            return hw_crc16_invert( self.dataBytes, poly, regVal )
+            def calculateParam(self, poly, intReg, xorVal, reverseOrder, reflectBits):
+                return hw_crc16_calculate_param( self.dataBytes, poly, intReg, xorVal, reverseOrder, reflectBits )
 
-        def invertRange(self, crcNum, poly, xorStart, xorEnd):
-            return hw_crc16_invert_range( self.dataBytes, poly, xorStart, xorEnd )
+            def calculateRange(self, poly, intRegStart, intRegEnd, xorStart, xorEnd):
+                return hw_crc16_calculate_range( self.dataBytes, self.dataCRC, poly, intRegStart, intRegEnd, xorStart, xorEnd )
+
+            def invert(self, poly, regVal):
+                return hw_crc16_invert( self.dataBytes, poly, regVal )
+
+            def invertRange(self, crcNum, poly, xorStart, xorEnd):
+                return hw_crc16_invert_range( self.dataBytes, poly, xorStart, xorEnd )
+
+        return SwigOOData16Operator
+
+
+SwigOOData16Operator = get_operator_class()
 
 
 ## ========================================================================

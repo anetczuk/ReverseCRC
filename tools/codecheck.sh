@@ -28,7 +28,7 @@ ignore_errors=E115,E126,E201,E202,E221,E241,E262,E265,E266,E402,E501,W391,D
 
 
 ## disabled
-if false; then
+if true; then
     echo "running pycodestyle"
     pycodestyle --show-source --statistics --count --ignore=$ignore_errors --exclude=build $src_dir
     exit_code=$?

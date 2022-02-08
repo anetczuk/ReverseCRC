@@ -28,17 +28,15 @@ ignore_errors=E115,E126,E201,E202,E221,E241,E262,E265,E266,E402,E501,W391,D
 
 
 ## disabled
-if true; then
-    echo "running pycodestyle"
-    pycodestyle --show-source --statistics --count --ignore=$ignore_errors --exclude=build $src_dir
-    exit_code=$?
-    
-    if [ $exit_code -ne 0 ]; then
-        exit $exit_code
-    fi
-    
-    echo "pycodestyle -- no warnings found"
+echo "running pycodestyle"
+pycodestyle --show-source --statistics --count --ignore=$ignore_errors --exclude=build $src_dir
+exit_code=$?
+
+if [ $exit_code -ne 0 ]; then
+    exit $exit_code
 fi
+
+echo "pycodestyle -- no warnings found"
 
 
 ## F401 'PyQt5.QtCore' imported but unused
